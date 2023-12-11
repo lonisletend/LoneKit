@@ -1,7 +1,7 @@
 {
   "name": "lonekit",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.5.1",
+    "dayjs": "^1.11.10",
+    "jsonpath": "^1.1.1",
     "vue": "^3.3.4",
+    "vue-json-pretty": "^2.2.4",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
