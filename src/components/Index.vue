@@ -43,6 +43,8 @@ import { RouterLink } from "vue-router";
 import {NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider} from "naive-ui";
 import { TimeOutline as TimeIcon } from "@vicons/ionicons5";
 import { Braces24Filled as JsonIcon } from "@vicons/fluent";
+import Md5Icon from "./icons/Md5Icon.vue";
+import Base64Icon from "./icons/Base64Icon.vue";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -79,6 +81,36 @@ const menuOptions = ref([
     ),
     key: "json-tool",
     icon: renderIcon(JsonIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "Md5Tool",
+          params: {
+          }
+        }
+      },
+      { default: () => "Md5 加密" }
+    ),
+    key: "md5-tool",
+    icon: renderIcon(Md5Icon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "Base64Tool",
+          params: {
+          }
+        }
+      },
+      { default: () => "Base64 编码/解码" }
+    ),
+    key: "base64-tool",
+    icon: renderIcon(Base64Icon)
   },
 ]);
 const activeKey = ref(null);

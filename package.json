@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.5.1",
+    "blueimp-md5": "^2.19.0",
     "dayjs": "^1.11.10",
+    "js-base64": "^3.7.5",
     "jsonpath": "^1.1.1",
     "vue": "^3.3.4",
     "vue-json-pretty": "^2.2.4",

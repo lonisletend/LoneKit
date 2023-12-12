@@ -22,6 +22,16 @@ const routes = [
         path: '/json',
         name: 'JsonTool',
         component: () => import('/src/components/tools/JsonTool.vue')
+      },
+      {
+        path: '/md5',
+        name: 'Md5Tool',
+        component: () => import('/src/components/tools/Md5Tool.vue')
+      },
+      {
+        path: '/base64',
+        name: 'Base64Tool',
+        component: () => import('/src/components/tools/Base64Tool.vue')
       }
     ]
   }
