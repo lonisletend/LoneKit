@@ -29,7 +29,11 @@
       </n-layout-sider>
       <div class="w-full h-full px-4 py-2 overflow-scroll">
         <n-notification-provider>
-          <router-view />
+          <router-view v-slot="{ Component }">
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
+          </router-view>
         </n-notification-provider>
       </div>
     </n-layout>
@@ -41,9 +45,8 @@ import router from "../router";
 import { h, ref } from "vue";
 import { RouterLink } from "vue-router";
 import {NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider} from "naive-ui";
-import { TimeOutline as TimeIcon } from "@vicons/ionicons5";
-import { Braces24Filled as JsonIcon } from "@vicons/fluent";
-import Md5Icon from "./icons/Md5Icon.vue";
+import { TimeOutline as TimeIcon, QrCodeOutline as QRCodeIcon, BarcodeOutline as BarcodeIcon } from "@vicons/ionicons5";
+import { Braces24Filled as JsonIcon, LockClosed24Regular as Md5Icon } from "@vicons/fluent";
 import Base64Icon from "./icons/Base64Icon.vue";
 
 function renderIcon(icon) {
@@ -111,6 +114,36 @@ const menuOptions = ref([
     ),
     key: "base64-tool",
     icon: renderIcon(Base64Icon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "QrCodeTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "二维码生成器" }
+    ),
+    key: "qr-code-tool",
+    icon: renderIcon(QRCodeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "BarcodeTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "条形码生成器" }
+    ),
+    key: "barcode-tool",
+    icon: renderIcon(BarcodeIcon)
   },
 ]);
 const activeKey = ref(null);

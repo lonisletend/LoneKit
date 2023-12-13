@@ -26,16 +26,16 @@ function handleChange(val, type) {
     if (lineMode.value === 'single') {
       target.value = encode(source.value);
     } else {
-      const values = source.value.split('\n');
+      const values = source.value.split('\n').filter(item => item);
       const results = values.map(value => encode(value));
       target.value = results.join('\n');
     }
   }
   if (type === 2) {
-    if (lineMode === 'single') {
+    if (lineMode.value === 'single') {
       source.value = decode(target.value);
     } else {
-      const values = target.value.split('\n');
+      const values = target.value.split('\n').filter(item => item);
       const results = values.map(value => decode(value));
       source.value = results.join('\n');
     }

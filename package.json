@@ -1,7 +1,7 @@
 {
   "name": "lonekit",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,11 +10,14 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@chenfengyuan/vue-barcode": "^2.0.2",
     "@tauri-apps/api": "^1.5.1",
     "blueimp-md5": "^2.19.0",
     "dayjs": "^1.11.10",
     "js-base64": "^3.7.5",
+    "jsbarcode": "^3.11.6",
     "jsonpath": "^1.1.1",
+    "qrcode.vue": "^3.4.1",
     "vue": "^3.3.4",
     "vue-json-pretty": "^2.2.4",
     "vue-router": "^4.2.5"

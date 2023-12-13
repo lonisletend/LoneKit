@@ -32,6 +32,16 @@ const routes = [
         path: '/base64',
         name: 'Base64Tool',
         component: () => import('/src/components/tools/Base64Tool.vue')
+      },
+      {
+        path: '/qrcode',
+        name: 'QrCodeTool',
+        component: () => import('/src/components/tools/QRCodeTool.vue')
+      },
+      {
+        path: '/barcode',
+        name: 'BarcodeTool',
+        component: () => import('/src/components/tools/BarcodeTool.vue')
       }
     ]
   }
