@@ -36,7 +36,7 @@ function handleChange(val) {
   if (lineMode.value === 'single') {
     targetList.value = [source.value];
   } else {
-    targetList.value = source.value.split('\n');
+    targetList.value = source.value.split('\n').filter(item => item);
   }
   // console.log('targetList ==> ', JSON.stringify(targetList.value));
 }
@@ -118,7 +118,7 @@ function copy(value) {
           :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
         />
       </div>
-      <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-scroll">
+      <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-auto">
         <div v-for="(target, index) in targetList" :key="index" class="w-full mb-4">
           <div class="flex my-1 justify-center">
             <qrcode-vue :value="target" :size="size" level="H" :foreground="color" />

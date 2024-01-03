@@ -13,11 +13,11 @@
       >
         <div class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
              v-if="!collapsed">
-          <span>LoneKit</span>
+          <router-link to="/">LoneKit</router-link>
         </div>
         <div class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
              v-else>
-          <span>LK</span>
+          <router-link to="/">Kit</router-link>
         </div>
         <n-menu
           v-model:value="activeKey"
@@ -27,7 +27,7 @@
           :options="menuOptions"
         />
       </n-layout-sider>
-      <div class="w-full h-full px-4 py-2 overflow-scroll">
+      <div class="w-full h-full px-4 py-2 overflow-auto">
         <n-notification-provider>
           <router-view v-slot="{ Component }">
             <keep-alive>

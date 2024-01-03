@@ -8,9 +8,11 @@
         <n-button @click="readClipboard">剪贴板</n-button>
         <n-button @click="showExample">示例</n-button>
         <n-button @click="clear">清空</n-button>
+        <n-button @click="compressive">压缩</n-button>
+        <n-button @click="copySource">复制</n-button>
       </div>
       <div class="w-full h-full text-xl">
-        <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full"
+        <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
                  placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
       </div>
 
@@ -23,7 +25,7 @@
                  placeholder="使用 JsonPath 进行过滤"/>
         <n-tooltip trigger="hover">
           <template #trigger>
-            <a href="https://www.educative.io/" target="_blank">
+            <a href="https://docs.hevodata.com/sources/engg-analytics/streaming/rest-api/writing-jsonpath-expressions/" target="_blank">
               <n-button size="small" circle>
                 <n-icon size="16"><question-icon /></n-icon>
               </n-button>
@@ -32,7 +34,7 @@
           JsonPath 是一种类似于 XPath 的表达式，可用于从 JSON 文档中选择元素。点击了解更多。
         </n-tooltip>
       </div>
-      <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-scroll">
+      <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-auto">
         <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/>
       </div>
     </div>
@@ -106,6 +108,14 @@ function readClipboard() {
 function showExample() {
   sourceJson.value = JSON.stringify(exampleJsonObject.value);
   handleSourceJsonChange(sourceJson.value);
+}
+
+function compressive() {
+  sourceJson.value = JSON.stringify(jsonObject.value);
+}
+
+function copySource() {
+  copy(sourceJson.value);
 }
 
 function clear() {
