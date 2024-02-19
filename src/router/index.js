@@ -42,6 +42,16 @@ const routes = [
         path: '/barcode',
         name: 'BarcodeTool',
         component: () => import('/src/components/tools/BarcodeTool.vue')
+      },
+      {
+        path: '/sql',
+        name: 'SQLTool',
+        component: () => import('/src/components/tools/SQLTool.vue')
+      },
+      {
+        path: '/diff',
+        name: 'DiffTool',
+        component: () => import('/src/components/tools/DiffTool.vue')
       }
     ]
   }

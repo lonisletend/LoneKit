@@ -2,31 +2,20 @@
 
 import {ref, watch} from "vue";
 import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
-import md5 from 'blueimp-md5';
+import { format } from 'sql-formatter';
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 
 const source = ref();
-const example = ref('test');
 const target = ref();
-
-const lineMode = ref('multi');
-const lineModeOptions = ref([
-  {label: '多行', value: 'multi'},
-  {label: '整体', value: 'single'},
-]);
-
-watch(lineMode, () => {
-  clear();
-})
+const options = {
+  language: 'sql',
+  tabWidth: 2,
+  keywordCase: 'upper',
+  linesBetweenQueries: 2,
+}
 
 function handleChange(val) {
-  if (lineMode.value === 'single') {
-    target.value = md5(source.value);
-  } else {
-    const values = source.value.split('\n').filter(item => item);
-    const results = values.map(value => md5(value));
-    target.value = results.join('\n');
-  }
+  target.value = format(source.value, options);
 }
 
 function readClipboard() {
@@ -45,7 +34,11 @@ function readClipboard() {
 }
 
 function showExample() {
-  source.value = 'test';
+  source.value = 'select supplier_name,city from\n' +
+      '(select * from suppliers join addresses on suppliers.address_id=addresses.id)\n' +
+      'as suppliers\n' +
+      'where supplier_id > 500\n' +
+      'order by supplier_name asc,city desc;';
   handleChange(source.value);
 }
 
@@ -84,15 +77,14 @@ function copy(value) {
   <div class="w-full h-full flex">
     <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
       <div class="w-full h-8 flex items-center space-x-4">
-        <n-tag size="large" type="warning">加密</n-tag>
-        <n-select v-model:value="lineMode" :options="lineModeOptions" :style="{width: '80px'}" />
+        <n-tag size="large" type="warning">SQL</n-tag>
         <n-button @click="readClipboard">剪贴板</n-button>
         <n-button @click="showExample">示例</n-button>
         <n-button @click="clear">清空</n-button>
       </div>
       <div class="w-full h-full text-xl">
         <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                 placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
+                 placeholder="输入需要格式化的 SQL" @input="handleChange"/>
       </div>
 
     </div>
@@ -103,7 +95,7 @@ function copy(value) {
       </div>
       <div class="w-full h-full text-xl">
         <n-input v-model:value="target" type="textarea" class="w-full h-full"
-                 placeholder="加密结果" :readonly="true"/>
+                 placeholder="格式化结果" :readonly="true"/>
       </div>
     </div>
   </div>
