@@ -3,8 +3,10 @@ import "./style.css";
 import App from "./App.vue";
 import router from "./router";
 import VueBarcode from '@chenfengyuan/vue-barcode';
+import CodeDiff from 'v-code-diff';
 
 const app = createApp(App);
+app.use(CodeDiff);
 app.use(router);
 
 const meta = document.createElement('meta')
