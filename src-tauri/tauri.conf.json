@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "LoneKit",
-    "version": "0.0.6"
+    "version": "0.0.7"
   },
   "tauri": {
     "allowlist": {
@@ -47,6 +47,14 @@
         "width": 1200,
         "height": 800
       }
-    ]
+    ],
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://gist.githubusercontent.com/lonisletend/20c919f1e69d1973aadfa20f8118dbbf/raw/"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE1QUY3QzYyNEZEREEzMjAKUldRZ285MVBZbnl2RllqeHMwVHB1UkpBUk8zeE5BN1VCOG9rYkFYNGNLOWFXRTJNNEErdU90WGgK"
+    }
   }
 }
