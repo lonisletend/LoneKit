@@ -45,10 +45,15 @@ import router from "../router";
 import { h, ref } from "vue";
 import { RouterLink } from "vue-router";
 import {NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider} from "naive-ui";
-import { TimeOutline as TimeIcon, QrCodeOutline as QRCodeIcon, BarcodeOutline as BarcodeIcon } from "@vicons/ionicons5";
-import { Braces24Filled as JsonIcon, LockClosed24Regular as Md5Icon, DatabaseSearch24Regular as SQLIcon } from "@vicons/fluent";
 import Base64Icon from "./icons/Base64Icon.vue";
+import Md5Icon from "./icons/Md5Icon.vue";
 import DiffIcon from "./icons/DiffIcon.vue";
+import SQLIcon from "./icons/SQLIcon.vue";
+import StringHexIcon from "./icons/StringHexIcon.vue";
+import QRCodeIcon from "./icons/QRCodeIcon.vue";
+import BarcodeIcon from "./icons/BarcodeIcon.vue";
+import TimeIcon from "./icons/TimeIcon.vue";
+import JsonIcon from "./icons/JsonIcon.vue";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -145,6 +150,21 @@ const menuOptions = ref([
     ),
     key: "base64-tool",
     icon: renderIcon(Base64Icon)
+  },
+  {
+    label: () => h(
+        RouterLink,
+        {
+          to: {
+            name: "StringHexTool",
+            params: {
+            }
+          }
+        },
+        { default: () => "字符串16进制" }
+    ),
+    key: "string-hex-tool",
+    icon: renderIcon(StringHexIcon)
   },
   {
     label: () => h(

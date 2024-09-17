@@ -34,6 +34,11 @@ const routes = [
         component: () => import('/src/components/tools/Base64Tool.vue')
       },
       {
+        path: '/stringHex',
+        name: 'StringHexTool',
+        component: () => import('/src/components/tools/StringHexTool.vue')
+      },
+      {
         path: '/qrcode',
         name: 'QrCodeTool',
         component: () => import('/src/components/tools/QRCodeTool.vue')

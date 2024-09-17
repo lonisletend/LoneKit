@@ -55,6 +55,10 @@
             <n-timeline-item />
             <n-timeline-item
                 type="success"
+                content="2024.06.09 v0.0.7, 本次新增：字符串16进制转换。"
+            />
+            <n-timeline-item
+                type="success"
                 content="2024.02.20 v0.0.6, 本次新增：SQL格式化、文本对比。"
             />
             <n-timeline-item
@@ -71,7 +75,7 @@
 
 <script setup>
 
-import { NTabs, NTabPane, NH1, NH2, NP, NText, NBlockquote, NTimeline, NTimelineItem } from "naive-ui";
+import { NTabs, NTabPane, NTimeline, NTimelineItem } from "naive-ui";
 
 </script>
 
