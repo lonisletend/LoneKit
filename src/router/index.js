@@ -19,6 +19,11 @@ const routes = [
         component: () => import('/src/components/tools/TimeTool.vue')
       },
       {
+        path: '/commonCodeFormat',
+        name: 'CommonCodeFormatTool',
+        component: () => import('/src/components/tools/CommonCodeFormatTool.vue')
+      },
+      {
         path: '/json',
         name: 'JsonTool',
         component: () => import('/src/components/tools/JsonTool.vue')
