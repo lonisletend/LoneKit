@@ -55,6 +55,10 @@
             <n-timeline-item />
             <n-timeline-item
                 type="success"
+                content="2024.10.10 v0.0.8, Json格式化(Wrap模式) 支持Tab, 终于不用打开多个浏览器Tab啦! 后续将整体支持Tab模式, 敬请期待。"
+            />
+            <n-timeline-item
+                type="success"
                 content="2024.06.09 v0.0.7, 本次新增：字符串16进制转换。"
             />
             <n-timeline-item
