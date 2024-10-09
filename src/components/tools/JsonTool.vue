@@ -51,6 +51,14 @@ import 'vue-json-pretty/lib/styles.css';
 import jsonpath from 'jsonpath';
 import { writeText, readText } from "@tauri-apps/api/clipboard";
 
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: 0
+  }
+});
+
 const sourceJson = ref();
 const exampleJsonObject = ref({
   "status": 200,

@@ -54,7 +54,7 @@ import QRCodeIcon from "./icons/QRCodeIcon.vue";
 import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
-import CodeIcon from "./icons/CodeIcon.vue";
+// import CodeIcon from "./icons/CodeIcon.vue";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -105,6 +105,21 @@ const menuOptions = ref([
       { default: () => "Json格式化" }
     ),
     key: "json-tool",
+    icon: renderIcon(JsonIcon)
+  },
+  {
+    label: () => h(
+        RouterLink,
+        {
+          to: {
+            name: "JsonToolWrapper",
+            params: {
+            }
+          }
+        },
+        { default: () => "Json格式化(Wrap)" }
+    ),
+    key: "json-tool-wrapper",
     icon: renderIcon(JsonIcon)
   },
   {
