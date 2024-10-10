@@ -92,21 +92,21 @@ const menuOptions = ref([
   //   key: "common-code-format-tool",
   //   icon: renderIcon(CodeIcon)
   // },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "JsonTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "Json格式化" }
-    ),
-    key: "json-tool",
-    icon: renderIcon(JsonIcon)
-  },
+  // {
+  //   label: () => h(
+  //     RouterLink,
+  //     {
+  //       to: {
+  //         name: "JsonTool",
+  //         params: {
+  //         }
+  //       }
+  //     },
+  //     { default: () => "Json格式化" }
+  //   ),
+  //   key: "json-tool",
+  //   icon: renderIcon(JsonIcon)
+  // },
   {
     label: () => h(
         RouterLink,
@@ -117,7 +117,7 @@ const menuOptions = ref([
             }
           }
         },
-        { default: () => "Json格式化(Wrap)" }
+        { default: () => "Json格式化" }
     ),
     key: "json-tool-wrapper",
     icon: renderIcon(JsonIcon)
