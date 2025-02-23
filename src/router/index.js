@@ -24,6 +24,11 @@ const routes = [
         component: () => import('/src/components/tools/CommonCodeFormatTool.vue')
       },
       {
+        path: '/commonCodeFormatWrapper',
+        name: 'CommonCodeFormatToolWrapper',
+        component: () => import('/src/components/wrapper/CommonCodeFormatToolWrapper.vue')
+      },
+      {
         path: '/json',
         name: 'JsonTool',
         component: () => import('/src/components/tools/JsonTool.vue')

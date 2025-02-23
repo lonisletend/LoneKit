@@ -1,42 +1,39 @@
 <script setup>
 
-import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
-import {readText, writeText} from "@tauri-apps/api/clipboard";
-// import { ModelOperations } from "@vscode/vscode-languagedetection";
+import { ref, watch } from "vue";
+import { NButton, NInput, NSelect, NTag, useNotification } from "naive-ui";
+import { readText, writeText } from "@tauri-apps/api/clipboard";
+import { codeToHtml } from 'shiki';
+
+import { formatCode, supportedLanguages, codeExample } from '../../utils/formatter';
+// import { detectLanguage } from '../../utils/languageDetector';
 
 const source = ref();
 const target = ref();
-const options = {
-  language: 'sql',
-  tabWidth: 2,
-  keywordCase: 'upper',
-  linesBetweenQueries: 2,
-}
 
-// const modulOperations = new ModelOperations();
+const selectedLanguage = ref('xml');
+watch(selectedLanguage, (val) => {
+  source.value = '';
+  handleChange(source.value);
+});
+const targetHtml = ref();
+
 
 async function handleChange(val) {
-//   const result = await modulOperations.runModel(`
-// function makeThing(): Thing {
-//     let size = 0;
-//     return {
-//         get size(): number {
-//         return size;
-//         },
-//         set size(value: string | number | boolean) {
-//         let num = Number(value);
-//         // Don't allow NaN and stuff.
-//         if (!Number.isFinite(num)) {
-//             size = 0;
-//             return;
-//         }
-//         size = num;
-//         },
-//     };
-// }
-// `);
-  console.log(result);
+  if (!val) {
+    target.value = '';
+    targetHtml.value = '';
+    return;
+  }
+  // selectedLanguage.value = detectLanguage(val);
+  // console.log('selectedLanguage.value', selectedLanguage.value);
+  try {
+    target.value = await formatCode(val, selectedLanguage.value);
+    targetHtml.value = await codeToHtml(target.value, { lang: selectedLanguage.value, theme: 'github-light' });
+  } catch (error) {
+    target.value = '';
+    targetHtml.value = error.message;
+  }
 }
 
 function readClipboard() {
@@ -55,17 +52,21 @@ function readClipboard() {
 }
 
 function showExample() {
-  source.value = 'select supplier_name,city from\n' +
-      '(select * from suppliers join addresses on suppliers.address_id=addresses.id)\n' +
-      'as suppliers\n' +
-      'where supplier_id > 500\n' +
-      'order by supplier_name asc,city desc;';
+  source.value = codeExample[selectedLanguage.value];
   handleChange(source.value);
 }
 
 function clear() {
   source.value = '';
   target.value = '';
+  handleChange(source.value);
+}
+
+function compressCode() {
+  if (source.value) {
+    source.value = source.value.replace(/\s+/g, ' ').trim();
+    handleChange(source.value);
+  }
 }
 
 const notification = useNotification();
@@ -76,6 +77,10 @@ function notify(type, message) {
     duration: 2500,
     keepAliveOnHover: true
   });
+}
+
+function copySource() {
+  copy(source.value);
 }
 
 function copyValue() {
@@ -99,13 +104,17 @@ function copy(value) {
     <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
       <div class="w-full h-8 flex items-center space-x-4">
         <n-tag size="large" type="warning">输入</n-tag>
-        <n-button @click="readClipboard">剪贴板</n-button>
+        <n-select v-model:value="selectedLanguage" :options="supportedLanguages" placeholder="语言"
+          :style="{ width: '100px' }" />
         <n-button @click="showExample">示例</n-button>
+        <n-button @click="readClipboard">剪贴板</n-button>
         <n-button @click="clear">清空</n-button>
+        <n-button @click="compressCode">压缩</n-button>
+        <n-button @click="copySource">复制</n-button>
       </div>
-      <div class="w-full h-full text-xl">
-        <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                 placeholder="输入需要格式化的代码片段" @input="handleChange"/>
+      <div class="w-full h-full">
+        <n-input v-model:value="source" type="textarea" class="w-full h-full" placeholder="输入需要格式化的代码片段"
+          @input="handleChange" :style="{ fontSize: '14px' }" />
       </div>
 
     </div>
@@ -114,14 +123,12 @@ function copy(value) {
         <n-tag size="large" type="success">结果</n-tag>
         <n-button @click="copyValue">复制</n-button>
       </div>
-      <div class="w-full h-full text-xl">
-        <n-input v-model:value="target" type="textarea" class="w-full h-full"
-                 placeholder="格式化结果" :readonly="true"/>
+      <div class="w-full h-full p-1 transition border border-gray-400 rounded overflow-auto">
+        <!-- <n-input v-model:value="target" type="textarea" class="w-full h-full" placeholder="格式化结果" :readonly="true" /> -->
+        <div v-html="targetHtml"></div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -1,31 +1,20 @@
 <template>
   <div class="w-full h-full flex">
     <n-layout has-sider>
-      <n-layout-sider
-        bordered
-        collapse-mode="width"
-        :collapsed-width="64"
-        :width="200"
-        :collapsed="collapsed"
-        show-trigger
-        @collapse="collapsed = true"
-        @expand="collapsed = false"
-      >
-        <div class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
-             v-if="!collapsed">
+      <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="200" :collapsed="collapsed"
+        show-trigger @collapse="collapsed = true" @expand="collapsed = false">
+        <div
+          class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
+          v-if="!collapsed">
           <router-link to="/">LoneKit</router-link>
         </div>
-        <div class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
-             v-else>
+        <div
+          class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
+          v-else>
           <router-link to="/">Kit</router-link>
         </div>
-        <n-menu
-          v-model:value="activeKey"
-          :collapsed="collapsed"
-          :collapsed-width="64"
-          :collapsed-icon-size="22"
-          :options="menuOptions"
-        />
+        <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22"
+          :options="menuOptions" />
       </n-layout-sider>
       <div class="w-full h-full px-4 py-2 overflow-auto">
         <n-notification-provider>
@@ -44,7 +33,7 @@
 import router from "../router";
 import { h, ref } from "vue";
 import { RouterLink } from "vue-router";
-import {NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider} from "naive-ui";
+import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
 import Base64Icon from "./icons/Base64Icon.vue";
 import Md5Icon from "./icons/Md5Icon.vue";
 import DiffIcon from "./icons/DiffIcon.vue";
@@ -54,7 +43,7 @@ import QRCodeIcon from "./icons/QRCodeIcon.vue";
 import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
-// import CodeIcon from "./icons/CodeIcon.vue";
+import CodeIcon from "./icons/CodeIcon.vue";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -79,21 +68,6 @@ const menuOptions = ref([
   },
   // {
   //   label: () => h(
-  //       RouterLink,
-  //       {
-  //         to: {
-  //           name: "CommonCodeFormatTool",
-  //           params: {
-  //           }
-  //         }
-  //       },
-  //       { default: () => "通用代码格式化" }
-  //   ),
-  //   key: "common-code-format-tool",
-  //   icon: renderIcon(CodeIcon)
-  // },
-  // {
-  //   label: () => h(
   //     RouterLink,
   //     {
   //       to: {
@@ -109,45 +83,60 @@ const menuOptions = ref([
   // },
   {
     label: () => h(
-        RouterLink,
-        {
-          to: {
-            name: "JsonToolWrapper",
-            params: {
-            }
+      RouterLink,
+      {
+        to: {
+          name: "JsonToolWrapper",
+          params: {
           }
-        },
-        { default: () => "Json格式化" }
+        }
+      },
+      { default: () => "Json格式化" }
     ),
     key: "json-tool-wrapper",
     icon: renderIcon(JsonIcon)
   },
   {
     label: () => h(
-        RouterLink,
-        {
-          to: {
-            name: "SQLTool",
-            params: {
-            }
+      RouterLink,
+      {
+        to: {
+          name: "CommonCodeFormatToolWrapper",
+          params: {
           }
-        },
-        { default: () => "SQL格式化" }
+        }
+      },
+      { default: () => "通用格式化" }
+    ),
+    key: "common-code-format-tool-wrapper",
+    icon: renderIcon(CodeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "SQLTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "SQL格式化" }
     ),
     key: "sql-tool",
     icon: renderIcon(SQLIcon)
   },
   {
     label: () => h(
-        RouterLink,
-        {
-          to: {
-            name: "DiffTool",
-            params: {
-            }
+      RouterLink,
+      {
+        to: {
+          name: "DiffTool",
+          params: {
           }
-        },
-        { default: () => "文本对比" }
+        }
+      },
+      { default: () => "文本对比" }
     ),
     key: "diff-tool",
     icon: renderIcon(DiffIcon)
@@ -184,15 +173,15 @@ const menuOptions = ref([
   },
   {
     label: () => h(
-        RouterLink,
-        {
-          to: {
-            name: "StringHexTool",
-            params: {
-            }
+      RouterLink,
+      {
+        to: {
+          name: "StringHexTool",
+          params: {
           }
-        },
-        { default: () => "字符串16进制" }
+        }
+      },
+      { default: () => "字符串16进制" }
     ),
     key: "string-hex-tool",
     icon: renderIcon(StringHexIcon)
