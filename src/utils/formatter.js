@@ -8,7 +8,7 @@ const languageConfigs = {
   xml: {
     parser: 'xml',
     plugins: [parserXml],
-    printWidth: 80,
+    printWidth: 200,
     tabWidth: 2,
     xmlWhitespaceSensitivity: 'ignore',
     xmlSelfClosingSpace: true,
@@ -26,7 +26,7 @@ const languageConfigs = {
   java: {
     parser: 'java',
     plugins: [parserJava],
-    printWidth: 80,
+    printWidth: 200,
     tabWidth: 2,
     useTabs: false,
     semi: true,

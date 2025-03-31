@@ -101,6 +101,21 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
+          name: "XmlToolWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "XML 格式化" }
+    ),
+    key: "xml-tool-wrapper",
+    icon: renderIcon(CodeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
           name: "CommonCodeFormatToolWrapper",
           params: {
           }

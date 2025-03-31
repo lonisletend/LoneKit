@@ -34,9 +34,19 @@ const routes = [
         component: () => import('/src/components/tools/JsonTool.vue')
       },
       {
+        path: '/xml',
+        name: 'XmlTool',
+        component: () => import('/src/components/tools/XmlTool.vue')
+      },
+      {
         path: '/jsonWrapper',
         name: 'JsonToolWrapper',
         component: () => import('/src/components/wrapper/JsonToolWrapper.vue')
+      },
+      {
+        path: '/xmlWrapper',
+        name: 'XmlToolWrapper',
+        component: () => import('/src/components/wrapper/XmlToolWrapper.vue')
       },
       {
         path: '/md5',
