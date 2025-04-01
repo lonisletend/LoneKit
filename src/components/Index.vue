@@ -116,21 +116,6 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
-          name: "CommonCodeFormatToolWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "通用格式化" }
-    ),
-    key: "common-code-format-tool-wrapper",
-    icon: renderIcon(CodeIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
           name: "SQLTool",
           params: {
           }
