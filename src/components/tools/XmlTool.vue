@@ -78,7 +78,7 @@ function copy(value) {
   <div class="w-full h-full flex">
     <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
       <div class="w-full h-8 flex items-center space-x-4">
-        <n-tag size="large" type="warning">SQL</n-tag>
+        <n-tag size="large" type="warning">输入</n-tag>
         <n-button @click="readClipboard">剪贴板</n-button>
         <n-button @click="showExample">示例</n-button>
         <n-button @click="clear">清空</n-button>
@@ -93,7 +93,7 @@ function copy(value) {
     </div>
     <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
       <div class="w-full h-8 flex items-center space-x-4">
-        <n-tag size="large" type="success">结果</n-tag>
+        <n-tag size="large" type="success">输出</n-tag>
         <n-button @click="copyValue">复制</n-button>
       </div>
       <div class="w-full h-full p-1 transition border border-gray-400 rounded overflow-auto">
