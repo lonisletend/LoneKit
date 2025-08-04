@@ -53,6 +53,7 @@
         <div class="w-full px-4">
           <n-timeline>
             <n-timeline-item />
+            <n-timeline-item type="success" content="2025.04.01 v0.1.0, 本次新增：XML格式化, 删除通用格式化(依赖太多, 性能太差)。" />
             <n-timeline-item type="success" content="2025.02.23 v0.0.9, 本次新增：通用格式化, 支持XML, Java 格式化。" />
             <n-timeline-item type="success" content="2024.10.10 v0.0.8, Json格式化(Wrap模式) 支持Tab, 终于不用打开多个浏览器Tab啦!" />
             <n-timeline-item type="success" content="2024.06.09 v0.0.7, 本次新增：字符串16进制转换。" />

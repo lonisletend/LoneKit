@@ -40,9 +40,6 @@ export function prettifyXml(sourceXml) {
     // describes how we want to modify the XML - indent everything
     '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">',
     '  <xsl:strip-space elements="*"/>',
-    '  <xsl:template match="para[content-style][not(text())]">', // change to just text() to strip space in text nodes
-    '    <xsl:value-of select="normalize-space(.)"/>',
-    '  </xsl:template>',
     '  <xsl:template match="node()|@*">',
     '    <xsl:copy><xsl:apply-templates select="node()|@*"/></xsl:copy>',
     '  </xsl:template>',
@@ -54,6 +51,13 @@ export function prettifyXml(sourceXml) {
   xsltProcessor.importStylesheet(xsltDoc);
   var resultDoc = xsltProcessor.transformToDocument(xmlDoc);
   var resultXml = new XMLSerializer().serializeToString(resultDoc);
+
+  // Preserve original empty tag format
+  resultXml = resultXml.replace(/<(\w+)([^>]*)\/>/g, (match, tagName, attributes) => {
+    return sourceXml.includes(`<${tagName}${attributes}></${tagName}>`)
+      ? `<${tagName}${attributes}></${tagName}>`
+      : match;
+  });
 
   // Add the declaration back if it was present
   if (hasDeclaration) {
