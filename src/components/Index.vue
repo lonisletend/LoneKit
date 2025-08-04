@@ -86,6 +86,21 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
+          name: "JsonFormatWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "Json格式化(Beta)" }
+    ),
+    key: "json-format-wrapper",
+    icon: renderIcon(JsonIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
           name: "JsonToolWrapper",
           params: {
           }
