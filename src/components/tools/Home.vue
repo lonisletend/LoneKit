@@ -53,14 +53,15 @@
         <div class="w-full px-4">
           <n-timeline>
             <n-timeline-item />
-            <n-timeline-item type="success" content="2025.08.05 v0.1.2, 本次新增：Json格式化(Beta), 使用 lone-format 组件, 支持大数, 支持编辑。" />
-            <n-timeline-item type="success" content="2025.04.01 v0.1.0, 本次新增：XML格式化, 删除通用格式化(依赖太多, 性能太差)。" />
-            <n-timeline-item type="success" content="2025.02.23 v0.0.9, 本次新增：通用格式化, 支持XML, Java 格式化。" />
-            <n-timeline-item type="success" content="2024.10.10 v0.0.8, Json格式化(Wrap模式) 支持Tab, 终于不用打开多个浏览器Tab啦!" />
-            <n-timeline-item type="success" content="2024.06.09 v0.0.7, 本次新增：字符串16进制转换。" />
-            <n-timeline-item type="success" content="2024.02.20 v0.0.6, 本次新增：SQL格式化、文本对比。" />
+            <n-timeline-item type="success" content="2025.08.05 v0.1.4, 优化：Json格式化(Beta), 长文本长数字换行逗号展示优化, 支持JsonPath/JavaScript过滤。" />
+            <n-timeline-item type="success" content="2025.08.05 v0.1.2, 新增：Json格式化(Beta), 使用 lone-format 组件, 支持大数, 支持编辑。" />
+            <n-timeline-item type="success" content="2025.04.01 v0.1.0, 新增：XML格式化, 删除：通用格式化(依赖太多, 性能太差)。" />
+            <n-timeline-item type="success" content="2025.02.23 v0.0.9, 新增：通用格式化, 支持XML, Java 格式化。" />
+            <n-timeline-item type="success" content="2024.10.10 v0.0.8, 优化：Json格式化(Wrap模式) 支持Tab, 终于不用打开多个浏览器Tab啦!" />
+            <n-timeline-item type="success" content="2024.06.09 v0.0.7, 新增：字符串16进制转换。" />
+            <n-timeline-item type="success" content="2024.02.20 v0.0.6, 新增：SQL格式化、文本对比。" />
             <n-timeline-item type="success"
-              content="2024.01.04 v0.0.5, 本次新增：时间戳转换、Json 格式化、Base64 编解码、MD5 加密、二维码生成、条形码生成。" />
+              content="2024.01.04 v0.0.5, 新增：时间戳转换、Json 格式化、Base64 编解码、MD5 加密、二维码生成、条形码生成。" />
             <n-timeline-item content="2023.12.10" />
           </n-timeline>
         </div>

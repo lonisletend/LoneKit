@@ -4,12 +4,12 @@
       <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="200" :collapsed="collapsed"
         show-trigger @collapse="collapsed = true" @expand="collapsed = false">
         <div
-          class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
+          class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
           v-if="!collapsed">
           <router-link to="/">LoneKit</router-link>
         </div>
         <div
-          class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
+          class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
           v-else>
           <router-link to="/">Kit</router-link>
         </div>
@@ -236,3 +236,10 @@ const menuOptions = ref([
 const activeKey = ref(null);
 const collapsed = ref(false);
 </script>
+
+<style scoped>
+/* Logo字体样式 - 优先使用Monaco和Consolas */
+.font-logo {
+  font-family: Monaco, Consolas, 'Courier New', monospace !important;
+}
+</style>
