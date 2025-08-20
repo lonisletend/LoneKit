@@ -3,18 +3,31 @@
     <n-layout has-sider>
       <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="200" :collapsed="collapsed"
         show-trigger @collapse="collapsed = true" @expand="collapsed = false">
-        <div
-          class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
-          v-if="!collapsed">
-          <router-link to="/">LoneKit</router-link>
+        <div class="flex flex-col h-full">
+          <div>
+            <div
+              class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
+              v-if="!collapsed">
+              <router-link to="/">LoneKit</router-link>
+            </div>
+            <div
+              class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
+              v-else>
+              <router-link to="/">Kit</router-link>
+            </div>
+            <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22"
+              :options="menuOptions" />
+          </div>
+          <!-- 版本号显示 -->
+          <div class="mt-auto mb-4 flex items-center justify-center">
+            <div class="text-xs text-gray-500 font-mono" v-if="!collapsed">
+              Version: {{ version }}
+            </div>
+            <div class="text-xs text-gray-500 font-mono" v-else>
+              V: {{ version.split('.')[0] }}.{{ version.split('.')[1] }}
+            </div>
+          </div>
         </div>
-        <div
-          class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
-          v-else>
-          <router-link to="/">Kit</router-link>
-        </div>
-        <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22"
-          :options="menuOptions" />
       </n-layout-sider>
       <div class="w-full h-full px-4 py-2 overflow-auto">
         <n-notification-provider>
@@ -34,6 +47,7 @@ import router from "../router";
 import { h, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
+import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
 import Md5Icon from "./icons/Md5Icon.vue";
 import DiffIcon from "./icons/DiffIcon.vue";
@@ -235,6 +249,7 @@ const menuOptions = ref([
 ]);
 const activeKey = ref(null);
 const collapsed = ref(false);
+const version = packageJson.version;
 </script>
 
 <style scoped>

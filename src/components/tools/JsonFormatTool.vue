@@ -36,7 +36,7 @@
       </div>
       <div class="w-full h-full text-lg transition overflow-auto">
         <JsonFormat class="w-full h-full"
-        ref="customJsonFormatRef" v-model="sourceJson" :show-toolbar="false" />
+        ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" :show-toolbar="false" />
         <!-- <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/> -->
       </div>
     </div>
@@ -182,17 +182,6 @@ function copy(value) {
 
 </script>
 
-<style>
-.vjs-tree {
-  font-family: Monaco, Menlo, Consolas, Bitstream Vera Sans Mono, monospace;
-  font-size: 15px;
-  text-align: left;
-}
-
-/* 输入框代码字体样式 */
-.n-input .n-input__textarea {
-  font-family: Monaco, Consolas, 'Courier New', monospace !important;
-  font-size: 14px !important;
-  line-height: 1.5 !important;
-}
+<style scoped>
+/* 组件特有样式可以保留在这里 */
 </style>
