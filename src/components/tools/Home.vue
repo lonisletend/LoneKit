@@ -53,6 +53,7 @@
         <div class="w-full px-4">
           <n-timeline>
             <n-timeline-item />
+            <n-timeline-item type="success" content="2025.11.03 v0.3.0, 优化：Json格式化 Beta 转正, 新增：XML 格式化(Beta)，lone-format 实现，支持节点折叠/展开。" />
             <n-timeline-item type="success" content="2025.08.05 v0.1.4, 优化：Json格式化(Beta), 长文本长数字换行逗号展示优化, 支持JsonPath/JavaScript过滤。" />
             <n-timeline-item type="success" content="2025.08.05 v0.1.2, 新增：Json格式化(Beta), 使用 lone-format 组件, 支持大数, 支持编辑。" />
             <n-timeline-item type="success" content="2025.04.01 v0.1.0, 新增：XML格式化, 删除：通用格式化(依赖太多, 性能太差)。" />

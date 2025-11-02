@@ -44,6 +44,11 @@ const routes = [
         component: () => import("/src/components/wrapper/XmlToolWrapper.vue"),
       },
       {
+        path: "/xmlFormatWrapper",
+        name: "XmlFormatWrapper",
+        component: () => import("/src/components/wrapper/XmlFormatWrapper.vue"),
+      },
+      {
         path: "/md5",
         name: "Md5Tool",
         component: () => import("/src/components/tools/Md5Tool.vue"),

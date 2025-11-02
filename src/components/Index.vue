@@ -24,7 +24,7 @@
               Version: {{ version }}
             </div>
             <div class="text-xs text-gray-500 font-mono" v-else>
-              V: {{ version.split('.')[0] }}.{{ version.split('.')[1] }}
+              V{{ version.split('.')[0] }}.{{ version.split('.')[1] }}
             </div>
           </div>
         </div>
@@ -105,25 +105,40 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "Json格式化(Beta)" }
+      { default: () => "Json 格式化" }
     ),
     key: "json-format-wrapper",
     icon: renderIcon(JsonIcon)
   },
+  // {
+  //   label: () => h(
+  //     RouterLink,
+  //     {
+  //       to: {
+  //         name: "JsonToolWrapper",
+  //         params: {
+  //         }
+  //       }
+  //     },
+  //     { default: () => "Json格式化" }
+  //   ),
+  //   key: "json-tool-wrapper",
+  //   icon: renderIcon(JsonIcon)
+  // },
   {
     label: () => h(
       RouterLink,
       {
         to: {
-          name: "JsonToolWrapper",
+          name: "XmlFormatWrapper",
           params: {
           }
         }
       },
-      { default: () => "Json格式化" }
+      { default: () => "XML 格式化(Beta)" }
     ),
-    key: "json-tool-wrapper",
-    icon: renderIcon(JsonIcon)
+    key: "xml-format-wrapper",
+    icon: renderIcon(CodeIcon)
   },
   {
     label: () => h(
