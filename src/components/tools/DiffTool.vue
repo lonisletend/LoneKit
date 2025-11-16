@@ -4,6 +4,10 @@ import {ref, watch} from "vue";
 import {NButton, NButtonGroup, NInput, NSelect, NTag, NSplit, useNotification} from "naive-ui";
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 
+defineOptions({
+  name: 'DiffTool'
+});
+
 const source = ref();
 const target = ref();
 const panel = ref('source');
@@ -30,7 +34,7 @@ function clear() {
         </n-button>
       </n-button-group>
     </div>
-    <div class="w-full h-full text-xl mt-2">
+    <div class="w-full h-full text-xl">
       <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
         <template #resize-trigger>
           <div class="resize-trigger"></div>

@@ -5,6 +5,10 @@ import {NButton, NInput, NSelect, NTag, NSplit, useNotification} from "naive-ui"
 import { format } from 'sql-formatter';
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 
+defineOptions({
+  name: 'SQLTool'
+});
+
 const source = ref();
 const target = ref();
 const options = {

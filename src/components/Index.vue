@@ -160,7 +160,7 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
-          name: "SQLTool",
+          name: "SQLToolWrapper",
           params: {
           }
         }
@@ -175,7 +175,7 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
-          name: "DiffTool",
+          name: "DiffToolWrapper",
           params: {
           }
         }

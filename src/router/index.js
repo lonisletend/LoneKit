@@ -79,9 +79,19 @@ const routes = [
         component: () => import("/src/components/tools/SQLTool.vue"),
       },
       {
+        path: "/sqlWrapper",
+        name: "SQLToolWrapper",
+        component: () => import("/src/components/wrapper/SQLToolWrapper.vue"),
+      },
+      {
         path: "/diff",
         name: "DiffTool",
         component: () => import("/src/components/tools/DiffTool.vue"),
+      },
+      {
+        path: "/diffWrapper",
+        name: "DiffToolWrapper",
+        component: () => import("/src/components/wrapper/DiffToolWrapper.vue"),
       },
     ],
   },

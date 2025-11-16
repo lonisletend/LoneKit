@@ -57,7 +57,7 @@ function readClipboard() {
 }
 
 function showExample() {
-  source.value = 'https://www.lonestack.com';
+  source.value = 'https://kit.lonestack.com';
   handleChange(source.value);
 }
 
