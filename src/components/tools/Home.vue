@@ -1,69 +1,62 @@
 <template>
   <div class="w-full h-full">
     <n-tabs type="line" animated>
-      <!--      <n-tab-pane name="about" tab="关于">-->
-      <!--        <div class="w-full px-4">-->
-      <!--          <n-h2>-->
-      <!--            <n-text type="success">LoneKit</n-text>-->
-      <!--          </n-h2>-->
-      <!--&lt;!&ndash;          <n-text type="success" class="text-2xl">LoneKit</n-text>&ndash;&gt;-->
-      <!--          <n-blockquote align-text>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              是一个简单易用的开发测试工具集合。-->
-      <!--            </n-p>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              包含了常用的工具，如：时间戳转换、Json 格式化、Base64 编解码、MD5 加密、二维码生成、条形码生成等并在不断增加和完善中。-->
-      <!--            </n-p>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              开源，Github链接: <a href="https://github.com/lonisletend/LoneKit" target="_blank" class="text-green-500">LoneKit</a>-->
-      <!--            </n-p>-->
-      <!--          </n-blockquote>-->
-      <!--          <n-h2>-->
-      <!--            <n-text type="success">为什么又重复造轮子？</n-text>-->
-      <!--          </n-h2>-->
-      <!--&lt;!&ndash;          <n-text type="success" class="text-2xl">为什么又重复造轮子？</n-text>&ndash;&gt;-->
-      <!--          <n-blockquote align-text>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              自然是因为那些轮子破破烂烂参差不齐。(-->
-      <!--            </n-p>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              项目中使用一些新接触的技术和框架，保持写代码的感觉。-->
-      <!--            </n-p>-->
-      <!--          </n-blockquote>-->
-      <!--          <n-h2>-->
-      <!--            <n-text type="success">我的期望</n-text>-->
-      <!--          </n-h2>-->
-      <!--          <n-blockquote align-text>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              希望每一个小工具都做到简洁、易用、高效。-->
-      <!--            </n-p>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              希望能替换你打开的无数个网页工具 tab。-->
-      <!--            </n-p>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              希望帮你每天节省10分钟。-->
-      <!--            </n-p>-->
-      <!--            <n-p class="text-lg">-->
-      <!--              希望你能早点下班，多陪陪家人，多享受生活。-->
-      <!--            </n-p>-->
-      <!--          </n-blockquote>-->
-      <!--        </div>-->
-      <!--      </n-tab-pane>-->
       <n-tab-pane name="version" tab="更新日志">
-        <div class="w-full px-4">
+        <div class="w-full px-4 py-2">
           <n-timeline>
-            <n-timeline-item />
-            <n-timeline-item type="success" content="2025.11.03 v0.3.0, 优化：Json格式化 Beta 转正, 新增：XML 格式化(Beta)，lone-format 实现，支持节点折叠/展开。" />
-            <n-timeline-item type="success" content="2025.08.05 v0.1.4, 优化：Json格式化(Beta), 长文本长数字换行逗号展示优化, 支持JsonPath/JavaScript过滤。" />
-            <n-timeline-item type="success" content="2025.08.05 v0.1.2, 新增：Json格式化(Beta), 使用 lone-format 组件, 支持大数, 支持编辑。" />
-            <n-timeline-item type="success" content="2025.04.01 v0.1.0, 新增：XML格式化, 删除：通用格式化(依赖太多, 性能太差)。" />
-            <n-timeline-item type="success" content="2025.02.23 v0.0.9, 新增：通用格式化, 支持XML, Java 格式化。" />
-            <n-timeline-item type="success" content="2024.10.10 v0.0.8, 优化：Json格式化(Wrap模式) 支持Tab, 终于不用打开多个浏览器Tab啦!" />
-            <n-timeline-item type="success" content="2024.06.09 v0.0.7, 新增：字符串16进制转换。" />
-            <n-timeline-item type="success" content="2024.02.20 v0.0.6, 新增：SQL格式化、文本对比。" />
-            <n-timeline-item type="success"
-              content="2024.01.04 v0.0.5, 新增：时间戳转换、Json 格式化、Base64 编解码、MD5 加密、二维码生成、条形码生成。" />
-            <n-timeline-item content="2023.12.10" />
+            <n-timeline-item 
+              v-for="(log, index) in changeLogs" 
+              :key="index"
+              :type="log.type || 'success'"
+            >
+              <template #header>
+                <div class="text-lg font-semibold text-gray-800">
+                  {{ log.date }} <span class="text-green-600">{{ log.version }}</span>
+                </div>
+              </template>
+              
+              <div class="mt-2 space-y-3">
+                <!-- 新增 -->
+                <div v-if="log.added && log.added.length > 0" class="changelog-section">
+                  <div class="changelog-title">
+                    <n-tag type="success" size="small">新增</n-tag>
+                  </div>
+                  <ul class="changelog-list">
+                    <li v-for="(item, i) in log.added" :key="i">{{ item }}</li>
+                  </ul>
+                </div>
+
+                <!-- 优化 -->
+                <div v-if="log.optimized && log.optimized.length > 0" class="changelog-section">
+                  <div class="changelog-title">
+                    <n-tag type="info" size="small">优化</n-tag>
+                  </div>
+                  <ul class="changelog-list">
+                    <li v-for="(item, i) in log.optimized" :key="i">{{ item }}</li>
+                  </ul>
+                </div>
+
+                <!-- 修复 -->
+                <div v-if="log.fixed && log.fixed.length > 0" class="changelog-section">
+                  <div class="changelog-title">
+                    <n-tag type="warning" size="small">修复</n-tag>
+                  </div>
+                  <ul class="changelog-list">
+                    <li v-for="(item, i) in log.fixed" :key="i">{{ item }}</li>
+                  </ul>
+                </div>
+
+                <!-- 删除 -->
+                <div v-if="log.removed && log.removed.length > 0" class="changelog-section">
+                  <div class="changelog-title">
+                    <n-tag type="error" size="small">删除</n-tag>
+                  </div>
+                  <ul class="changelog-list">
+                    <li v-for="(item, i) in log.removed" :key="i">{{ item }}</li>
+                  </ul>
+                </div>
+              </div>
+            </n-timeline-item>
           </n-timeline>
         </div>
       </n-tab-pane>
@@ -73,8 +66,124 @@
 
 <script setup>
 
-import { NTabs, NTabPane, NTimeline, NTimelineItem } from "naive-ui";
+import { NTabs, NTabPane, NTimeline, NTimelineItem, NTag } from "naive-ui";
+import { ref } from "vue";
+
+const changeLogs = ref([
+  {
+    date: '2025.11.16',
+    version: 'v0.3.5',
+    optimized: [
+      'DiffTool、SQLTool 支持多 Tab 模式。',
+      '所有左右分栏工具支持可拖动调整宽度，分隔条默认隐藏，hover 显示。',
+      'JSON 格式化、XML 格式化 渲染结果区域滚动。',
+    ],
+  },
+  {
+    date: '2025.11.03',
+    version: 'v0.3.0',
+    added: [
+      'XML 格式化 (Beta)，使用 lone-format 实现，支持节点折叠/展开。',
+    ],
+    optimized: [
+      'Json 格式化 Beta 转正。',
+    ],
+  },
+  {
+    date: '2025.08.05',
+    version: 'v0.1.4',
+    added: [],
+    optimized: [
+      'Json 格式化 (Beta) 长文本长数字换行逗号展示优化。',
+      'Json 格式化支持 JsonPath/JavaScript 过滤。',
+    ],
+  },
+  {
+    date: '2025.08.05',
+    version: 'v0.1.2',
+    added: [
+      'Json 格式化 (Beta)，使用 lone-format 组件，支持大数、支持编辑。',
+    ],
+  },
+  {
+    date: '2025.04.01',
+    version: 'v0.1.0',
+    added: [
+      'XML 格式化。',
+    ],
+    removed: [
+      '通用格式化（依赖太多，性能太差）。',
+    ]
+  },
+  {
+    date: '2025.02.23',
+    version: 'v0.0.9',
+    added: [
+      '通用格式化，支持 XML、Java 格式化。',
+    ],
+  },
+  {
+    date: '2024.10.10',
+    version: 'v0.0.8',
+    optimized: [
+      'Json 格式化 (Wrap模式) 支持 Tab，终于不用打开多个浏览器 Tab 啦！',
+    ],
+  },
+  {
+    date: '2024.06.09',
+    version: 'v0.0.7',
+    added: [
+      '字符串16进制转换。',
+    ],
+  },
+  {
+    date: '2024.02.20',
+    version: 'v0.0.6',
+    added: [
+      'SQL 格式化。',
+      '文本对比。',
+    ],
+  },
+  {
+    date: '2024.01.04',
+    version: 'v0.0.5',
+    added: [
+      '时间戳转换。',
+      'Json 格式化。',
+      'Base64 编解码。',
+      'MD5 加密。',
+      '二维码生成。',
+      '条形码生成。',
+    ],
+  },
+  {
+    date: '2023.12.10',
+    version: 'v0.0.1',
+    added: [
+      '项目初始化。',
+    ],
+  }
+]);
 
 </script>
 
-<style></style>
+<style scoped>
+.changelog-section {
+  margin-bottom: 12px;
+}
+
+.changelog-title {
+  margin-bottom: 8px;
+}
+
+.changelog-list {
+  margin-left: 24px;
+  list-style-type: disc;
+  color: #666;
+}
+
+.changelog-list li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+</style>
