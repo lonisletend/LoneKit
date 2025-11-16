@@ -16,3 +16,29 @@
   font-size: 15px;
   text-align: left;
 }
+
+/* lone-format JsonFormat 组件样式 - 确保内部滚动 */
+.json-format {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.json-format__content {
+  flex: 1;
+  overflow: auto !important;
+  max-height: 100% !important;
+}
+
+/* lone-format XmlFormat 组件样式 - 确保内部滚动 */
+.xml-format {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.xml-format__content {
+  flex: 1;
+  overflow: auto !important;
+  max-height: 100% !important;
+}

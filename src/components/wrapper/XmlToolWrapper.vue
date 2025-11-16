@@ -21,12 +21,14 @@ const {
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
-    <n-tabs v-model:value="activeTabName" type="card" :addable="addable" :closable="closable"
-      tab-style="min-width: 80px;" @close="handleClose" @add="handleAdd">
-      <n-tab v-for="tab in tabs" :key="tab.id" :name="tab.name"></n-tab>
-    </n-tabs>
-    <div class="flex-grow">
+  <div class="h-full flex flex-col overflow-hidden">
+    <div class="flex-shrink-0">
+      <n-tabs v-model:value="activeTabName" type="card" :addable="addable" :closable="closable"
+        tab-style="min-width: 80px;" @close="handleClose" @add="handleAdd">
+        <n-tab v-for="tab in tabs" :key="tab.id" :name="tab.name"></n-tab>
+      </n-tabs>
+    </div>
+    <div class="flex-1 overflow-hidden">
       <keep-alive :include="cachedComponents">
         <component
             :is="currentComponent"

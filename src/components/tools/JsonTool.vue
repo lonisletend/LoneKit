@@ -1,7 +1,9 @@
 <template>
   <div class="w-full h-full flex">
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
+    <!-- 左侧输入区域 -->
+    <div class="w-1/2 h-full p-2 flex flex-col">
+      <!-- 固定的操作按钮 -->
+      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
         <n-tag size="large" type="warning">
           输入
         </n-tag>
@@ -11,14 +13,17 @@
         <n-button @click="compressive">压缩</n-button>
         <n-button @click="copySource">复制</n-button>
       </div>
-      <div class="w-full h-full text-xl">
+      <!-- 可滚动的输入区域 -->
+      <div class="flex-1 w-full overflow-hidden">
         <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
                  placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
       </div>
-
     </div>
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
+    
+    <!-- 右侧输出区域 -->
+    <div class="w-1/2 h-full p-2 flex flex-col">
+      <!-- 固定的操作按钮 -->
+      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
         <n-tag size="large" type="success">输出</n-tag>
         <n-button @click="copyJson">复制</n-button>
         <n-input v-model:value="jsonPath" type="text" @keydown.enter="jsonFilter" clearable
@@ -34,7 +39,8 @@
           JsonPath 是一种类似于 XPath 的表达式，可用于从 JSON 文档中选择元素。点击了解更多。
         </n-tooltip>
       </div>
-      <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-auto">
+      <!-- 可滚动的输出区域 -->
+      <div class="flex-1 w-full p-1 text-lg border border-gray-400 rounded overflow-auto">
         <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/>
       </div>
     </div>

@@ -74,8 +74,8 @@ function copy(value) {
 
 <template>
   <div class="w-full h-full flex">
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
+    <div class="w-1/2 h-full p-2 flex flex-col">
+      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
         <n-tag size="large" type="warning">输入</n-tag>
         <n-button @click="readClipboard">剪贴板</n-button>
         <n-button @click="showExample">示例</n-button>
@@ -83,18 +83,17 @@ function copy(value) {
         <n-button @click="compressive">压缩</n-button>
         <n-button @click="copySource">复制</n-button>
       </div>
-      <div class="w-full h-full text-xl">
-        <n-input v-model:value="source" type="textarea" class="w-full h-full" placeholder="输入需要格式化的 XML"
+      <div class="flex-1 w-full overflow-hidden">
+        <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" placeholder="输入需要格式化的 XML"
           @input="handleChange" />
       </div>
-
     </div>
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
+    <div class="w-1/2 h-full p-2 flex flex-col">
+      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
         <n-tag size="large" type="success">输出</n-tag>
         <n-button @click="copyValue">复制</n-button>
       </div>
-      <div class="w-full h-full text-lg transition overflow-auto">
+      <div class="flex-1 w-full overflow-hidden text-lg">
         <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
       </div>
     </div>
