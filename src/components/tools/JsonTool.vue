@@ -1,56 +1,64 @@
 <template>
-  <div class="w-full h-full flex">
-    <!-- 左侧输入区域 -->
-    <div class="w-1/2 h-full p-2 flex flex-col">
-      <!-- 固定的操作按钮 -->
-      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-        <n-tag size="large" type="warning">
-          输入
-        </n-tag>
-        <n-button @click="readClipboard">剪贴板</n-button>
-        <n-button @click="showExample">示例</n-button>
-        <n-button @click="clear">清空</n-button>
-        <n-button @click="compressive">压缩</n-button>
-        <n-button @click="copySource">复制</n-button>
-      </div>
-      <!-- 可滚动的输入区域 -->
-      <div class="flex-1 w-full overflow-hidden">
-        <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
-                 placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
-      </div>
-    </div>
-    
-    <!-- 右侧输出区域 -->
-    <div class="w-1/2 h-full p-2 flex flex-col">
-      <!-- 固定的操作按钮 -->
-      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-        <n-tag size="large" type="success">输出</n-tag>
-        <n-button @click="copyJson">复制</n-button>
-        <n-input v-model:value="jsonPath" type="text" @keydown.enter="jsonFilter" clearable
-                 placeholder="使用 JsonPath 进行过滤"/>
-        <n-tooltip trigger="hover">
-          <template #trigger>
-            <a href="https://docs.hevodata.com/sources/engg-analytics/streaming/rest-api/writing-jsonpath-expressions/" target="_blank">
-              <n-button size="small" circle>
-                <n-icon size="16"><question-icon /></n-icon>
-              </n-button>
-            </a>
-          </template>
-          JsonPath 是一种类似于 XPath 的表达式，可用于从 JSON 文档中选择元素。点击了解更多。
-        </n-tooltip>
-      </div>
-      <!-- 可滚动的输出区域 -->
-      <div class="flex-1 w-full p-1 text-lg border border-gray-400 rounded overflow-auto">
-        <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/>
-      </div>
-    </div>
+  <div class="w-full h-full">
+    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
+      <template #resize-trigger>
+        <div class="resize-trigger"></div>
+      </template>
+      <template #1>
+        <!-- 左侧输入区域 -->
+        <div class="h-full p-2 flex flex-col">
+          <!-- 固定的操作按钮 -->
+          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <n-tag size="large" type="warning">
+              输入
+            </n-tag>
+            <n-button @click="readClipboard">剪贴板</n-button>
+            <n-button @click="showExample">示例</n-button>
+            <n-button @click="clear">清空</n-button>
+            <n-button @click="compressive">压缩</n-button>
+            <n-button @click="copySource">复制</n-button>
+          </div>
+          <!-- 可滚动的输入区域 -->
+          <div class="flex-1 w-full overflow-hidden">
+            <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
+                     placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
+          </div>
+        </div>
+      </template>
+      <template #2>
+        <!-- 右侧输出区域 -->
+        <div class="h-full p-2 flex flex-col">
+          <!-- 固定的操作按钮 -->
+          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <n-tag size="large" type="success">输出</n-tag>
+            <n-button @click="copyJson">复制</n-button>
+            <n-input v-model:value="jsonPath" type="text" @keydown.enter="jsonFilter" clearable
+                     placeholder="使用 JsonPath 进行过滤"/>
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <a href="https://docs.hevodata.com/sources/engg-analytics/streaming/rest-api/writing-jsonpath-expressions/" target="_blank">
+                  <n-button size="small" circle>
+                    <n-icon size="16"><question-icon /></n-icon>
+                  </n-button>
+                </a>
+              </template>
+              JsonPath 是一种类似于 XPath 的表达式，可用于从 JSON 文档中选择元素。点击了解更多。
+            </n-tooltip>
+          </div>
+          <!-- 可滚动的输出区域 -->
+          <div class="flex-1 w-full p-1 text-lg border border-gray-400 rounded overflow-auto">
+            <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/>
+          </div>
+        </div>
+      </template>
+    </n-split>
   </div>
 </template>
 
 <script setup>
 
 import {ref, onMounted, reactive, computed} from "vue";
-import {NInput, NTag, NButton, NIcon, NTooltip, useNotification} from "naive-ui";
+import {NInput, NTag, NButton, NIcon, NTooltip, NSplit, useNotification} from "naive-ui";
 import { Question24Filled as QuestionIcon } from '@vicons/fluent';
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';

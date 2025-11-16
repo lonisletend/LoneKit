@@ -42,3 +42,16 @@
   overflow: auto !important;
   max-height: 100% !important;
 }
+
+/* n-split 分隔条样式 - 默认隐藏，hover 时显示 */
+.resize-trigger {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+  cursor: col-resize;
+}
+
+.resize-trigger:hover {
+  background-color: rgba(24, 160, 88, 0.3);
+}

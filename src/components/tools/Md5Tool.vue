@@ -1,7 +1,7 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
+import {NButton, NInput, NSelect, NTag, NSplit, useNotification} from "naive-ui";
 import md5 from 'blueimp-md5';
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 
@@ -81,31 +81,39 @@ function copy(value) {
 </script>
 
 <template>
-  <div class="w-full h-full flex">
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
-        <n-tag size="large" type="warning">加密</n-tag>
-        <n-select v-model:value="lineMode" :options="lineModeOptions" :style="{width: '80px'}" />
-        <n-button @click="readClipboard">剪贴板</n-button>
-        <n-button @click="showExample">示例</n-button>
-        <n-button @click="clear">清空</n-button>
-      </div>
-      <div class="w-full h-full text-xl">
-        <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                 placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
-      </div>
-
-    </div>
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
-        <n-tag size="large" type="success">结果</n-tag>
-        <n-button @click="copyValue">复制</n-button>
-      </div>
-      <div class="w-full h-full text-xl">
-        <n-input v-model:value="target" type="textarea" class="w-full h-full"
-                 placeholder="加密结果" :readonly="true"/>
-      </div>
-    </div>
+  <div class="w-full h-full">
+    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
+      <template #resize-trigger>
+        <div class="resize-trigger"></div>
+      </template>
+      <template #1>
+        <div class="h-full p-2 flex flex-col space-y-2">
+          <div class="w-full h-8 flex items-center space-x-4">
+            <n-tag size="large" type="warning">加密</n-tag>
+            <n-select v-model:value="lineMode" :options="lineModeOptions" :style="{width: '80px'}" />
+            <n-button @click="readClipboard">剪贴板</n-button>
+            <n-button @click="showExample">示例</n-button>
+            <n-button @click="clear">清空</n-button>
+          </div>
+          <div class="w-full h-full text-xl">
+            <n-input v-model:value="source" type="textarea" class="w-full h-full"
+                     placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
+          </div>
+        </div>
+      </template>
+      <template #2>
+        <div class="h-full p-2 flex flex-col space-y-2">
+          <div class="w-full h-8 flex items-center space-x-4">
+            <n-tag size="large" type="success">结果</n-tag>
+            <n-button @click="copyValue">复制</n-button>
+          </div>
+          <div class="w-full h-full text-xl">
+            <n-input v-model:value="target" type="textarea" class="w-full h-full"
+                     placeholder="加密结果" :readonly="true"/>
+          </div>
+        </div>
+      </template>
+    </n-split>
   </div>
 </template>
 

@@ -1,7 +1,7 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NButtonGroup, NInput, NSelect, NTag, useNotification} from "naive-ui";
+import {NButton, NButtonGroup, NInput, NSelect, NTag, NSplit, useNotification} from "naive-ui";
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 
 const source = ref();
@@ -30,20 +30,28 @@ function clear() {
         </n-button>
       </n-button-group>
     </div>
-    <div class="w-full h-full text-xl flex space-x-4 mt-2">
-      <div class="w-1/2 h-full flex flex-col space-y-2">
-        <div class="w-full h-full text-xl">
-          <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                   placeholder="原始文本"/>
-        </div>
-
-      </div>
-      <div class="w-1/2 h-full flex flex-col space-y-2">
-        <div class="w-full h-full text-xl">
-          <n-input v-model:value="target" type="textarea" class="w-full h-full"
-                   placeholder="对比文本"/>
-        </div>
-      </div>
+    <div class="w-full h-full text-xl mt-2">
+      <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
+        <template #resize-trigger>
+          <div class="resize-trigger"></div>
+        </template>
+        <template #1>
+          <div class="h-full p-2 flex flex-col space-y-2">
+            <div class="w-full h-full text-xl">
+              <n-input v-model:value="source" type="textarea" class="w-full h-full"
+                       placeholder="原始文本"/>
+            </div>
+          </div>
+        </template>
+        <template #2>
+          <div class="h-full p-2 flex flex-col space-y-2">
+            <div class="w-full h-full text-xl">
+              <n-input v-model:value="target" type="textarea" class="w-full h-full"
+                       placeholder="对比文本"/>
+            </div>
+          </div>
+        </template>
+      </n-split>
     </div>
   </div>
 

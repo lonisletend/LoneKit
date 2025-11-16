@@ -1,7 +1,7 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, NRadioGroup, NRadioButton, NColorPicker, useNotification} from "naive-ui";
+import {NButton, NInput, NSelect, NTag, NRadioGroup, NRadioButton, NColorPicker, NSplit, useNotification} from "naive-ui";
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 
 const source = ref();
@@ -105,42 +105,50 @@ function copy(value) {
 </script>
 
 <template>
-  <div class="w-full h-full flex">
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
-        <n-tag size="large" type="warning">输入</n-tag>
-        <n-select v-model:value="lineMode" :options="lineModeOptions" :style="{width: '80px'}" />
-        <n-button @click="readClipboard">剪贴板</n-button>
-        <n-button @click="showExample">示例</n-button>
-        <n-button @click="clear">清空</n-button>
-      </div>
-      <div class="w-full h-full text-xl">
-        <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                 placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
-      </div>
-
-    </div>
-    <div class="w-1/2 h-full p-2 flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-4">
-        <n-tag size="large" type="success">结果</n-tag>
-        <n-radio-group v-model:value="height" name="sizeRadioGroup">
-          <n-radio-button v-for="(item, index) in heightOptions" :key="index" :value="item.value" :label="item.label"/>
-        </n-radio-group>
-        <n-color-picker v-model:value="color" :style="{width: '80px'}"
-          :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
-        />
-      </div>
-      <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-auto">
-        <div v-for="(target, index) in targetList" :key="index" class="w-full mb-4">
-          <div class="flex my-1 justify-center">
-            <vue-barcode :value="target" :options="{ displayValue: false, lineColor: color, height: size.height, width: size.width }"></vue-barcode>
+  <div class="w-full h-full">
+    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
+      <template #resize-trigger>
+        <div class="resize-trigger"></div>
+      </template>
+      <template #1>
+        <div class="h-full p-2 flex flex-col space-y-2">
+          <div class="w-full h-8 flex items-center space-x-4">
+            <n-tag size="large" type="warning">输入</n-tag>
+            <n-select v-model:value="lineMode" :options="lineModeOptions" :style="{width: '80px'}" />
+            <n-button @click="readClipboard">剪贴板</n-button>
+            <n-button @click="showExample">示例</n-button>
+            <n-button @click="clear">清空</n-button>
           </div>
-          <div class="flex justify-center">
-            {{ target }}
+          <div class="w-full h-full text-xl">
+            <n-input v-model:value="source" type="textarea" class="w-full h-full"
+                     placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+      <template #2>
+        <div class="h-full p-2 flex flex-col space-y-2">
+          <div class="w-full h-8 flex items-center space-x-4">
+            <n-tag size="large" type="success">结果</n-tag>
+            <n-radio-group v-model:value="height" name="sizeRadioGroup">
+              <n-radio-button v-for="(item, index) in heightOptions" :key="index" :value="item.value" :label="item.label"/>
+            </n-radio-group>
+            <n-color-picker v-model:value="color" :style="{width: '80px'}"
+              :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
+            />
+          </div>
+          <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-auto">
+            <div v-for="(target, index) in targetList" :key="index" class="w-full mb-4">
+              <div class="flex my-1 justify-center">
+                <vue-barcode :value="target" :options="{ displayValue: false, lineColor: color, height: size.height, width: size.width }"></vue-barcode>
+              </div>
+              <div class="flex justify-center">
+                {{ target }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </n-split>
   </div>
 </template>
 

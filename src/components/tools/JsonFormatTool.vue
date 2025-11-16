@@ -1,60 +1,65 @@
 <template>
-  <div class="w-full h-full flex">
-    <!-- 左侧输入区域 -->
-    <div class="w-1/2 h-full p-2 flex flex-col">
-      <!-- 固定的操作按钮 -->
-      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-        <n-tag size="large" type="warning">
-          输入
-        </n-tag>
-        <n-button @click="readClipboard">剪贴板</n-button>
-        <n-button @click="showExample">示例</n-button>
-        <n-button @click="clear">清空</n-button>
-        <n-button @click="compressive">压缩</n-button>
-        <n-button @click="copySource">复制</n-button>
-      </div>
-      <!-- 可滚动的输入区域 -->
-      <div class="flex-1 w-full overflow-hidden">
-        <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
-                 placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
-      </div>
-    </div>
-    
-    <!-- 右侧输出区域 -->
-    <div class="w-1/2 h-full p-2 flex flex-col">
-      <!-- 固定的操作按钮 -->
-      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-        <n-tag size="large" type="success">输出</n-tag>
-        <n-button @click="copyJson">复制</n-button>
-        <n-input-group>
-          <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
-          <n-input 
-            v-model:value="filterExpression" 
-            type="text" 
-            @keydown.enter="jsonFilter" 
-            @clear="onFilterExpressionClear"
-            clearable
-            :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：data.data.filter(item => item.rating > 0.5)'"
-          />
-        </n-input-group>
-      </div>
-      <!-- 可滚动的输出区域 -->
-      <div class="flex-1 w-full overflow-hidden text-lg">
-        <JsonFormat class="w-full h-full"
-        ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" :show-toolbar="false" />
-        <!-- <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/> -->
-      </div>
-    </div>
+  <div class="w-full h-full">
+    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
+      <template #resize-trigger>
+        <div class="resize-trigger"></div>
+      </template>
+      <template #1>
+        <!-- 左侧输入区域 -->
+        <div class="h-full p-2 flex flex-col">
+          <!-- 固定的操作按钮 -->
+          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <n-tag size="large" type="warning">
+              输入
+            </n-tag>
+            <n-button @click="readClipboard">剪贴板</n-button>
+            <n-button @click="showExample">示例</n-button>
+            <n-button @click="clear">清空</n-button>
+            <n-button @click="compressive">压缩</n-button>
+            <n-button @click="copySource">复制</n-button>
+          </div>
+          <!-- 可滚动的输入区域 -->
+          <div class="flex-1 w-full overflow-hidden">
+            <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
+                     placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
+          </div>
+        </div>
+      </template>
+      <template #2>
+        <!-- 右侧输出区域 -->
+        <div class="h-full p-2 flex flex-col">
+          <!-- 固定的操作按钮 -->
+          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <n-tag size="large" type="success">输出</n-tag>
+            <n-button @click="copyJson">复制</n-button>
+            <n-input-group>
+              <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
+              <n-input 
+                v-model:value="filterExpression" 
+                type="text" 
+                @keydown.enter="jsonFilter" 
+                @clear="onFilterExpressionClear"
+                clearable
+                :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：data.data.filter(item => item.rating > 0.5)'"
+              />
+            </n-input-group>
+          </div>
+          <!-- 可滚动的输出区域 -->
+          <div class="flex-1 w-full overflow-hidden text-lg">
+            <JsonFormat class="w-full h-full"
+            ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" :show-toolbar="false" />
+            <!-- <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/> -->
+          </div>
+        </div>
+      </template>
+    </n-split>
   </div>
 </template>
 
 <script setup>
 
-import {ref, onMounted, reactive, computed, watch} from "vue";
-import {NInput, NInputGroup, NSelect, NTag, NButton, NIcon, NTooltip, useNotification} from "naive-ui";
-import { Question24Filled as QuestionIcon } from '@vicons/fluent';
-import VueJsonPretty from 'vue-json-pretty';
-import 'vue-json-pretty/lib/styles.css';
+import {ref, watch} from "vue";
+import {NInput, NInputGroup, NSelect, NTag, NButton, NSplit, useNotification} from "naive-ui";
 import jsonpath from 'jsonpath';
 import { writeText, readText } from "@tauri-apps/api/clipboard";
 import { JsonFormat } from 'lone-format'

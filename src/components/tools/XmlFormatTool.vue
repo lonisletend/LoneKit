@@ -1,7 +1,7 @@
 <script setup>
 
 import { ref, watch } from "vue";
-import { NButton, NInput, NSelect, NTag, useNotification } from "naive-ui";
+import { NButton, NInput, NSelect, NTag, NSplit, useNotification } from "naive-ui";
 import { readText, writeText } from "@tauri-apps/api/clipboard";
 import { XmlFormat } from 'lone-format';
 
@@ -73,30 +73,39 @@ function copy(value) {
 </script>
 
 <template>
-  <div class="w-full h-full flex">
-    <div class="w-1/2 h-full p-2 flex flex-col">
-      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-        <n-tag size="large" type="warning">输入</n-tag>
-        <n-button @click="readClipboard">剪贴板</n-button>
-        <n-button @click="showExample">示例</n-button>
-        <n-button @click="clear">清空</n-button>
-        <n-button @click="compressive">压缩</n-button>
-        <n-button @click="copySource">复制</n-button>
-      </div>
-      <div class="flex-1 w-full overflow-hidden">
-        <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" placeholder="输入需要格式化的 XML"
-          @input="handleChange" />
-      </div>
-    </div>
-    <div class="w-1/2 h-full p-2 flex flex-col">
-      <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-        <n-tag size="large" type="success">输出</n-tag>
-        <n-button @click="copyValue">复制</n-button>
-      </div>
-      <div class="flex-1 w-full overflow-hidden text-lg">
-        <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
-      </div>
-    </div>
+  <div class="w-full h-full">
+    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
+      <template #resize-trigger>
+        <div class="resize-trigger"></div>
+      </template>
+      <template #1>
+        <div class="h-full p-2 flex flex-col">
+          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <n-tag size="large" type="warning">输入</n-tag>
+            <n-button @click="readClipboard">剪贴板</n-button>
+            <n-button @click="showExample">示例</n-button>
+            <n-button @click="clear">清空</n-button>
+            <n-button @click="compressive">压缩</n-button>
+            <n-button @click="copySource">复制</n-button>
+          </div>
+          <div class="flex-1 w-full overflow-hidden">
+            <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" placeholder="输入需要格式化的 XML"
+              @input="handleChange" />
+          </div>
+        </div>
+      </template>
+      <template #2>
+        <div class="h-full p-2 flex flex-col">
+          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <n-tag size="large" type="success">输出</n-tag>
+            <n-button @click="copyValue">复制</n-button>
+          </div>
+          <div class="flex-1 w-full overflow-hidden text-lg">
+            <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
+          </div>
+        </div>
+      </template>
+    </n-split>
   </div>
 </template>
 
