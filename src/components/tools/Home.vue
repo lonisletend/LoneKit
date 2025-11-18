@@ -71,6 +71,16 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2025.11.19',
+    version: 'v0.3.6',
+    optimized: [
+      'Json 格式化、XML 格式化 (Beta)  折叠提示效果。',
+    ],
+    fixed: [
+      'Json 格式化字符串类型大数编辑保存后格式错误问题。',
+    ],
+  },
+  {
     date: '2025.11.16',
     version: 'v0.3.5',
     optimized: [
