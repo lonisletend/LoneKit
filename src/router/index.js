@@ -31,7 +31,7 @@ const routes = [
       {
         path: "/jsonWrapper",
         name: "JsonToolWrapper",
-        component: () => import("/src/components/wrapper/JsonToolWrapper.vue"),
+        component: () => import("/src/components/wrapper/JsonFormatWrapper.vue"),
       },
       {
         path: "/jsonFormatWrapper",
@@ -41,7 +41,7 @@ const routes = [
       {
         path: "/xmlWrapper",
         name: "XmlToolWrapper",
-        component: () => import("/src/components/wrapper/XmlToolWrapper.vue"),
+        component: () => import("/src/components/wrapper/XmlFormatWrapper.vue"),
       },
       {
         path: "/xmlFormatWrapper",

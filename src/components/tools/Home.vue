@@ -71,6 +71,16 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2025.12.03',
+    version: 'v0.4.0',
+    optimized: [
+      'Json 格式化 优化编辑样式。'
+    ],
+    added: [
+      'XML 格式化 (Beta) 转正，支持编辑功能，增加对齐线，优化展示。'
+    ],
+  },  
+  {
     date: '2025.11.19',
     version: 'v0.3.6',
     optimized: [

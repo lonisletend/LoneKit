@@ -135,26 +135,26 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "XML 格式化(Beta)" }
+      { default: () => "XML 格式化" }
     ),
     key: "xml-format-wrapper",
     icon: renderIcon(CodeIcon)
   },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "XmlToolWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "XML 格式化" }
-    ),
-    key: "xml-tool-wrapper",
-    icon: renderIcon(CodeIcon)
-  },
+  // {
+  //   label: () => h(
+  //     RouterLink,
+  //     {
+  //       to: {
+  //         name: "XmlToolWrapper",
+  //         params: {
+  //         }
+  //       }
+  //     },
+  //     { default: () => "XML 格式化" }
+  //   ),
+  //   key: "xml-tool-wrapper",
+  //   icon: renderIcon(CodeIcon)
+  // },
   {
     label: () => h(
       RouterLink,
