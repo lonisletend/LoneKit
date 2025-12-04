@@ -40,7 +40,7 @@
                 @keydown.enter="jsonFilter" 
                 @clear="onFilterExpressionClear"
                 clearable
-                :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：data.data.filter(item => item.rating > 0.5)'"
+                :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：$.data.filter(item => item.rating > 0.5)'"
               />
             </n-input-group>
           </div>

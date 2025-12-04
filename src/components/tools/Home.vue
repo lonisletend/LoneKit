@@ -71,6 +71,16 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2025.12.05',
+    version: 'v0.4.1',
+    optimized: [
+      'Json 格式化 JavaScript 过滤，修改为 $ 指代当前数据，与 JsonPath 保持一致。'
+    ],
+    fixed: [
+      'Json 格式化 JavaScript 过滤，修复保护小数过滤匹配错误问题。'
+    ],
+  },  
+  {
     date: '2025.12.03',
     version: 'v0.4.0',
     optimized: [
