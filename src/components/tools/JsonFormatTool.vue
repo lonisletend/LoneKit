@@ -32,6 +32,9 @@
           <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
             <n-tag size="large" type="success">输出</n-tag>
             <n-button @click="copyJson">复制</n-button>
+            <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
+              <template #icon> <component :is="SortIcon" /> </template>
+            </n-button>
             <n-input-group>
               <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
               <n-input 
@@ -60,6 +63,7 @@
 
 import {ref, watch} from "vue";
 import {NInput, NInputGroup, NSelect, NTag, NButton, NSplit, useNotification} from "naive-ui";
+import { TextSortAscending24Regular as SortIcon } from '@vicons/fluent';
 import jsonpath from 'jsonpath';
 import { writeText, readText } from "@tauri-apps/api/clipboard";
 import { JsonFormat } from 'lone-format'
@@ -77,6 +81,7 @@ const exampleJsonStr = ref(`{"status":200,"text":"","error":null,"data":[{"news_
 const jsonObject = ref();
 const filterType = ref('jsonpath');
 const filterExpression = ref('');
+const isSorted = ref(false);
 
 // 过滤类型选项
 const filterTypeOptions = [
@@ -168,6 +173,15 @@ function onFilterExpressionClear() {
 
 function jsonFilter() {
   executeFilter();
+}
+
+function toggleSort() {
+  isSorted.value = !isSorted.value;
+  if (isSorted.value) {
+    customJsonFormatRef.value?.sortKeys();
+  } else {
+    customJsonFormatRef.value?.clearSortKeys();
+  }
 }
 
 const notification = useNotification();
