@@ -1,13 +1,26 @@
 <script setup>
 
 import { ref, watch } from "vue";
-import { NButton, NInput, NSelect, NTag, NSplit, useNotification } from "naive-ui";
+import { NButton, NInput, NInputGroup, NSelect, NTag, NSplit, useNotification } from "naive-ui";
 import { readText, writeText } from "@tauri-apps/api/clipboard";
 import { XmlFormat } from 'lone-format';
 
 const source = ref();
 const target = ref();
-const customXmlFormatRef = ref(null)
+const customXmlFormatRef = ref(null);
+const filterType = ref('xpath');
+const filterExpression = ref('');
+
+// 过滤类型选项
+const filterTypeOptions = [
+  { label: 'XPath', value: 'xpath' }
+];
+
+// 监听过滤类型变化，自动清空表达式
+watch(filterType, () => {
+  filterExpression.value = '';
+  executeFilter(); // 清空后执行过滤（实际上是清空过滤）
+});
 
 function handleChange(val) {
 }
@@ -70,6 +83,34 @@ function copy(value) {
   notify('success', '复制成功!');
 }
 
+function executeFilter() {
+  const expression = filterExpression.value.trim();
+  
+  if (!expression) {
+    // 表达式为空时，清空过滤
+    customXmlFormatRef.value?.clearFilter();
+    customXmlFormatRef.value?.expandAll();
+    return;
+  }
+  
+  // 表达式有值时，执行过滤
+  const filterConfig = {
+    type: filterType.value,
+    expression: expression
+  };
+  
+  customXmlFormatRef.value?.filter(filterConfig);
+}
+
+function onFilterExpressionClear() {
+  // 清空表达式时也触发过滤执行
+  executeFilter();
+}
+
+function xmlFilter() {
+  executeFilter();
+}
+
 </script>
 
 <template>
@@ -99,6 +140,17 @@ function copy(value) {
           <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
             <n-tag size="large" type="success">输出</n-tag>
             <n-button @click="copyValue">复制</n-button>
+            <n-input-group>
+              <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
+              <n-input 
+                v-model:value="filterExpression" 
+                type="text" 
+                @keydown.enter="xmlFilter" 
+                @clear="onFilterExpressionClear"
+                clearable
+                placeholder="使用 XPath 进行过滤，如：//book[@category='programming']/title"
+              />
+            </n-input-group>
           </div>
           <div class="flex-1 w-full overflow-hidden text-lg">
             <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
