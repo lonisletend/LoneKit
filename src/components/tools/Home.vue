@@ -71,6 +71,14 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2025.12.07',
+    version: 'v0.4.2',
+    added: [
+      'Json 格式化 支持格式化结果 key 排序功能。',
+      'XML 格式化 支持 XPath 过滤功能。',
+    ],
+  },  
+  {
     date: '2025.12.05',
     version: 'v0.4.1',
     optimized: [
