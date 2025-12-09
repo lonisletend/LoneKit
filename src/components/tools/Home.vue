@@ -71,6 +71,14 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2025.12.10',
+    version: 'v0.4.3',
+    fixed: [
+      'XML 格式化 修复空内容默认自闭合标签问题，保留原格式。',
+      'XML 格式化 修复实体引用校验错误问题。'
+    ],
+  },  
+  {
     date: '2025.12.07',
     version: 'v0.4.2',
     added: [
