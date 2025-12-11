@@ -170,6 +170,21 @@ const menuOptions = ref([
     key: "sql-tool",
     icon: renderIcon(SQLIcon)
   },
+    {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "SQLFormatWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "SQL格式化 (Beta)" }
+    ),
+    key: "sql-format-wrapper",
+    icon: renderIcon(SQLIcon)
+  },
   {
     label: () => h(
       RouterLink,
