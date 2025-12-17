@@ -1,72 +1,78 @@
 <template>
-  <div class="w-full h-full">
-    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
-      <template #resize-trigger>
-        <div class="resize-trigger"></div>
-      </template>
-      <template #1>
-        <!-- 左侧输入区域 -->
-        <div class="h-full p-2 flex flex-col">
-          <!-- 固定的操作按钮 -->
-          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-            <n-tag size="large" type="warning">
-              输入
-            </n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">清空</n-button>
-            <n-button @click="compressive">压缩</n-button>
-            <n-button @click="copySource">复制</n-button>
-          </div>
-          <!-- 可滚动的输入区域 -->
-          <div class="flex-1 w-full overflow-hidden">
-            <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
-                     placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
-          </div>
+  <SplitPanel>
+    <template #left>
+      <!-- 左侧输入区域 -->
+      <div class="h-full p-2 flex flex-col">
+        <!-- 固定的操作按钮 -->
+        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+          <n-tag size="large" type="warning">
+            输入
+          </n-tag>
+          <n-button @click="readClipboard">剪贴板</n-button>
+          <n-button @click="showExample">示例</n-button>
+          <n-button @click="clear">清空</n-button>
+          <n-button @click="compressive">压缩</n-button>
+          <n-button @click="copySource">复制</n-button>
         </div>
-      </template>
-      <template #2>
-        <!-- 右侧输出区域 -->
-        <div class="h-full p-2 flex flex-col">
-          <!-- 固定的操作按钮 -->
-          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-            <n-tag size="large" type="success">输出</n-tag>
-            <n-button @click="copyJson">复制</n-button>
-            <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
-              <template #icon> <component :is="SortIcon" /> </template>
-            </n-button>
-            <n-input-group>
-              <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
-              <n-input 
-                v-model:value="filterExpression" 
-                type="text" 
-                @keydown.enter="jsonFilter" 
-                @clear="onFilterExpressionClear"
-                clearable
-                :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：$.data.filter(item => item.rating > 0.5)'"
-              />
-            </n-input-group>
-          </div>
-          <!-- 可滚动的输出区域 -->
-          <div class="flex-1 w-full overflow-hidden text-lg">
-            <JsonFormat class="w-full h-full"
-            ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" :show-toolbar="false" />
-            <!-- <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/> -->
-          </div>
+        <!-- 可滚动的输入区域 -->
+        <div class="flex-1 w-full overflow-hidden">
+          <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
+                   placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
         </div>
-      </template>
-    </n-split>
-  </div>
+      </div>
+    </template>
+    <template #right>
+      <!-- 右侧输出区域 -->
+      <div class="h-full p-2 flex flex-col">
+        <!-- 固定的操作按钮 -->
+        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+          <n-tag size="large" type="success">输出</n-tag>
+          <n-button @click="copyJson">复制</n-button>
+          <n-button @click="collapseAll">
+            <template #icon> <component :is="CollapseIcon" /> </template>
+          </n-button>
+          <n-button @click="expandAll">
+            <template #icon> <component :is="ExpandIcon" /> </template>
+          </n-button>
+          <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
+            <template #icon> <component :is="SortIcon" /> </template>
+          </n-button>
+          <n-input-group>
+            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
+            <n-input 
+              v-model:value="filterExpression" 
+              type="text" 
+              @keydown.enter="jsonFilter" 
+              @clear="onFilterExpressionClear"
+              clearable
+              :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：$.data.filter(item => item.rating > 0.5)'"
+            />
+          </n-input-group>
+        </div>
+        <!-- 可滚动的输出区域 -->
+        <div class="flex-1 w-full overflow-hidden text-lg">
+          <JsonFormat class="w-full h-full"
+          ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" :show-toolbar="false" />
+          <!-- <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/> -->
+        </div>
+      </div>
+    </template>
+  </SplitPanel>
 </template>
 
 <script setup>
 
 import {ref, watch} from "vue";
-import {NInput, NInputGroup, NSelect, NTag, NButton, NSplit, useNotification} from "naive-ui";
-import { TextSortAscending24Regular as SortIcon } from '@vicons/fluent';
+import {NInput, NInputGroup, NSelect, NTag, NButton, useNotification} from "naive-ui";
+import { 
+  TextSortAscending24Regular as SortIcon,
+  ArrowMaximizeVertical24Regular as ExpandIcon,
+  ArrowMinimizeVertical24Regular as CollapseIcon
+} from '@vicons/fluent';
 import jsonpath from 'jsonpath';
 import { writeText, readText } from "@tauri-apps/api/clipboard";
 import { JsonFormat } from 'lone-format'
+import SplitPanel from '../common/SplitPanel.vue'
 
 const props = defineProps({
   id: {
@@ -75,6 +81,7 @@ const props = defineProps({
     default: 0
   }
 });
+
 const customJsonFormatRef = ref(null)
 const sourceJson = ref();
 const exampleJsonStr = ref(`{"status":200,"text":"","error":null,"data":[{"news_id":123456789012345678901234567890,"title":"iPhone X Review: Innovative future with real black technology","source":"Netease phone","rating":0.5},{"news_id":123456789012345678901234567891,"title":"Traffic paradise: How to design streets for people and unmanned vehicles in the future?","source":"Netease smart","link":"http://netease.smart/traffic-paradise/1235","rating":0.60},{"news_id":123456789012345678901234567892,"title":"Teslamask's American Business Relations: The government does not pay billions to build factories","source":"AI Finance","rating":0.8000,"members":["Daniel","Mike","John"]}]}`);
@@ -182,6 +189,14 @@ function toggleSort() {
   } else {
     customJsonFormatRef.value?.clearSortKeys();
   }
+}
+
+function expandAll() {
+  customJsonFormatRef.value?.expandAll();
+}
+
+function collapseAll() {
+  customJsonFormatRef.value?.collapseAll();
 }
 
 const notification = useNotification();

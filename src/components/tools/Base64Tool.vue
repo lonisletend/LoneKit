@@ -1,10 +1,11 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, NSplit, useNotification} from "naive-ui";
+import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
 import 'vue-json-pretty/lib/styles.css';
 import { encode, decode } from 'js-base64';
 import {readText, writeText} from "@tauri-apps/api/clipboard";
+import SplitPanel from '../common/SplitPanel.vue'
 
 const source = ref();
 const example = ref('test');
@@ -114,11 +115,8 @@ function copy(value) {
 
 <template>
   <div class="w-full h-full">
-    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
-      <template #resize-trigger>
-        <div class="resize-trigger"></div>
-      </template>
-      <template #1>
+    <SplitPanel>
+      <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="warning">编码</n-tag>
@@ -134,7 +132,7 @@ function copy(value) {
           </div>
         </div>
       </template>
-      <template #2>
+      <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="success">解码</n-tag>
@@ -150,7 +148,7 @@ function copy(value) {
           </div>
         </div>
       </template>
-    </n-split>
+    </SplitPanel>
   </div>
 </template>
 

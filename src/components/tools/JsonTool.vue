@@ -1,10 +1,7 @@
 <template>
   <div class="w-full h-full">
-    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
-      <template #resize-trigger>
-        <div class="resize-trigger"></div>
-      </template>
-      <template #1>
+    <SplitPanel>
+      <template #left>
         <!-- 左侧输入区域 -->
         <div class="h-full p-2 flex flex-col">
           <!-- 固定的操作按钮 -->
@@ -25,7 +22,7 @@
           </div>
         </div>
       </template>
-      <template #2>
+      <template #right>
         <!-- 右侧输出区域 -->
         <div class="h-full p-2 flex flex-col">
           <!-- 固定的操作按钮 -->
@@ -51,19 +48,20 @@
           </div>
         </div>
       </template>
-    </n-split>
+    </SplitPanel>
   </div>
 </template>
 
 <script setup>
 
 import {ref, onMounted, reactive, computed} from "vue";
-import {NInput, NTag, NButton, NIcon, NTooltip, NSplit, useNotification} from "naive-ui";
+import {NInput, NTag, NButton, NIcon, NTooltip, useNotification} from "naive-ui";
 import { Question24Filled as QuestionIcon } from '@vicons/fluent';
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import jsonpath from 'jsonpath';
 import { writeText, readText } from "@tauri-apps/api/clipboard";
+import SplitPanel from '../common/SplitPanel.vue'
 
 const props = defineProps({
   id: {

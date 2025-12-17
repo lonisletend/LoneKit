@@ -1,8 +1,9 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NButtonGroup, NInput, NSelect, NTag, NSplit, useNotification} from "naive-ui";
+import {NButton, NButtonGroup, NInput, NSelect, NTag, useNotification} from "naive-ui";
 import {readText, writeText} from "@tauri-apps/api/clipboard";
+import SplitPanel from '../common/SplitPanel.vue'
 
 defineOptions({
   name: 'DiffTool'
@@ -35,11 +36,8 @@ function clear() {
       </n-button-group>
     </div>
     <div class="w-full h-full text-xl">
-      <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
-        <template #resize-trigger>
-          <div class="resize-trigger"></div>
-        </template>
-        <template #1>
+      <SplitPanel>
+        <template #left>
           <div class="h-full p-2 flex flex-col space-y-2">
             <div class="w-full h-full text-xl">
               <n-input v-model:value="source" type="textarea" class="w-full h-full"
@@ -47,7 +45,7 @@ function clear() {
             </div>
           </div>
         </template>
-        <template #2>
+        <template #right>
           <div class="h-full p-2 flex flex-col space-y-2">
             <div class="w-full h-full text-xl">
               <n-input v-model:value="target" type="textarea" class="w-full h-full"
@@ -55,7 +53,7 @@ function clear() {
             </div>
           </div>
         </template>
-      </n-split>
+      </SplitPanel>
     </div>
   </div>
 

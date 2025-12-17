@@ -1,9 +1,14 @@
 <script setup>
 
 import { ref, watch } from "vue";
-import { NButton, NInput, NInputGroup, NSelect, NTag, NSplit, useNotification } from "naive-ui";
+import { NButton, NInput, NInputGroup, NSelect, NTag, useNotification } from "naive-ui";
+import { 
+  ArrowMaximizeVertical24Regular as ExpandIcon,
+  ArrowMinimizeVertical24Regular as CollapseIcon
+} from '@vicons/fluent';
 import { readText, writeText } from "@tauri-apps/api/clipboard";
 import { XmlFormat } from 'lone-format';
+import SplitPanel from '../common/SplitPanel.vue'
 
 const source = ref();
 const target = ref();
@@ -111,54 +116,63 @@ function xmlFilter() {
   executeFilter();
 }
 
+function expandAll() {
+  customXmlFormatRef.value?.expandAll();
+}
+
+function collapseAll() {
+  customXmlFormatRef.value?.collapseAll();
+}
+
 </script>
 
 <template>
-  <div class="w-full h-full">
-    <n-split direction="horizontal" :default-size="0.5" :min="0.2" :max="0.8">
-      <template #resize-trigger>
-        <div class="resize-trigger"></div>
-      </template>
-      <template #1>
-        <div class="h-full p-2 flex flex-col">
-          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-            <n-tag size="large" type="warning">输入</n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">清空</n-button>
-            <n-button @click="compressive">压缩</n-button>
-            <n-button @click="copySource">复制</n-button>
-          </div>
-          <div class="flex-1 w-full overflow-hidden">
-            <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" placeholder="输入需要格式化的 XML"
-              @input="handleChange" />
-          </div>
+  <SplitPanel>
+    <template #left>
+      <div class="h-full p-2 flex flex-col">
+        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+          <n-tag size="large" type="warning">输入</n-tag>
+          <n-button @click="readClipboard">剪贴板</n-button>
+          <n-button @click="showExample">示例</n-button>
+          <n-button @click="clear">清空</n-button>
+          <n-button @click="compressive">压缩</n-button>
+          <n-button @click="copySource">复制</n-button>
         </div>
-      </template>
-      <template #2>
-        <div class="h-full p-2 flex flex-col">
-          <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-            <n-tag size="large" type="success">输出</n-tag>
-            <n-button @click="copyValue">复制</n-button>
-            <n-input-group>
-              <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
-              <n-input 
-                v-model:value="filterExpression" 
-                type="text" 
-                @keydown.enter="xmlFilter" 
-                @clear="onFilterExpressionClear"
-                clearable
-                placeholder="使用 XPath 进行过滤，如：//book[@category='programming']/title"
-              />
-            </n-input-group>
-          </div>
-          <div class="flex-1 w-full overflow-hidden text-lg">
-            <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
-          </div>
+        <div class="flex-1 w-full overflow-hidden">
+          <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" placeholder="输入需要格式化的 XML"
+            @input="handleChange" />
         </div>
-      </template>
-    </n-split>
-  </div>
+      </div>
+    </template>
+    <template #right>
+      <div class="h-full p-2 flex flex-col">
+        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+          <n-tag size="large" type="success">输出</n-tag>
+          <n-button @click="copyValue">复制</n-button>
+          <n-button @click="collapseAll">
+            <template #icon> <component :is="CollapseIcon" /> </template>
+          </n-button>
+          <n-button @click="expandAll">
+            <template #icon> <component :is="ExpandIcon" /> </template>
+          </n-button>
+          <n-input-group>
+            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
+            <n-input 
+              v-model:value="filterExpression" 
+              type="text" 
+              @keydown.enter="xmlFilter" 
+              @clear="onFilterExpressionClear"
+              clearable
+              placeholder="使用 XPath 进行过滤，如：//book[@category='programming']/title"
+            />
+          </n-input-group>
+        </div>
+        <div class="flex-1 w-full overflow-hidden text-lg">
+          <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
+        </div>
+      </div>
+    </template>
+  </SplitPanel>
 </template>
 
 <style scoped>
