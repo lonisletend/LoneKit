@@ -71,6 +71,20 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2025.12.19',
+    version: 'v0.5.0',
+    added: [
+      'Json 格式化、XML 格式化 支持全部折叠/全部展开。',
+      'SQL 格式化 (Beta) 。'
+    ],
+    optimized: [
+      '所有左右分栏工具宽度调整分隔条支持双击还原左右 1:1 布局。'
+    ],
+    fixed: [
+      'XML 格式化 修复 CDATA 中内容被错误识别为非法实体引用问题。',
+    ],
+  }, 
+  {
     date: '2025.12.10',
     version: 'v0.4.3',
     fixed: [

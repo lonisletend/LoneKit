@@ -165,7 +165,7 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "SQL格式化" }
+      { default: () => "SQL 格式化" }
     ),
     key: "sql-tool",
     icon: renderIcon(SQLIcon)
@@ -180,7 +180,7 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "SQL格式化 (Beta)" }
+      { default: () => "SQL 格式化 (Beta)" }
     ),
     key: "sql-format-wrapper",
     icon: renderIcon(SQLIcon)

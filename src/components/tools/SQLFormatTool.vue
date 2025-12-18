@@ -77,6 +77,14 @@ function copy(value) {
   notify('success', '复制成功!');
 }
 
+function compressive() {
+  customSqlFormatRef.value?.compressSource();
+}
+
+function copySource() {
+  copy(source.value);
+}
+
 </script>
 
 <template>
@@ -89,6 +97,8 @@ function copy(value) {
             <n-button @click="readClipboard">剪贴板</n-button>
             <n-button @click="showExample">示例</n-button>
             <n-button @click="clear">清空</n-button>
+            <n-button @click="compressive">压缩</n-button>
+            <n-button @click="copySource">复制</n-button>
           </div>
           <div class="w-full h-full text-xl">
             <n-input v-model:value="source" type="textarea" class="w-full h-full"
