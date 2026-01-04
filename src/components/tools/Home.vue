@@ -71,6 +71,13 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2026.01.05',
+    version: 'v0.5.1',
+    added: [
+      '所有多 Tab 页面支持双击编辑 Tab 标题功能。'
+    ],
+  },
+  {
     date: '2025.12.19',
     version: 'v0.5.0',
     added: [

@@ -27,6 +27,9 @@ export function useTabManager(options) {
   // 跟踪需要被 keep-alive 缓存的组件名称
   const cachedComponents = ref([`${componentName}-1`]);
 
+  // 记录当前正在编辑的tab ID
+  const editingTabId = ref(null);
+
   // 为每个 tab 创建动态组件的缓存（不需要响应式）
   const componentCache = {};
 
@@ -109,6 +112,38 @@ export function useTabManager(options) {
     }
   }
 
+  /**
+   * 更新标签名称
+   * @param {number} tabId - 标签 ID
+   * @param {string} newName - 新的标签名称
+   */
+  function handleUpdateTab(tabId, newName) {
+    const tab = tabs.value.find((t) => t.id === tabId);
+    if (!tab) return;
+
+    const oldName = tab.name;
+    const trimmedName = newName.trim();
+    
+    // 如果名称为空或者未修改，则不更新
+    if (!trimmedName || trimmedName === oldName) return;
+
+    tab.name = trimmedName;
+    
+    // 如果当前激活的是被修改的标签，更新激活标签名称
+    if (activeTabName.value === oldName) {
+      activeTabName.value = trimmedName;
+    }
+  }
+
+  /**
+   * 处理编辑状态变化
+   * @param {number} tabId - 标签 ID
+   * @param {boolean} isEditing - 是否正在编辑
+   */
+  function handleEditingChange(tabId, isEditing) {
+    editingTabId.value = isEditing ? tabId : null;
+  }
+
   return {
     // 响应式数据
     tabs,
@@ -117,9 +152,12 @@ export function useTabManager(options) {
     currentComponent,
     addable,
     closable,
+    editingTabId,
     
     // 方法
     handleAdd,
-    handleClose
+    handleClose,
+    handleUpdateTab,
+    handleEditingChange
   };
 }
