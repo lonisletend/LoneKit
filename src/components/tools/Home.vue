@@ -72,6 +72,13 @@ import { ref } from "vue";
 const changeLogs = ref([
   {
     date: '2026.01.14',
+    version: 'v0.6.0',
+    added: [
+      '新增二维码识别工具，支持图片拖拽、点击上传、剪贴板读取、历史列表、URL 自动渲染等。'
+    ]
+  },
+  {
+    date: '2026.01.14',
     version: 'v0.5.2',
     fixed: [
       '修复多 Tab 页面编辑 Tab 标题后，页面内容丢失的问题。'

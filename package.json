@@ -1,7 +1,7 @@
 {
   "name": "lonekit",
   "private": true,
-  "version": "0.5.2",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,6 +18,7 @@
     "jsbarcode": "^3.11.6",
     "jsonpath": "^1.1.1",
     "lone-format": "^0.11.1",
+    "qr-scanner": "^1.4.2",
     "qrcode.vue": "^3.4.1",
     "sql-formatter": "^15.0.2",
     "v-code-diff": "^1.9.0",

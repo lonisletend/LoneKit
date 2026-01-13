@@ -69,6 +69,11 @@ const routes = [
         component: () => import("/src/components/tools/QRCodeTool.vue"),
       },
       {
+        path: "/qrcode-reader",
+        name: "QRCodeReaderTool",
+        component: () => import("/src/components/tools/QRCodeReaderTool.vue"),
+      },
+      {
         path: "/barcode",
         name: "BarcodeTool",
         component: () => import("/src/components/tools/BarcodeTool.vue"),

@@ -54,6 +54,7 @@ import DiffIcon from "./icons/DiffIcon.vue";
 import SQLIcon from "./icons/SQLIcon.vue";
 import StringHexIcon from "./icons/StringHexIcon.vue";
 import QRCodeIcon from "./icons/QRCodeIcon.vue";
+import QRCodeReaderIcon from "./icons/QRCodeReaderIcon.vue";
 import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
@@ -170,21 +171,21 @@ const menuOptions = ref([
     key: "sql-tool",
     icon: renderIcon(SQLIcon)
   },
-    {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "SQLFormatWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "SQL 格式化 (Beta)" }
-    ),
-    key: "sql-format-wrapper",
-    icon: renderIcon(SQLIcon)
-  },
+  //   {
+  //   label: () => h(
+  //     RouterLink,
+  //     {
+  //       to: {
+  //         name: "SQLFormatWrapper",
+  //         params: {
+  //         }
+  //       }
+  //     },
+  //     { default: () => "SQL 格式化 (Beta)" }
+  //   ),
+  //   key: "sql-format-wrapper",
+  //   icon: renderIcon(SQLIcon)
+  // },
   {
     label: () => h(
       RouterLink,
@@ -210,7 +211,7 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "Md5 加密" }
+      { default: () => "Md5" }
     ),
     key: "md5-tool",
     icon: renderIcon(Md5Icon)
@@ -225,7 +226,7 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "Base64 编码/解码" }
+      { default: () => "Base64" }
     ),
     key: "base64-tool",
     icon: renderIcon(Base64Icon)
@@ -255,10 +256,25 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "二维码生成器" }
+      { default: () => "二维码生成" }
     ),
     key: "qr-code-tool",
     icon: renderIcon(QRCodeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "QRCodeReaderTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "二维码识别" }
+    ),
+    key: "qr-code-reader-tool",
+    icon: renderIcon(QRCodeReaderIcon)
   },
   {
     label: () => h(
@@ -270,7 +286,7 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "条形码生成器" }
+      { default: () => "条形码生成" }
     ),
     key: "barcode-tool",
     icon: renderIcon(BarcodeIcon)
