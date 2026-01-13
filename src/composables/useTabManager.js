@@ -45,6 +45,12 @@ export function useTabManager(options) {
     return tabs.value.length > 1;
   });
 
+  // 获取当前活动 tab 的 ID
+  const activeTabId = computed(() => {
+    const currentTab = tabs.value.find((tab) => tab.name === activeTabName.value);
+    return currentTab ? currentTab.id : null;
+  });
+
   // 获取当前活动 tab 的组件
   const currentComponent = computed(() => {
     const currentTab = tabs.value.find((tab) => tab.name === activeTabName.value);
@@ -148,6 +154,7 @@ export function useTabManager(options) {
     // 响应式数据
     tabs,
     activeTabName,
+    activeTabId,
     cachedComponents,
     currentComponent,
     addable,

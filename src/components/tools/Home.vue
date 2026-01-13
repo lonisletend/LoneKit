@@ -71,6 +71,13 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2026.01.14',
+    version: 'v0.5.2',
+    fixed: [
+      '修复多 Tab 页面编辑 Tab 标题后，页面内容丢失的问题。'
+    ],
+  },
+  {
     date: '2026.01.05',
     version: 'v0.5.1',
     added: [

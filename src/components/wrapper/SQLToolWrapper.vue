@@ -7,6 +7,7 @@ import { useTabManager } from '../../composables/useTabManager.js';
 const {
   tabs,
   activeTabName,
+  activeTabId,
   cachedComponents,
   currentComponent,
   addable,
@@ -49,7 +50,7 @@ const {
         <component
             :is="currentComponent"
             v-if="currentComponent"
-            :key="activeTabName"
+            :key="activeTabId"
         ></component>
       </keep-alive>
     </div>
