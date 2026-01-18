@@ -1,10 +1,13 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
+import {NButton, NInput, NSelect, NTag} from "naive-ui";
 import { encode, decode } from 'js-base64';
-import {readText, writeText} from "@tauri-apps/api/clipboard";
+import {readText} from "@tauri-apps/api/clipboard";
 import SplitPanel from '../common/SplitPanel.vue'
+import { useCommon } from '../../composables/useCommon';
+
+const { notify, copyToClipboard } = useCommon();
 
 const source = ref();
 const example = ref('test');

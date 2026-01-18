@@ -1,14 +1,17 @@
 <script setup>
 
 import { ref, watch } from "vue";
-import { NButton, NInput, NInputGroup, NSelect, NTag, useNotification } from "naive-ui";
+import { NButton, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
 import { 
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
-import { readText, writeText } from "@tauri-apps/api/clipboard";
+import { readText } from "@tauri-apps/api/clipboard";
 import { XmlFormat } from 'lone-format';
 import SplitPanel from '../common/SplitPanel.vue'
+import { useCommon } from '../../composables/useCommon';
+
+const { notify, copyToClipboard } = useCommon();
 
 const source = ref();
 const target = ref();

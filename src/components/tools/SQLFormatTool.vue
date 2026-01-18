@@ -9,6 +9,9 @@ import {
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 import { SqlFormat } from 'lone-format'
 import SplitPanel from '../common/SplitPanel.vue'
+import { useCommon } from '../../composables/useCommon'
+
+const { notify, copyToClipboard } = useCommon();
 
 defineOptions({
   name: 'SQLFormatTool'

@@ -71,6 +71,16 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2026.01.18',
+    version: 'v0.6.1',
+    added: [
+      'SQL 格式化，支持高亮、折叠。'
+    ],
+    optimized: [
+      '删除已废弃实现，减少依赖。'
+    ],
+  },
+  {
     date: '2026.01.14',
     version: 'v0.6.0',
     added: [
