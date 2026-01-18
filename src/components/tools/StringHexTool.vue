@@ -1,9 +1,12 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
-import {readText, writeText} from "@tauri-apps/api/clipboard";
-import SplitPanel from '../common/SplitPanel.vue'
+import { NButton, NInput, NSelect, NTag } from "naive-ui";
+import { readText } from "@tauri-apps/api/clipboard";
+import SplitPanel from '../common/SplitPanel.vue';
+import { useCommon } from '../../composables/useCommon';
+
+const { notify, copyToClipboard } = useCommon();
 
 const source = ref();
 const target = ref();
@@ -147,32 +150,9 @@ function clear() {
   target.value = '';
 }
 
-const notification = useNotification();
-
-function notify(type, message) {
-  notification[type]({
-    content: message,
-    duration: 2500,
-    keepAliveOnHover: true
-  });
-}
-
 function copyValue(type) {
-  if (type === 1) {
-    copy(source.value);
-  } else {
-    copy(target.value);
-  }
-}
-
-function copy(value) {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(value);
-  }
-  if (window.__TAURI_IPC__) {
-    writeText(value.toString());
-  }
-  notify('success', '复制成功!');
+  const value = type === 1 ? source.value : target.value;
+  copyToClipboard(value, '复制成功!');
 }
 
 </script>

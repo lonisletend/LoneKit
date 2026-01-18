@@ -60,31 +60,11 @@ function compressive() {
 }
 
 function copySource() {
-  copy(source.value);
-}
-
-const notification = useNotification();
-
-function notify(type, message) {
-  notification[type]({
-    content: message,
-    duration: 2500,
-    keepAliveOnHover: true
-  });
+  copyToClipboard(source.value);
 }
 
 async function copyValue() {
   await customXmlFormatRef.value?.copyXml()
-  notify('success', '复制成功!');
-}
-
-function copy(value) {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(value);
-  }
-  if (window.__TAURI_IPC__) {
-    writeText(value.toString());
-  }
   notify('success', '复制成功!');
 }
 

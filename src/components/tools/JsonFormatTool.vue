@@ -62,16 +62,19 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NInput, NInputGroup, NSelect, NTag, NButton, useNotification} from "naive-ui";
+import {NInput, NInputGroup, NSelect, NTag, NButton} from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
 import jsonpath from 'jsonpath';
-import { writeText, readText } from "@tauri-apps/api/clipboard";
+import { readText } from "@tauri-apps/api/clipboard";
 import { JsonFormat } from 'lone-format'
 import SplitPanel from '../common/SplitPanel.vue'
+import { useCommon } from '../../composables/useCommon';
+
+const { notify, copyToClipboard } = useCommon();
 
 const props = defineProps({
   id: {
@@ -141,7 +144,7 @@ function compressive() {
 }
 
 function copySource() {
-  copy(sourceJson.value);
+  copyToClipboard(sourceJson.value);
 }
 
 function clear() {
@@ -196,26 +199,6 @@ function expandAll() {
 
 function collapseAll() {
   customJsonFormatRef.value?.collapseAll();
-}
-
-const notification = useNotification();
-
-function notify(type, message) {
-  notification[type]({
-    content: message,
-    duration: 2500,
-    keepAliveOnHover: true
-  });
-}
-
-function copy(value) {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(value);
-  }
-  if (window.__TAURI_IPC__) {
-    writeText(value.toString());
-  }
-  notify('success', '复制成功!');
 }
 
 </script>

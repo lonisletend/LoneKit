@@ -1,25 +1,17 @@
 <script setup>
 import { ref, nextTick } from "vue";
-import { NButton, NCard, NUpload, NUploadDragger, NIcon, NText, useNotification, NTag, NEmpty } from "naive-ui";
+import { NButton, NCard, NUpload, NUploadDragger, NIcon, NText, NTag, NEmpty } from "naive-ui";
 import { CloudUploadOutline } from "@vicons/ionicons5";
 import QrScanner from 'qr-scanner';
-import { writeText } from "@tauri-apps/api/clipboard";
 import SplitPanel from '../common/SplitPanel.vue';
+import { useCommon } from '../../composables/useCommon';
 
 // 历史记录数组
 const historyList = ref([]);
 const isLoading = ref(false);
 const isProcessing = ref(false);
 
-const notification = useNotification();
-
-function notify(type, message) {
-  notification[type]({
-    content: message,
-    duration: 2500,
-    keepAliveOnHover: true
-  });
-}
+const { notify, copyToClipboard } = useCommon();
 
 // 处理图片文件并识别二维码（通用逻辑）
 async function processImageFile(imageFile) {
@@ -138,20 +130,7 @@ function deleteItem(id) {
 }
 
 function copyText(text) {
-  if (!text) {
-    notify('warning', '没有可复制的内容');
-    return;
-  }
-  
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      notify('success', '复制成功');
-    });
-  } else if (window.__TAURI_IPC__) {
-    writeText(text).then(() => {
-      notify('success', '复制成功');
-    });
-  }
+  copyToClipboard(text);
 }
 
 // 判断文本是否为URL
