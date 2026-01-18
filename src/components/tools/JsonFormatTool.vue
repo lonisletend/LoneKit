@@ -53,7 +53,6 @@
         <div class="flex-1 w-full overflow-hidden text-lg">
           <JsonFormat class="w-full h-full"
           ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" :show-toolbar="false" />
-          <!-- <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/> -->
         </div>
       </div>
     </template>

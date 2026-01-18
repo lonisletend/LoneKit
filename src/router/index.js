@@ -19,29 +19,9 @@ const routes = [
         component: () => import("/src/components/tools/TimeTool.vue"),
       },
       {
-        path: "/json",
-        name: "JsonTool",
-        component: () => import("/src/components/tools/JsonTool.vue"),
-      },
-      {
-        path: "/xml",
-        name: "XmlTool",
-        component: () => import("/src/components/tools/XmlTool.vue"),
-      },
-      {
-        path: "/jsonWrapper",
-        name: "JsonToolWrapper",
-        component: () => import("/src/components/wrapper/JsonFormatWrapper.vue"),
-      },
-      {
         path: "/jsonFormatWrapper",
         name: "JsonFormatWrapper",
         component: () => import("/src/components/wrapper/JsonFormatWrapper.vue"),
-      },
-      {
-        path: "/xmlWrapper",
-        name: "XmlToolWrapper",
-        component: () => import("/src/components/wrapper/XmlFormatWrapper.vue"),
       },
       {
         path: "/xmlFormatWrapper",
@@ -77,16 +57,6 @@ const routes = [
         path: "/barcode",
         name: "BarcodeTool",
         component: () => import("/src/components/tools/BarcodeTool.vue"),
-      },
-      {
-        path: "/sql",
-        name: "SQLTool",
-        component: () => import("/src/components/tools/SQLTool.vue"),
-      },
-      {
-        path: "/sqlWrapper",
-        name: "SQLToolWrapper",
-        component: () => import("/src/components/wrapper/SQLToolWrapper.vue"),
       },
       {
         path: "/sqlFormatWrapper",

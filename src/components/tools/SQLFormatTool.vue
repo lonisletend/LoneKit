@@ -1,8 +1,11 @@
 <script setup>
 
-import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
-import { format } from 'sql-formatter';
+import {ref} from "vue";
+import {NButton, NInput, NTag, useNotification} from "naive-ui";
+import { 
+  ArrowMaximizeVertical24Regular as ExpandIcon,
+  ArrowMinimizeVertical24Regular as CollapseIcon
+} from '@vicons/fluent';
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 import { SqlFormat } from 'lone-format'
 import SplitPanel from '../common/SplitPanel.vue'
@@ -12,29 +15,17 @@ defineOptions({
 });
 
 const source = ref();
-const target = ref();
-const options = {
-  language: 'sql',
-  tabWidth: 2,
-  keywordCase: 'upper',
-  linesBetweenQueries: 2,
-}
 const customSqlFormatRef = ref(null)
-function handleChange(val) {
-  target.value = format(source.value, options);
-}
 
 function readClipboard() {
   if (navigator && navigator.clipboard) {
     navigator.clipboard.readText().then(text => {
       source.value = text;
-      handleChange(source.value);
     });
   }
   if (window.__TAURI_IPC__) {
     readText().then(text => {
       source.value = text;
-      handleChange(source.value);
     });
   }
 }
@@ -45,12 +36,10 @@ function showExample() {
       'as suppliers\n' +
       'where supplier_id > 500\n' +
       'order by supplier_name asc,city desc;';
-  handleChange(source.value);
 }
 
 function clear() {
   source.value = '';
-  target.value = '';
 }
 
 const notification = useNotification();
@@ -63,8 +52,9 @@ function notify(type, message) {
   });
 }
 
-function copyValue() {
-  copy(target.value);
+async function copyValue() {
+  await customSqlFormatRef.value?.copySql()
+  notify('success', '复制成功!');
 }
 
 function copy(value) {
@@ -85,6 +75,15 @@ function copySource() {
   copy(source.value);
 }
 
+function expandAll() {
+  customSqlFormatRef.value?.expandAll();
+}
+
+function collapseAll() {
+  customSqlFormatRef.value?.collapseAll();
+}
+
+
 </script>
 
 <template>
@@ -102,7 +101,7 @@ function copySource() {
           </div>
           <div class="w-full h-full text-xl">
             <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                     placeholder="输入需要格式化的 SQL" @input="handleChange"/>
+                     placeholder="输入需要格式化的 SQL"/>
           </div>
         </div>
       </template>
@@ -111,11 +110,16 @@ function copySource() {
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="success">结果</n-tag>
             <n-button @click="copyValue">复制</n-button>
+            <n-button @click="collapseAll">
+              <template #icon> <component :is="CollapseIcon" /> </template>
+            </n-button>
+            <n-button @click="expandAll">
+              <template #icon> <component :is="ExpandIcon" /> </template>
+            </n-button>
           </div>
           <div class="flex-1 w-full overflow-hidden text-lg">
             <SqlFormat class="w-full h-full"
             ref="customSqlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
-            <!-- <vue-json-pretty :data="jsonObject" v-if="sourceJson" :showLineNumber="true" :showIcon="true" :editable="true"/> -->
           </div>
         </div>
       </template>

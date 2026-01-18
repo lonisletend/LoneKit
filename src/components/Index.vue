@@ -81,21 +81,6 @@ const menuOptions = ref([
     key: "time-tool",
     icon: renderIcon(TimeIcon)
   },
-  // {
-  //   label: () => h(
-  //     RouterLink,
-  //     {
-  //       to: {
-  //         name: "JsonTool",
-  //         params: {
-  //         }
-  //       }
-  //     },
-  //     { default: () => "Json格式化" }
-  //   ),
-  //   key: "json-tool",
-  //   icon: renderIcon(JsonIcon)
-  // },
   {
     label: () => h(
       RouterLink,
@@ -111,21 +96,6 @@ const menuOptions = ref([
     key: "json-format-wrapper",
     icon: renderIcon(JsonIcon)
   },
-  // {
-  //   label: () => h(
-  //     RouterLink,
-  //     {
-  //       to: {
-  //         name: "JsonToolWrapper",
-  //         params: {
-  //         }
-  //       }
-  //     },
-  //     { default: () => "Json格式化" }
-  //   ),
-  //   key: "json-tool-wrapper",
-  //   icon: renderIcon(JsonIcon)
-  // },
   {
     label: () => h(
       RouterLink,
@@ -141,51 +111,21 @@ const menuOptions = ref([
     key: "xml-format-wrapper",
     icon: renderIcon(CodeIcon)
   },
-  // {
-  //   label: () => h(
-  //     RouterLink,
-  //     {
-  //       to: {
-  //         name: "XmlToolWrapper",
-  //         params: {
-  //         }
-  //       }
-  //     },
-  //     { default: () => "XML 格式化" }
-  //   ),
-  //   key: "xml-tool-wrapper",
-  //   icon: renderIcon(CodeIcon)
-  // },
-  {
+    {
     label: () => h(
       RouterLink,
       {
         to: {
-          name: "SQLToolWrapper",
+          name: "SQLFormatWrapper",
           params: {
           }
         }
       },
       { default: () => "SQL 格式化" }
     ),
-    key: "sql-tool",
+    key: "sql-format-wrapper",
     icon: renderIcon(SQLIcon)
   },
-  //   {
-  //   label: () => h(
-  //     RouterLink,
-  //     {
-  //       to: {
-  //         name: "SQLFormatWrapper",
-  //         params: {
-  //         }
-  //       }
-  //     },
-  //     { default: () => "SQL 格式化 (Beta)" }
-  //   ),
-  //   key: "sql-format-wrapper",
-  //   icon: renderIcon(SQLIcon)
-  // },
   {
     label: () => h(
       RouterLink,

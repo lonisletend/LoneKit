@@ -2,12 +2,10 @@
 
 import {ref, watch} from "vue";
 import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
-import 'vue-json-pretty/lib/styles.css';
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 import SplitPanel from '../common/SplitPanel.vue'
 
 const source = ref();
-const example = ref('test');
 const target = ref();
 
 const lineMode = ref('multi');

@@ -2,7 +2,6 @@
 
 import {ref, watch} from "vue";
 import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
-import 'vue-json-pretty/lib/styles.css';
 import { encode, decode } from 'js-base64';
 import {readText, writeText} from "@tauri-apps/api/clipboard";
 import SplitPanel from '../common/SplitPanel.vue'
