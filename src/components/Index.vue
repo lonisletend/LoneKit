@@ -59,6 +59,7 @@ import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
+import { Flash24Filled as FlashIcon } from '@vicons/fluent';
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -80,6 +81,21 @@ const menuOptions = ref([
     ),
     key: "time-tool",
     icon: renderIcon(TimeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "CommonFormatWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "通用格式化" }
+    ),
+    key: "common-format-wrapper",
+    icon: renderIcon(FlashIcon)
   },
   {
     label: () => h(
