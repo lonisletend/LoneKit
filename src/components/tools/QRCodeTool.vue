@@ -101,7 +101,7 @@ function clear() {
               :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
             />
           </div>
-          <div class="w-full h-full p-1 text-lg transition border border-gray-400 rounded overflow-auto">
+          <div class="w-full h-full p-1 text-lg transition border border-gray-300 rounded overflow-auto">
             <div v-for="(target, index) in targetList" :key="index" class="w-full mb-4">
               <div class="flex my-1 justify-center">
                 <qrcode-vue :value="target" :size="size" level="H" :foreground="color" />

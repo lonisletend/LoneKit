@@ -102,7 +102,7 @@ function collapseAll() {
           </div>
           <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
             <SqlFormat class="w-full h-full"
-            ref="customSqlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
+            ref="customSqlFormatRef" v-model="source" theme="min-light"/>
           </div>
         </div>
       </template>

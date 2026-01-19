@@ -151,7 +151,7 @@ function collapseAll() {
           </n-input-group>
         </div>
         <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
-          <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
+          <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light"/>
         </div>
       </div>
     </template>
