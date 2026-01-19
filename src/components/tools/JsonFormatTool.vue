@@ -50,9 +50,9 @@
           </n-input-group>
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-hidden text-lg">
+        <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
           <JsonFormat class="w-full h-full"
-          ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" :show-toolbar="false" />
+          ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" />
         </div>
       </div>
     </template>

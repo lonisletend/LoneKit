@@ -100,7 +100,7 @@ function collapseAll() {
               <template #icon> <component :is="ExpandIcon" /> </template>
             </n-button>
           </div>
-          <div class="flex-1 w-full overflow-hidden text-lg">
+          <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
             <SqlFormat class="w-full h-full"
             ref="customSqlFormatRef" v-model="source" theme="min-light" :show-toolbar="false" />
           </div>
