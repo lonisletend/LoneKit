@@ -71,6 +71,14 @@ import { ref } from "vue";
 
 const changeLogs = ref([
   {
+    date: '2026.01.21',
+    version: 'v0.6.3',
+    optimized: [
+      '通用格式化工具，优化展示区域字体和样式。',
+      '文本对比工具，优化对比展示字体和样式。支持选择并排/逐行对比模式。'
+    ],
+  },
+  {
     date: '2026.01.20',
     version: 'v0.6.2',
     added: [

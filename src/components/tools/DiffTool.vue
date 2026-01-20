@@ -1,9 +1,9 @@
 <script setup>
 
-import {ref, watch} from "vue";
-import {NButton, NButtonGroup, NInput, NSelect, NTag, useNotification} from "naive-ui";
-import {readText, writeText} from "@tauri-apps/api/clipboard";
-import SplitPanel from '../common/SplitPanel.vue'
+import {ref} from "vue";
+import {NButton, NButtonGroup, NInput, NSelect} from "naive-ui";
+import SplitPanel from '../common/SplitPanel.vue';
+import { CodeDiff } from 'v-code-diff'
 
 defineOptions({
   name: 'DiffTool'
@@ -12,6 +12,12 @@ defineOptions({
 const source = ref();
 const target = ref();
 const panel = ref('source');
+const outputFormat = ref('side-by-side');
+
+const outputFormatOptions = [
+  { label: '并排（side-by-side）', value: 'side-by-side' },
+  { label: '逐行（line-by-line）', value: 'line-by-line' }
+];
 
 function showExample() {
 }
@@ -67,12 +73,18 @@ function clear() {
           对比结果
         </n-button>
       </n-button-group>
+      <n-select 
+        v-model:value="outputFormat" 
+        :options="outputFormatOptions" 
+        :style="{width: '200px'}"
+        class="w-32"
+      />
     </div>
-    <div class="w-full h-full text-xl flex space-x-4">
-      <code-diff
+    <div class="w-full h-full text-xl flex space-x-4 custom-diff-area">
+      <CodeDiff
           :old-string="source"
           :new-string="target"
-          output-format="side-by-side"
+          :output-format="outputFormat"
       />
     </div>
   </div>
@@ -86,5 +98,22 @@ function clear() {
   border: 1px solid var(--color-border-default, #ddd);
   border-radius: 6px;
   overflow-y: auto;
+}
+
+/* Diff 对比结果展示区域字体优化 - 覆盖 v-code-diff 组件自带样式 */
+.custom-diff-area :deep(.blob-code-inner),
+.custom-diff-area :deep(.file-header) {
+  font-family: Monaco, Consolas, 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.custom-diff-area :deep(.file-header) {
+  background-color: var(--color-canvas-default) !important;
+}
+
+/* 确保 CodeDiff 组件占满全宽 */
+.custom-diff-area :deep(.code-diff-view) {
+  width: 100% !important;
 }
 </style>

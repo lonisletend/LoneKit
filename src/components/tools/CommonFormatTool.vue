@@ -29,7 +29,7 @@
           <n-button @click="copyAll">复制全部</n-button>
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-auto border border-gray-300 rounded p-3">
+        <div class="flex-1 w-full overflow-auto border border-gray-300 rounded p-3 custom-show-area">
           <div v-for="(segment, index) in parsedSegments" :key="index" class="mb-3">
             <!-- 普通文本 -->
             <div v-if="segment.type === 'plainText'" class="text-gray-700 whitespace-pre-wrap">
