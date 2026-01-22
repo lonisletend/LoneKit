@@ -1,31 +1,33 @@
 <template>
   <div class="w-full h-full flex">
     <n-layout has-sider>
-      <n-layout-sider
-        bordered
-        collapse-mode="width"
-        :collapsed-width="64"
-        :width="200"
-        :collapsed="collapsed"
-        show-trigger
-        @collapse="collapsed = true"
-        @expand="collapsed = false"
-      >
-        <div class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
-             v-if="!collapsed">
-          <router-link to="/">LoneKit</router-link>
+      <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="200" :collapsed="collapsed"
+        show-trigger @collapse="collapsed = true" @expand="collapsed = false">
+        <div class="flex flex-col h-full">
+          <div>
+            <div
+              class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
+              v-if="!collapsed">
+              <router-link to="/">LoneKit</router-link>
+            </div>
+            <div
+              class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
+              v-else>
+              <router-link to="/">Kit</router-link>
+            </div>
+            <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22"
+              :options="menuOptions" />
+          </div>
+          <!-- 版本号显示 -->
+          <div class="mt-auto mb-4 flex items-center justify-center">
+            <div class="text-xs text-gray-500 font-mono" v-if="!collapsed">
+              Version: {{ version }}
+            </div>
+            <div class="text-xs text-gray-500 font-mono" v-else>
+              V{{ version.split('.')[0] }}.{{ version.split('.')[1] }}
+            </div>
+          </div>
         </div>
-        <div class="w-full h-16 mt-2 flex items-center justify-center font-bold text-2xl text-green-600 cursor-pointer select-none"
-             v-else>
-          <router-link to="/">Kit</router-link>
-        </div>
-        <n-menu
-          v-model:value="activeKey"
-          :collapsed="collapsed"
-          :collapsed-width="64"
-          :collapsed-icon-size="22"
-          :options="menuOptions"
-        />
       </n-layout-sider>
       <div class="w-full h-full px-4 py-2 overflow-auto">
         <n-notification-provider>
@@ -44,11 +46,20 @@
 import router from "../router";
 import { h, ref } from "vue";
 import { RouterLink } from "vue-router";
-import {NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider} from "naive-ui";
-import { TimeOutline as TimeIcon, QrCodeOutline as QRCodeIcon, BarcodeOutline as BarcodeIcon } from "@vicons/ionicons5";
-import { Braces24Filled as JsonIcon, LockClosed24Regular as Md5Icon, DatabaseSearch24Regular as SQLIcon } from "@vicons/fluent";
+import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
+import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
+import Md5Icon from "./icons/Md5Icon.vue";
 import DiffIcon from "./icons/DiffIcon.vue";
+import SQLIcon from "./icons/SQLIcon.vue";
+import StringHexIcon from "./icons/StringHexIcon.vue";
+import QRCodeIcon from "./icons/QRCodeIcon.vue";
+import QRCodeReaderIcon from "./icons/QRCodeReaderIcon.vue";
+import BarcodeIcon from "./icons/BarcodeIcon.vue";
+import TimeIcon from "./icons/TimeIcon.vue";
+import JsonIcon from "./icons/JsonIcon.vue";
+import CodeIcon from "./icons/CodeIcon.vue";
+import { Flash24Filled as FlashIcon } from '@vicons/fluent';
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -76,42 +87,72 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
-          name: "JsonTool",
+          name: "CommonFormatWrapper",
           params: {
           }
         }
       },
-      { default: () => "Json格式化" }
+      { default: () => "通用格式化" }
     ),
-    key: "json-tool",
+    key: "common-format-wrapper",
+    icon: renderIcon(FlashIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "JsonFormatWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "Json 格式化" }
+    ),
+    key: "json-format-wrapper",
     icon: renderIcon(JsonIcon)
   },
   {
     label: () => h(
-        RouterLink,
-        {
-          to: {
-            name: "SQLTool",
-            params: {
-            }
+      RouterLink,
+      {
+        to: {
+          name: "XmlFormatWrapper",
+          params: {
           }
-        },
-        { default: () => "SQL格式化" }
+        }
+      },
+      { default: () => "XML 格式化" }
     ),
-    key: "sql-tool",
+    key: "xml-format-wrapper",
+    icon: renderIcon(CodeIcon)
+  },
+    {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "SQLFormatWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "SQL 格式化" }
+    ),
+    key: "sql-format-wrapper",
     icon: renderIcon(SQLIcon)
   },
   {
     label: () => h(
-        RouterLink,
-        {
-          to: {
-            name: "DiffTool",
-            params: {
-            }
+      RouterLink,
+      {
+        to: {
+          name: "DiffToolWrapper",
+          params: {
           }
-        },
-        { default: () => "文本对比" }
+        }
+      },
+      { default: () => "文本对比" }
     ),
     key: "diff-tool",
     icon: renderIcon(DiffIcon)
@@ -126,7 +167,7 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "Md5 加密" }
+      { default: () => "Md5" }
     ),
     key: "md5-tool",
     icon: renderIcon(Md5Icon)
@@ -141,10 +182,25 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "Base64 编码/解码" }
+      { default: () => "Base64" }
     ),
     key: "base64-tool",
     icon: renderIcon(Base64Icon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "StringHexTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "字符串16进制" }
+    ),
+    key: "string-hex-tool",
+    icon: renderIcon(StringHexIcon)
   },
   {
     label: () => h(
@@ -156,10 +212,25 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "二维码生成器" }
+      { default: () => "二维码生成" }
     ),
     key: "qr-code-tool",
     icon: renderIcon(QRCodeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "QRCodeReaderTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "二维码识别" }
+    ),
+    key: "qr-code-reader-tool",
+    icon: renderIcon(QRCodeReaderIcon)
   },
   {
     label: () => h(
@@ -171,12 +242,21 @@ const menuOptions = ref([
           }
         }
       },
-      { default: () => "条形码生成器" }
+      { default: () => "条形码生成" }
     ),
     key: "barcode-tool",
     icon: renderIcon(BarcodeIcon)
   },
+
 ]);
 const activeKey = ref(null);
 const collapsed = ref(false);
+const version = packageJson.version;
 </script>
+
+<style scoped>
+/* Logo字体样式 - 优先使用Monaco和Consolas */
+.font-logo {
+  font-family: Monaco, Consolas, 'Courier New', monospace !important;
+}
+</style>

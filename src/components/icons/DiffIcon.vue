@@ -1,10 +1,9 @@
-<script setup>
-
-</script>
-
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 40" fill="none" x="0px" y="0px"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.87868 4.87868C7.44129 4.31607 8.20435 4 9 4H19C20.0135 4.00017 20.9861 4.40249 21.7039 5.11807L24.8826 8.29678C25.598 9.01452 25.9998 9.9867 26 11.0001V25C26 25.7956 25.6839 26.5587 25.1213 27.1213C24.5587 27.6839 23.7956 28 23 28H9C8.20435 28 7.44129 27.6839 6.87868 27.1213C6.31607 26.5587 6 25.7956 6 25V7C6 6.20435 6.31607 5.44129 6.87868 4.87868ZM5.46447 3.46447C6.40215 2.52678 7.67392 2 9 2H19.0001C20.5433 2.00021 22.0235 2.61223 23.1161 3.70193L26.2981 6.88386C27.3878 7.97655 27.9998 9.45682 28 11V25C28 26.3261 27.4732 27.5979 26.5355 28.5355C25.5979 29.4732 24.3261 30 23 30H9C7.67392 30 6.40215 29.4732 5.46447 28.5355C4.52678 27.5979 4 26.3261 4 25V7C4 5.67392 4.52678 4.40215 5.46447 3.46447ZM17 9C17 8.44772 16.5523 8 16 8C15.4477 8 15 8.44772 15 9V12H12C11.4477 12 11 12.4477 11 13C11 13.5523 11.4477 14 12 14H15V17C15 17.5523 15.4477 18 16 18C16.5523 18 17 17.5523 17 17V14H20C20.5523 14 21 13.5523 21 13C21 12.4477 20.5523 12 20 12H17V9ZM20 24C20.5523 24 21 23.5523 21 23C21 22.4477 20.5523 22 20 22H12C11.4477 22 11 22.4477 11 23C11 23.5523 11.4477 24 12 24H20Z" fill="black"/><text x="0" y="47" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">Created by Braja Omar Justico</text><text x="0" y="52" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">from the Noun Project</text></svg></template>
+  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M12.5 11h2V9h2V7h-2V5h-2v2h-2v2h2zm-2 4h6v-2h-6zM8 19q-.825 0-1.412-.587T6 17V3q0-.825.588-1.412T8 1h7l6 6v10q0 .825-.587 1.413T19 19zm0-2h11V8l-5-5H8zm-4 6q-.825 0-1.412-.587T2 21V7h2v14h11v2zm4-6V3z"/></svg>
+</template>
 
-<style scoped>
-
-</style>
+<script>
+export default {
+  name: 'DiffIcon'
+}
+</script>

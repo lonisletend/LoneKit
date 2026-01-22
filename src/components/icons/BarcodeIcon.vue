@@ -1,0 +1,9 @@
+<template>
+  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 6v12m7-12v12m7-12v12M10 6.5v11a.5.5 0 0 0 1 0v-11a.5.5 0 0 0-1 0m7 0v11a.5.5 0 0 0 1 0v-11a.5.5 0 0 0-1 0M3.5 6a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5v0a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5"/></svg>
+</template>
+
+<script>
+export default {
+  name: 'BarcodeIcon'
+}
+</script>

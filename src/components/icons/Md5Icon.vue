@@ -1,15 +1,9 @@
-<script setup>
-
-</script>
-
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 122.88">
-    <path
-      d="M17.89 0h88.9c8.85 0 16.1 7.24 16.1 16.1v90.68c0 8.85-7.24 16.1-16.1 16.1H16.1c-8.85 0-16.1-7.24-16.1-16.1v-88.9C0 8.05 8.05 0 17.89 0zm9.39 31.06h24.77l9.43 36.97 9.46-36.97H95.6v60.76H80.24V45.5L68.38 91.82H54.47L42.64 45.5v46.32H27.28V31.06z"
-      fill-rule="evenodd" clip-rule="evenodd"/>
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M11 19h2v-3h3v-2h-3v-3h-2v3H8v2h3zm-5 3q-.825 0-1.412-.587T4 20V10q0-.825.588-1.412T6 8h1V6q0-2.075 1.463-3.537T12 1t3.538 1.463T17 6v2h1q.825 0 1.413.588T20 10v10q0 .825-.587 1.413T18 22zm0-2h12V10H6zM9 8h6V6q0-1.25-.875-2.125T12 3t-2.125.875T9 6zM6 20V10z"/></svg>
 </template>
 
-<style scoped>
-
-</style>
+<script>
+export default {
+  name: 'Md5Icon'
+}
+</script>

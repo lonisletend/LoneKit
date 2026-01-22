@@ -1,15 +1,14 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag} from "naive-ui";
-import { encode, decode } from 'js-base64';
-import SplitPanel from '../common/SplitPanel.vue'
+import { NButton, NInput, NSelect, NTag } from "naive-ui";
+
+import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 const source = ref();
-const example = ref('test');
 const target = ref();
 
 const lineMode = ref('multi');
@@ -21,6 +20,73 @@ const lineModeOptions = ref([
 watch(lineMode, () => {
   clear();
 })
+
+// ----------------------------------------------------------------------------
+// This is the same for all of the below, and
+// you probably won't need it except for debugging
+// in most cases.
+function bytesToHex(bytes) {
+  return Array.from(
+      bytes,
+      byte => byte.toString(16).padStart(2, "0")
+  ).join("");
+}
+
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i !== bytes.length; i++) {
+    bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+  }
+  return bytes;
+}
+
+// You almost certainly want UTF-8, which is
+// now natively supported:
+function stringToUTF8Bytes(string) {
+  return new TextEncoder().encode(string);
+}
+
+// But you might want UTF-16 for some reason.
+// .charCodeAt(index) will return the underlying
+// UTF-16 code-units (not code-points!), so you
+// just need to format them in whichever endian order you want.
+function stringToUTF16Bytes(string, littleEndian) {
+  const bytes = new Uint8Array(string.length * 2);
+  // Using DataView is the only way to get a specific
+  // endianness.
+  const view = new DataView(bytes.buffer);
+  for (let i = 0; i != string.length; i++) {
+    view.setUint16(i, string.charCodeAt(i), littleEndian);
+  }
+  return bytes;
+}
+
+// And you might want UTF-32 in even weirder cases.
+// Fortunately, iterating a string gives the code
+// points, which are identical to the UTF-32 encoding,
+// though you still have the endianess issue.
+function stringToUTF32Bytes(string, littleEndian) {
+  const codepoints = Array.from(string, c => c.codePointAt(0));
+  const bytes = new Uint8Array(codepoints.length * 4);
+  // Using DataView is the only way to get a specific
+  // endianness.
+  const view = new DataView(bytes.buffer);
+  for (let i = 0; i != codepoints.length; i++) {
+    view.setUint32(i, codepoints[i], littleEndian);
+  }
+  return bytes;
+}
+// ----------------------------------------------------------------------------
+
+
+
+function encode(value) {
+  return bytesToHex(stringToUTF8Bytes(value));
+}
+
+function decode(value) {
+  return new TextDecoder().decode(hexToBytes(value));
+}
 
 function handleChange(val, type) {
   console.log('handleChange', val, type);
@@ -62,7 +128,7 @@ function showExample(type) {
     source.value = 'test';
     handleChange(source.value, 1);
   } else {
-    target.value = 'dGVzdA==';
+    target.value = '74657374';
     handleChange(target.value, 2);
   }
 }
@@ -94,7 +160,7 @@ function copyValue(type) {
           </div>
           <div class="w-full h-full text-xl">
             <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                     placeholder="输入编码字符串" @input="val => handleChange(val, 1)"/>
+                     placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
           </div>
         </div>
       </template>
@@ -110,7 +176,7 @@ function copyValue(type) {
           </div>
           <div class="w-full h-full text-xl">
             <n-input v-model:value="target" type="textarea" class="w-full h-full"
-                     placeholder="输入解码字符串" @input="val => handleChange(val, 2)"/>
+                     placeholder="输入16进制" @input="val => handleChange(val, 2)"/>
           </div>
         </div>
       </template>

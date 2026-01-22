@@ -36,9 +36,10 @@
 <script setup>
 import { ref, onMounted, reactive } from "vue";
 import { NInputGroup, NInputGroupLabel, NInput, NInputNumber, NButton, NDatePicker, NNotificationProvider } from "naive-ui";
-import { useNotification } from "naive-ui";
 import dayjs from "dayjs";
-import { writeText } from "@tauri-apps/api/clipboard";
+import { useCommon } from '../../composables/useCommon';
+
+const { notify, copyToClipboard } = useCommon();
 
 const inputTime = ref();
 const timestamp = ref();
@@ -164,36 +165,16 @@ function isDatetime(str) {
 }
 
 function copyTimestamp() {
-  copy(timestamp.value);
+  copyToClipboard(timestamp.value.toString(), '复制成功!');
 }
 function copyMilliTimestamp() {
-  copy(milliTimestamp.value);
+  copyToClipboard(milliTimestamp.value.toString(), '复制成功!');
 }
 function copyDate() {
-  copy(dayjs(milliTimestamp.value).format('YYYY-MM-DD'));
+  copyToClipboard(dayjs(milliTimestamp.value).format('YYYY-MM-DD'), '复制成功!');
 }
 function copyDateTime() {
-  copy(dayjs(milliTimestamp.value).format('YYYY-MM-DD HH:mm:ss'));
-}
-
-const notification = useNotification();
-function notify(type, message) {
-  notification[type]({
-    content: message,
-    // meta: "想不出来",
-    duration: 2500,
-    keepAliveOnHover: true
-  });
-}
-
-function copy(value) {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(value);
-  }
-  if (window.__TAURI_IPC__) {
-    writeText(value.toString());
-  }
-  notify('success', '复制成功!');
+  copyToClipboard(dayjs(milliTimestamp.value).format('YYYY-MM-DD HH:mm:ss'), '复制成功!');
 }
 </script>
 

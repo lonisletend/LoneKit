@@ -1,3 +1,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 全局输入框代码字体样式 */
+.n-input .n-input__textarea,
+.n-input .n-input__input-el,
+.custom-show-area {
+  font-family: Monaco, Consolas, 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+/* JSON格式化组件样式 */
+.vjs-tree {
+  font-family: Monaco, Menlo, Consolas, Bitstream Vera Sans Mono, monospace;
+  font-size: 15px;
+  text-align: left;
+}
+
+/* lone-format JsonFormat 组件样式 - 确保内部滚动 */
+.json-format {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.json-format__content {
+  flex: 1;
+  overflow: auto !important;
+  max-height: 100% !important;
+}
+
+/* lone-format XmlFormat 组件样式 - 确保内部滚动 */
+.xml-format {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.xml-format__content {
+  flex: 1;
+  overflow: auto !important;
+  max-height: 100% !important;
+}
+
+/* n-split 分隔条样式 - 默认隐藏，hover 时显示 */
+.resize-trigger {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+  cursor: col-resize;
+}
+
+.resize-trigger:hover {
+  background-color: rgba(24, 160, 88, 0.3);
+}
