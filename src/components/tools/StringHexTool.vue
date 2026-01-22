@@ -2,11 +2,11 @@
 
 import {ref, watch} from "vue";
 import { NButton, NInput, NSelect, NTag } from "naive-ui";
-import { readText } from "@tauri-apps/api/clipboard";
+
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
 
-const { notify, copyToClipboard } = useCommon();
+const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 const source = ref();
 const target = ref();
@@ -110,28 +110,16 @@ function handleChange(val, type) {
   }
 }
 
-function readClipboard(type) {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.readText().then(text => {
-      if (type === 1) {
-        source.value = text;
-        handleChange(source.value, 1);
-      } else {
-        target.value = text;
-        handleChange(target.value, 2);
-      }
-    });
-  }
-  if (window.__TAURI_IPC__) {
-    readText().then(text => {
-      if (type === 1) {
-        source.value = text;
-        handleChange(source.value, 1);
-      } else {
-        target.value = text;
-        handleChange(target.value, 2);
-      }
-    });
+async function readClipboard(type) {
+  const text = await readFromClipboard();
+  if (text) {
+    if (type === 1) {
+      source.value = text;
+      handleChange(source.value, 1);
+    } else {
+      target.value = text;
+      handleChange(target.value, 2);
+    }
   }
 }
 

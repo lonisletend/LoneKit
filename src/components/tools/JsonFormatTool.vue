@@ -69,12 +69,11 @@ import {
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
 import jsonpath from 'jsonpath';
-import { readText } from "@tauri-apps/api/clipboard";
 import { JsonFormat } from 'lone-format'
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 
-const { notify, copyToClipboard } = useCommon();
+const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 const props = defineProps({
   id: {
@@ -119,18 +118,11 @@ function handleSourceJsonChange(val) {
   }
 }
 
-function readClipboard() {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.readText().then(text => {
-      sourceJson.value = text;
-      handleSourceJsonChange(sourceJson.value);
-    });
-  }
-  if (window.__TAURI_IPC__) {
-    readText().then(text => {
-      sourceJson.value = text;
-      handleSourceJsonChange(sourceJson.value);
-    });
+async function readClipboard() {
+  const text = await readFromClipboard();
+  if (text) {
+    sourceJson.value = text;
+    handleSourceJsonChange(sourceJson.value);
   }
 }
 

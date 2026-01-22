@@ -2,59 +2,46 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "LoneKit",
-    "version": "0.6.3"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "createUpdaterArtifacts": "v1Compatible"
   },
-  "tauri": {
-    "allowlist": {
-      "clipboard": {
-        "all": true,
-        "writeText": true,
-        "readText": true
-      },
-      "shell": {
-        "all": true,
-        "open": true
-      },
-      "globalShortcut": {
-        "all": true
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.lonestack.lonekit",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
+  "productName": "LoneKit",
+  "mainBinaryName": "LoneKit",
+  "version": "0.6.3",
+  "identifier": "com.lonestack.lonekit",
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE1QUY3QzYyNEZEREEzMjAKUldRZ285MVBZbnl2RllqeHMwVHB1UkpBUk8zeE5BN1VCOG9rYkFYNGNLOWFXRTJNNEErdU90WGgK",
+      "endpoints": [
+        "https://gist.githubusercontent.com/lonisletend/20c919f1e69d1973aadfa20f8118dbbf/raw/"
       ]
-    },
-    "security": {
-      "csp": null
-    },
+    }
+  },
+  "app": {
     "windows": [
       {
         "fullscreen": false,
         "resizable": true,
         "title": "LoneKit",
         "width": 1200,
-        "height": 800
+        "height": 800,
+        "useHttpsScheme": true
       }
     ],
-    "updater": {
-      "active": true,
-      "endpoints": [
-        "https://gist.githubusercontent.com/lonisletend/20c919f1e69d1973aadfa20f8118dbbf/raw/"
-      ],
-      "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE1QUY3QzYyNEZEREEzMjAKUldRZ285MVBZbnl2RllqeHMwVHB1UkpBUk8zeE5BN1VCOG9rYkFYNGNLOWFXRTJNNEErdU90WGgK"
+    "security": {
+      "csp": null
     }
   }
 }

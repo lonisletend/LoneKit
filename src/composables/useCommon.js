@@ -1,9 +1,9 @@
 import { useNotification } from "naive-ui";
-import { writeText } from "@tauri-apps/api/clipboard";
+import { writeText, readText } from "@tauri-apps/plugin-clipboard-manager";
 
 /**
  * 通用工具 Composable
- * 提供通知和复制功能的统一封装
+ * 提供通知、复制和剪贴板读取功能的统一封装
  */
 export function useCommon() {
   const notification = useNotification();
@@ -58,8 +58,35 @@ export function useCommon() {
     }
   }
 
+  /**
+   * 从剪贴板读取文本
+   * @returns {Promise<string|null>} 剪贴板中的文本内容，失败时返回 null
+   */
+  async function readClipboard() {
+    try {
+      // 优先使用 Web Clipboard API
+      if (navigator && navigator.clipboard) {
+        return await navigator.clipboard.readText();
+      }
+      
+      // Tauri 环境下使用 Tauri API
+      if (window.__TAURI_IPC__) {
+        return await readText();
+      }
+
+      notify('error', '无法访问剪贴板');
+      return null;
+    } catch (error) {
+      console.error('读取剪贴板失败:', error);
+      notify('error', '读取剪贴板失败');
+      return null;
+    }
+  }
+
   return {
     notify,
-    copyToClipboard
+    copyToClipboard,
+    readClipboard,
+    readFromClipboard: readClipboard  // 别名，避免函数名冲突
   };
 }

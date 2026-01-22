@@ -106,12 +106,12 @@ import {
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
-import { readText } from "@tauri-apps/api/clipboard";
+
 import { JsonFormat, XmlFormat } from 'lone-format';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
 
-const { notify, copyToClipboard } = useCommon();
+const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 const props = defineProps({
   id: {
@@ -363,18 +363,11 @@ function handleSourceTextChange() {
   }
 }
 
-function readClipboard() {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.readText().then(text => {
-      sourceText.value = text;
-      handleSourceTextChange();
-    });
-  }
-  if (window.__TAURI_IPC__) {
-    readText().then(text => {
-      sourceText.value = text;
-      handleSourceTextChange();
-    });
+async function readClipboard() {
+  const text = await readFromClipboard();
+  if (text) {
+    sourceText.value = text;
+    handleSourceTextChange();
   }
 }
 
@@ -404,13 +397,13 @@ async function copyAll() {
       // 调用组件的复制方法
       await jsonFormatRefs.value[i]?.copyJson();
       // 从剪贴板读取格式化后的内容
-      const formattedJson = await readClipboardText();
+      const formattedJson = await readFromClipboard();
       textParts.push(formattedJson);
     } else if (segment.type === 'xml') {
       // 调用组件的复制方法
       await xmlFormatRefs.value[i]?.copyXml();
       // 从剪贴板读取格式化后的内容
-      const formattedXml = await readClipboardText();
+      const formattedXml = await readFromClipboard();
       textParts.push(formattedXml);
     }
   }
@@ -418,17 +411,6 @@ async function copyAll() {
   // 用换行连接所有部分
   const allText = textParts.join('\n');
   await copyToClipboard(allText);
-}
-
-// 辅助方法：从剪贴板读取文本
-async function readClipboardText() {
-  if (navigator && navigator.clipboard) {
-    return await navigator.clipboard.readText();
-  }
-  if (window.__TAURI_IPC__) {
-    return await readText();
-  }
-  return '';
 }
 
 </script>

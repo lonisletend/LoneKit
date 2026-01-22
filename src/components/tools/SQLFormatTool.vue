@@ -6,12 +6,12 @@ import {
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
-import {readText, writeText} from "@tauri-apps/api/clipboard";
+
 import { SqlFormat } from 'lone-format'
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon'
 
-const { notify, copyToClipboard } = useCommon();
+const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 defineOptions({
   name: 'SQLFormatTool'
@@ -20,16 +20,10 @@ defineOptions({
 const source = ref();
 const customSqlFormatRef = ref(null)
 
-function readClipboard() {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.readText().then(text => {
-      source.value = text;
-    });
-  }
-  if (window.__TAURI_IPC__) {
-    readText().then(text => {
-      source.value = text;
-    });
+async function readClipboard() {
+  const text = await readFromClipboard();
+  if (text) {
+    source.value = text;
   }
 }
 

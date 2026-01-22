@@ -3,11 +3,10 @@
 import {ref, watch} from "vue";
 import {NButton, NInput, NSelect, NTag} from "naive-ui";
 import md5 from 'blueimp-md5';
-import {readText} from "@tauri-apps/api/clipboard";
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 
-const { notify, copyToClipboard } = useCommon();
+const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 const source = ref();
 const example = ref('test');
@@ -33,18 +32,11 @@ function handleChange(val) {
   }
 }
 
-function readClipboard() {
-  if (navigator && navigator.clipboard) {
-    navigator.clipboard.readText().then(text => {
-      source.value = text;
-      handleChange(source.value);
-    });
-  }
-  if (window.__TAURI_IPC__) {
-    readText().then(text => {
-      source.value = text;
-      handleChange(source.value);
-    });
+async function readClipboard() {
+  const text = await readFromClipboard();
+  if (text) {
+    source.value = text;
+    handleChange(source.value);
   }
 }
 
