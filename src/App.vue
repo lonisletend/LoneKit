@@ -1,9 +1,14 @@
 <template>
   <div class="w-full h-full bg-white">
     <router-view />
+    <UpdateDialog ref="updateDialogRef" />
   </div>
 </template>
 <script setup>
+import { ref } from 'vue';
+import UpdateDialog from './components/common/UpdateDialog.vue';
+
+const updateDialogRef = ref(null);
 </script>
 
 <style>
