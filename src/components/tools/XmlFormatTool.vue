@@ -3,6 +3,7 @@
 import { ref, watch } from "vue";
 import { NButton, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
 import { 
+  TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
@@ -18,6 +19,7 @@ const target = ref();
 const customXmlFormatRef = ref(null);
 const filterType = ref('xpath');
 const filterExpression = ref('');
+const isSorted = ref(false);
 
 // 过滤类型选项
 const filterTypeOptions = [
@@ -100,6 +102,15 @@ function collapseAll() {
   customXmlFormatRef.value?.collapseAll();
 }
 
+function toggleSort() {
+  isSorted.value = !isSorted.value;
+  if (isSorted.value) {
+    customXmlFormatRef.value?.sort();
+  } else {
+    customXmlFormatRef.value?.clearSort();
+  }
+}
+
 </script>
 
 <template>
@@ -130,6 +141,9 @@ function collapseAll() {
           </n-button>
           <n-button @click="expandAll">
             <template #icon> <component :is="ExpandIcon" /> </template>
+          </n-button>
+          <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
+            <template #icon> <component :is="SortIcon" /> </template>
           </n-button>
           <n-input-group>
             <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />

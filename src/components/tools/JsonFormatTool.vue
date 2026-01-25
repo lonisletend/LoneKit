@@ -38,7 +38,7 @@
             <template #icon> <component :is="SortIcon" /> </template>
           </n-button>
           <n-input-group>
-            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
+            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '146px' }" />
             <n-input 
               v-model:value="filterExpression" 
               type="text" 
