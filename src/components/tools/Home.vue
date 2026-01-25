@@ -10,8 +10,12 @@
               :type="log.type || 'success'"
             >
               <template #header>
-                <div class="text-lg font-semibold text-gray-800">
-                  {{ log.date }} <span class="text-green-600">{{ log.version }}</span>
+                <div class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <span>{{ log.date }}</span>
+                  <span class="text-green-600">{{ log.version }}</span>
+                  <a v-if="log.releaseLink" :href="log.releaseLink" target="_blank" rel="noopener noreferrer" class="inline-flex items-center hover:opacity-70 transition-opacity">
+                    <component :is="GithubIcon" class="w-5 h-5 text-gray-600" />
+                  </a>
                 </div>
               </template>
               
@@ -68,8 +72,22 @@
 
 import { NTabs, NTabPane, NTimeline, NTimelineItem, NTag } from "naive-ui";
 import { ref } from "vue";
+import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
+  {
+    date: '2026.01.25',
+    version: 'v0.7.0',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.7.0',
+    added: [
+      '通用格式化工具，渲染区域新增「折叠全部」、「展开全部」功能。JSON/XML 块支持排序。',
+      'XML 格式化工具，新增「排序」功能。',
+      'Tauri 升级到 v2，打包增加对 Apple Silicon 支持，增加 RPM 格式支持。增加版本检查和自动升级功能。',
+    ],
+    optimized: [
+      '优化若干样式细节。升级依赖版本。',
+    ],
+  },
   {
     date: '2026.01.21',
     version: 'v0.6.3',

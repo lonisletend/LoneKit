@@ -26,7 +26,13 @@
         <!-- 固定的操作按钮 -->
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
           <n-tag size="large" type="success">输出</n-tag>
-          <n-button @click="copyAll">复制全部</n-button>
+          <n-button @click="copyAll">复制</n-button>
+          <n-button @click="collapseAll">
+            <template #icon> <component :is="CollapseIcon" /> </template>
+          </n-button>
+          <n-button @click="expandAll">
+            <template #icon> <component :is="ExpandIcon" /> </template>
+          </n-button> 
         </div>
         <!-- 可滚动的输出区域 -->
         <div class="flex-1 w-full overflow-auto border border-gray-300 rounded p-3 custom-show-area">
@@ -53,6 +59,11 @@
                 <n-button size="small" circle @click="expandJsonSegment(index)">
                   <template #icon>
                     <component :is="ExpandIcon" />
+                  </template>
+                </n-button>
+                <n-button size="small" circle @click="toggleJsonSort(index)" :secondary="jsonSortStates[index]" :type="jsonSortStates[index] ? 'success' : 'default'">
+                  <template #icon>
+                    <component :is="SortIcon" />
                   </template>
                 </n-button>
               </div>
@@ -83,6 +94,11 @@
                     <component :is="ExpandIcon" />
                   </template>
                 </n-button>
+                <n-button size="small" circle @click="toggleXmlSort(index)" :secondary="xmlSortStates[index]" :type="xmlSortStates[index] ? 'success' : 'default'">
+                  <template #icon>
+                    <component :is="SortIcon" />
+                  </template>
+                </n-button>
               </div>
               <XmlFormat 
                 :ref="el => setXmlFormatRef(el, index)"
@@ -103,6 +119,7 @@ import { ref, watch } from "vue";
 import { NInput, NTag, NButton } from "naive-ui";
 import { 
   Copy24Regular as CopyIcon,
+  TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
@@ -125,8 +142,26 @@ const sourceText = ref('');
 const parsedSegments = ref([]);
 const jsonFormatRefs = ref({});
 const xmlFormatRefs = ref({});
+const jsonSortStates = ref({});
+const xmlSortStates = ref({});
 
-const exampleText = ref(`TestController：调用 test 方法，参数：{"test": "123456"}, 返回：{"resultValue": [{"test": "testResult"}], "success": true}, 接收到 XML 数据：<root><user><name>张三</name><age>25</age></user></root>处理完成`);
+const exampleText = ref(`[2026-01-25 14:23:45.123] [INFO] [OrderService] - 开始处理订单创建请求
+[2026-01-25 14:23:45.156] [DEBUG] [OrderService] - 接收到订单请求数据: {"orderId":"ORD2026012545678","customerId":"CUST001","customerName":"LoneKit","items":[{"productId":"PROD001","productName":"iPhone 15 Pro","quantity":2,"price":7999.00,"discount":0.95},{"productId":"PROD002","productName":"AirPods Pro 2","quantity":1,"price":1899.00,"discount":1.0}],"shippingAddress":{"province":"北京市","city":"朝阳区","street":"建国路88号","zipCode":"100020","contact":"13800138000"},"paymentMethod":"ALIPAY","totalAmount":17897.05,"discount":799.95,"createTime":"2026-01-25T14:23:45.000Z","status":"PENDING"}
+[2026-01-25 14:23:45.234] [INFO] [OrderService] - 订单数据验证通过，开始库存检查
+[2026-01-25 14:23:45.267] [DEBUG] [InventoryService] - 调用库存服务 API: POST /api/v1/inventory/check
+[2026-01-25 14:23:45.345] [INFO] [InventoryService] - 库存检查结果: {"success":true,"availableStock":{"PROD001":150,"PROD002":89},"reservationId":"RSV20260125001","expireTime":"2026-01-25T14:33:45.000Z"}
+[2026-01-25 14:23:45.389] [DEBUG] [OrderService] - 生成支付请求，调用支付网关
+[2026-01-25 14:23:45.445] [INFO] [PaymentGateway] - 创建支付订单，返回支付链接
+[2026-01-25 14:23:45.501] [DEBUG] [MessageQueue] - 发送订单创建消息到 Kafka topic: order-events
+[2026-01-25 14:23:45.534] [INFO] [MessageQueue] - 消息发送成功，partition: 3, offset: 123456789
+[2026-01-25 14:23:45.578] [DEBUG] [AuditService] - 记录审计日志，写入数据库
+[2026-01-25 14:23:45.612] [INFO] [AuditService] - 审计日志保存成功，日志ID: AUDIT20260125456789
+[2026-01-25 14:23:45.645] [DEBUG] [NotificationService] - 发送 XML 格式通知到外部系统
+[2026-01-25 14:23:45.678] [INFO] [NotificationService] - 通知消息内容: <?xml version="1.0" encoding="UTF-8"?><notification><type>ORDER_CREATED</type><orderId>ORD2026012545678</orderId><customer><id>CUST001</id><name>LoneKit</name><phone>13800138000</phone><level>VIP</level></customer><order><totalAmount>17897.05</totalAmount><itemCount>3</itemCount><status>PENDING</status><timestamp>2026-01-25T14:23:45.000Z</timestamp></order><actions><action type="email" to="customer@example.com" priority="high"/><action type="sms" to="13800138000" priority="medium"/></actions></notification>
+[2026-01-25 14:23:45.723] [INFO] [NotificationService] - XML 通知发送完成，响应状态: 200
+[2026-01-25 14:23:45.756] [INFO] [OrderService] - 订单创建流程完成，订单号: ORD2026012545678
+[2026-01-25 14:23:45.789] [DEBUG] [OrderService] - 最终响应数据: {"success":true,"orderId":"ORD2026012545678","paymentUrl":"https://pay.example.com/checkout?token=abc123xyz","qrCode":"data:image/png;base64,iVBORw0KGgo...","estimatedDelivery":"2026-01-28","trackingEnabled":true,"message":"订单创建成功，请在15分钟内完成支付"}
+[2026-01-25 14:23:45.812] [INFO] [OrderService] - 请求处理完成，总耗时: 667ms`);
 
 // 设置 JSON 格式化组件的 ref
 function setJsonFormatRef(el, index) {
@@ -168,6 +203,26 @@ function collapseXmlSegment(index) {
 
 function expandXmlSegment(index) {
   xmlFormatRefs.value[index]?.expandAll();
+}
+
+// JSON 排序切换
+function toggleJsonSort(index) {
+  jsonSortStates.value[index] = !jsonSortStates.value[index];
+  if (jsonSortStates.value[index]) {
+    jsonFormatRefs.value[index]?.sortKeys();
+  } else {
+    jsonFormatRefs.value[index]?.clearSortKeys();
+  }
+}
+
+// XML 排序切换
+function toggleXmlSort(index) {
+  xmlSortStates.value[index] = !xmlSortStates.value[index];
+  if (xmlSortStates.value[index]) {
+    xmlFormatRefs.value[index]?.sort();
+  } else {
+    xmlFormatRefs.value[index]?.clearSort();
+  }
 }
 
 // 查找完整的 JSON 对象或数组（支持任意层级嵌套）
@@ -257,18 +312,22 @@ function resolveText(text) {
   // 查找 JSON（使用新的括号匹配算法）
   const jsonMatches = findJsonMatches(text);
   
-  // 正则匹配 XML 标签
-  const xmlPattern = /<(\w+)[^>]*>.*?<\/\1>|<\w+[^>]*\/>/gs;
+  // 正则匹配 XML 标签（支持可选的 XML 声明）
+  // 匹配：可选的 <?xml...?> 声明 + XML 标签
+  const xmlPattern = /(?:<\?xml[^?]*\?>\s*)?(?:<(\w+)[^>]*>.*?<\/\1>|<\w+[^>]*\/>)/gs;
   const xmlMatches = [];
   
   let xmlMatch;
   while ((xmlMatch = xmlPattern.exec(text)) !== null) {
-    xmlMatches.push({
-      start: xmlMatch.index,
-      end: xmlMatch.index + xmlMatch[0].length,
-      content: xmlMatch[0],
-      type: 'xml'
-    });
+    // 如果匹配到内容不为空
+    if (xmlMatch[0].trim()) {
+      xmlMatches.push({
+        start: xmlMatch.index,
+        end: xmlMatch.index + xmlMatch[0].length,
+        content: xmlMatch[0],
+        type: 'xml'
+      });
+    }
   }
   
   // 合并所有匹配
@@ -411,6 +470,32 @@ async function copyAll() {
   // 用换行连接所有部分
   const allText = textParts.join('\n');
   await copyToClipboard(allText);
+}
+
+// 折叠全部
+function collapseAll() {
+  for (let i = 0; i < parsedSegments.value.length; i++) {
+    const segment = parsedSegments.value[i];
+    
+    if (segment.type === 'json') {
+      jsonFormatRefs.value[i]?.collapseAll();
+    } else if (segment.type === 'xml') {
+      xmlFormatRefs.value[i]?.collapseAll();
+    }
+  }
+}
+
+// 展开全部
+function expandAll() {
+  for (let i = 0; i < parsedSegments.value.length; i++) {
+    const segment = parsedSegments.value[i];
+    
+    if (segment.type === 'json') {
+      jsonFormatRefs.value[i]?.expandAll();
+    } else if (segment.type === 'xml') {
+      xmlFormatRefs.value[i]?.expandAll();
+    }
+  }
 }
 
 </script>
