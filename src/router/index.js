@@ -19,6 +19,11 @@ const routes = [
         component: () => import("/src/components/tools/TimeTool.vue"),
       },
       {
+        path: "/uuid",
+        name: "UUIDTool",
+        component: () => import("/src/components/tools/UUIDTool.vue"),
+      },
+      {
         path: "/jsonFormatWrapper",
         name: "JsonFormatWrapper",
         component: () => import("/src/components/wrapper/JsonFormatWrapper.vue"),

@@ -76,6 +76,13 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.03.10',
+    version: 'v0.7.1',
+    added: [
+      '新增 UUID 工具，支持 v4 生成与解析。',
+    ],
+  },
+  {
     date: '2026.01.25',
     version: 'v0.7.0',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.7.0',

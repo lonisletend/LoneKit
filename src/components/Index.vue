@@ -59,7 +59,7 @@ import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
-import { Flash24Filled as FlashIcon } from '@vicons/fluent';
+import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon } from '@vicons/fluent';
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -127,7 +127,7 @@ const menuOptions = ref([
     key: "xml-format-wrapper",
     icon: renderIcon(CodeIcon)
   },
-    {
+  {
     label: () => h(
       RouterLink,
       {
@@ -156,6 +156,21 @@ const menuOptions = ref([
     ),
     key: "diff-tool",
     icon: renderIcon(DiffIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "UUIDTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "UUID" }
+    ),
+    key: "uuid-tool",
+    icon: renderIcon(UUIDIcon)
   },
   {
     label: () => h(
