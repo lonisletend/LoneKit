@@ -162,6 +162,21 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
+          name: "FolderDiffToolWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "文件夹对比" }
+    ),
+    key: "folder-diff-tool",
+    icon: renderIcon(DiffIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
           name: "UUIDTool",
           params: {
           }

@@ -79,6 +79,11 @@ const routes = [
         component: () => import("/src/components/wrapper/DiffToolWrapper.vue"),
       },
       {
+        path: "/folderDiffWrapper",
+        name: "FolderDiffToolWrapper",
+        component: () => import("/src/components/wrapper/FolderDiffToolWrapper.vue"),
+      },
+      {
         path: "/commonFormatWrapper",
         name: "CommonFormatWrapper",
         component: () => import("/src/components/wrapper/CommonFormatWrapper.vue"),
