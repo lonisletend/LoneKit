@@ -59,7 +59,7 @@ import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
-import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon } from '@vicons/fluent';
+import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon } from '@vicons/fluent';
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -170,7 +170,7 @@ const menuOptions = ref([
       { default: () => "文件夹对比" }
     ),
     key: "folder-diff-tool",
-    icon: renderIcon(DiffIcon)
+    icon: renderIcon(FolderDiffIcon)
   },
   {
     label: () => h(

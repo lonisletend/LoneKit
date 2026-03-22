@@ -76,6 +76,13 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.03.23',
+    version: 'v0.7.2',
+    added: [
+      '新增文件夹对比工具，支持左右目录双树对照、差异状态标记与文件内容对比预览。',
+    ],
+  },
+  {
     date: '2026.03.10',
     version: 'v0.7.1',
     added: [

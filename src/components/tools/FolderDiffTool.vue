@@ -1,7 +1,12 @@
 <script setup>
-import { computed, h, ref } from 'vue';
-import { NAlert, NButton, NCard, NIcon, NModal, NSelect, NTree } from 'naive-ui';
-import { FolderOpen24Regular as FolderIcon } from '@vicons/fluent';
+import { computed, h, nextTick, ref } from 'vue';
+import { NAlert, NButton, NCard, NIcon, NModal, NSpin, NTree } from 'naive-ui';
+import {
+  ArrowClockwise24Regular as RefreshIcon,
+  ArrowMaximizeVertical24Regular as ExpandIcon,
+  ArrowMinimizeVertical24Regular as CollapseIcon,
+  FolderOpen24Regular as FolderIcon
+} from '@vicons/fluent';
 import { CodeDiff } from 'v-code-diff';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
@@ -14,9 +19,13 @@ const { notify } = useCommon();
 
 const leftInputRef = ref(null);
 const rightInputRef = ref(null);
+const leftTreeBodyRef = ref(null);
+const rightTreeBodyRef = ref(null);
+const leftDirHandle = ref(null);
+const rightDirHandle = ref(null);
 
-const leftFolderName = ref('未选择目录');
-const rightFolderName = ref('未选择目录');
+const leftFolderName = ref('未选择文件夹');
+const rightFolderName = ref('未选择文件夹');
 
 const leftFilesMap = ref(new Map());
 const rightFilesMap = ref(new Map());
@@ -41,12 +50,7 @@ const previewType = ref('message');
 const previewMessage = ref('');
 const leftText = ref('');
 const rightText = ref('');
-const outputFormat = ref('side-by-side');
-
-const outputFormatOptions = [
-  { label: '并排（side-by-side）', value: 'side-by-side' },
-  { label: '逐行（line-by-line）', value: 'line-by-line' }
-];
+const hoveredSamePath = ref('');
 
 const statusFilter = ref('all');
 const hasComparedResult = ref(false);
@@ -95,6 +99,8 @@ const rightExpandedKeys = computed(() => {
   collectDirKeys(rightTreeData.value, keys);
   return expandedDirKeys.value.filter((key) => keys.has(key));
 });
+
+let isSyncingScroll = false;
 
 function collectDirKeys(nodes, keySet) {
   nodes.forEach((node) => {
@@ -179,24 +185,33 @@ async function pickFolder(side) {
 
 async function pickFolderWithFSAccess(side) {
   try {
+    loading.value = true;
+    loadingText.value = side === 'left' ? '正在加载左侧文件夹...' : '正在加载右侧文件夹...';
+
     const handle = await window.showDirectoryPicker();
 
+    loadingText.value = side === 'left' ? '正在扫描左侧文件夹...' : '正在扫描右侧文件夹...';
     const fileMap = new Map();
     await collectFilesFromDirectoryHandle(handle, '', fileMap);
 
     if (side === 'left') {
+      leftDirHandle.value = handle;
       leftFolderName.value = handle.name;
       leftFilesMap.value = fileMap;
     } else {
+      rightDirHandle.value = handle;
       rightFolderName.value = handle.name;
       rightFilesMap.value = fileMap;
     }
 
-    handleFolderSelectionChange();
+    await handleFolderSelectionChange();
   } catch (error) {
     if (error?.name !== 'AbortError') {
-      notify('error', `目录选择失败: ${error?.message || '未知错误'}`);
+      notify('error', `文件夹选择失败: ${error?.message || '未知错误'}`);
     }
+  } finally {
+    loading.value = false;
+    loadingText.value = '';
   }
 }
 
@@ -218,56 +233,67 @@ async function collectFilesFromDirectoryHandle(dirHandle, prefix, fileMap) {
   }
 }
 
-function onLeftInputChange(event) {
-  handleFileInputChange(event, 'left');
+async function onLeftInputChange(event) {
+  await handleFileInputChange(event, 'left');
 }
 
-function onRightInputChange(event) {
-  handleFileInputChange(event, 'right');
+async function onRightInputChange(event) {
+  await handleFileInputChange(event, 'right');
 }
 
-function handleFileInputChange(event, side) {
+async function handleFileInputChange(event, side) {
   const files = Array.from(event.target?.files || []);
 
   if (!files.length) {
     return;
   }
 
-  const map = new Map();
-  let folderName = '已选择目录';
+  loading.value = true;
+  loadingText.value = side === 'left' ? '正在加载左侧文件夹...' : '正在加载右侧文件夹...';
+  await nextTick();
 
-  files.forEach((file) => {
-    const rawPath = file.webkitRelativePath || file.name;
-    const normalized = normalizePath(rawPath);
-    const parts = normalized.split('/');
+  try {
+    const map = new Map();
+    let folderName = '已选择文件夹';
 
-    if (parts.length > 1) {
-      folderName = parts[0];
+    files.forEach((file) => {
+      const rawPath = file.webkitRelativePath || file.name;
+      const normalized = normalizePath(rawPath);
+      const parts = normalized.split('/');
+
+      if (parts.length > 1) {
+        folderName = parts[0];
+      }
+
+      const relativePath = trimRootPrefix(normalized);
+      map.set(relativePath, {
+        path: relativePath,
+        size: file.size,
+        file
+      });
+    });
+
+    if (side === 'left') {
+      leftDirHandle.value = null;
+      leftFolderName.value = folderName;
+      leftFilesMap.value = map;
+    } else {
+      rightDirHandle.value = null;
+      rightFolderName.value = folderName;
+      rightFilesMap.value = map;
     }
 
-    const relativePath = trimRootPrefix(normalized);
-    map.set(relativePath, {
-      path: relativePath,
-      size: file.size,
-      file
-    });
-  });
-
-  if (side === 'left') {
-    leftFolderName.value = folderName;
-    leftFilesMap.value = map;
-  } else {
-    rightFolderName.value = folderName;
-    rightFilesMap.value = map;
+    event.target.value = '';
+    await handleFolderSelectionChange();
+  } finally {
+    loading.value = false;
+    loadingText.value = '';
   }
-
-  event.target.value = '';
-  handleFolderSelectionChange();
 }
 
-function handleFolderSelectionChange() {
+async function handleFolderSelectionChange() {
   if (hasLeftFolder.value && hasRightFolder.value) {
-    startCompare();
+    await startCompare();
     return;
   }
 
@@ -374,7 +400,7 @@ async function startCompare() {
   }
 
   loading.value = true;
-  loadingText.value = '正在比较目录内容，请稍候...';
+  loadingText.value = '正在比较文件夹内容，请稍候...';
 
   try {
     const compareMap = await buildFileDiffMap(leftFilesMap.value, rightFilesMap.value);
@@ -389,9 +415,9 @@ async function startCompare() {
     leftSelectedKeys.value = [];
     rightSelectedKeys.value = [];
 
-    notify('success', `目录比较完成，共 ${compareMap.size} 个文件项目`);
+    notify('success', `文件夹比较完成，共 ${compareMap.size} 个文件项目`);
   } catch (error) {
-    notify('error', `目录比较失败: ${error?.message || '未知错误'}`);
+    notify('error', `文件夹比较失败: ${error?.message || '未知错误'}`);
   } finally {
     loading.value = false;
     loadingText.value = '';
@@ -602,12 +628,14 @@ function buildTreeData(side, sideFileMap, compareMap, directoryMap, filterStatus
 
 function clearSideFolder(side) {
   if (side === 'left') {
-    leftFolderName.value = '未选择目录';
+    leftDirHandle.value = null;
+    leftFolderName.value = '未选择文件夹';
     leftFilesMap.value = new Map();
     leftTreeData.value = [];
     leftSelectedKeys.value = [];
   } else {
-    rightFolderName.value = '未选择目录';
+    rightDirHandle.value = null;
+    rightFolderName.value = '未选择文件夹';
     rightFilesMap.value = new Map();
     rightTreeData.value = [];
     rightSelectedKeys.value = [];
@@ -625,12 +653,168 @@ function clearSideFolder(side) {
   handleFolderSelectionChange();
 }
 
+function collectTreeDirKeys(nodes, keySet) {
+  nodes.forEach((node) => {
+    if (node.nodeType === 'dir') {
+      keySet.add(node.key);
+      if (node.children?.length) {
+        collectTreeDirKeys(node.children, keySet);
+      }
+    }
+  });
+}
+
+function getSideTreeDirKeys(side) {
+  const keySet = new Set();
+  const targetNodes = side === 'left' ? leftTreeData.value : rightTreeData.value;
+  collectTreeDirKeys(targetNodes, keySet);
+  return keySet;
+}
+
+function waitForPaint() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function beginUiLoading(text) {
+  loading.value = true;
+  loadingText.value = text;
+  await nextTick();
+  await waitForPaint();
+  return Date.now();
+}
+
+async function endUiLoading(startAt, minVisibleMs = 220) {
+  const elapsed = Date.now() - startAt;
+  if (elapsed < minVisibleMs) {
+    await sleep(minVisibleMs - elapsed);
+  }
+  loading.value = false;
+  loadingText.value = '';
+}
+
+async function expandSideAll(side) {
+  if (loading.value) {
+    return;
+  }
+
+  const startedAt = await beginUiLoading(side === 'left' ? '正在展开左侧文件树...' : '正在展开右侧文件树...');
+  try {
+    const sideKeys = getSideTreeDirKeys(side);
+    expandedDirKeys.value = Array.from(new Set([...expandedDirKeys.value, ...sideKeys]));
+  } finally {
+    await endUiLoading(startedAt);
+  }
+}
+
+async function collapseSideAll(side) {
+  if (loading.value) {
+    return;
+  }
+
+  const startedAt = await beginUiLoading(side === 'left' ? '正在折叠左侧文件树...' : '正在折叠右侧文件树...');
+  try {
+    const sideKeys = getSideTreeDirKeys(side);
+    expandedDirKeys.value = expandedDirKeys.value.filter((key) => !sideKeys.has(key));
+  } finally {
+    await endUiLoading(startedAt);
+  }
+}
+
+async function refreshSide(side) {
+  if (loading.value) {
+    return;
+  }
+
+  const hasFolder = side === 'left' ? hasLeftFolder.value : hasRightFolder.value;
+  if (!hasFolder) {
+    notify('warning', `请先选择${side === 'left' ? '左侧' : '右侧'}文件夹`);
+    return;
+  }
+
+  const handle = side === 'left' ? leftDirHandle.value : rightDirHandle.value;
+  if (!handle) {
+    notify('warning', '当前文件夹为上传模式，无法自动刷新，请重新选择该侧文件夹');
+    await pickFolder(side);
+    return;
+  }
+
+  try {
+    loading.value = true;
+    loadingText.value = side === 'left' ? '正在刷新左侧文件夹...' : '正在刷新右侧文件夹...';
+
+    const fileMap = new Map();
+    await collectFilesFromDirectoryHandle(handle, '', fileMap);
+
+    if (side === 'left') {
+      leftFilesMap.value = fileMap;
+      leftFolderName.value = handle.name;
+    } else {
+      rightFilesMap.value = fileMap;
+      rightFolderName.value = handle.name;
+    }
+
+    await handleFolderSelectionChange();
+  } catch (error) {
+    notify('error', `刷新失败: ${error?.message || '未知错误'}`);
+  } finally {
+    loading.value = false;
+    loadingText.value = '';
+  }
+}
+
 function renderTreeLabel({ option }) {
-  return h('div', { class: ['tree-node-label', `status-${option.status}`, `type-${option.nodeType}`] }, [
+  return h('div', {
+    class: [
+      'tree-node-label',
+      `status-${option.status}`,
+      `type-${option.nodeType}`,
+      {
+        'is-sync-hover': option.status === 'same' && hoveredSamePath.value === option.path
+      }
+    ],
+    onMouseenter: () => {
+      if (option.status === 'same') {
+        hoveredSamePath.value = option.path;
+      }
+    },
+    onMouseleave: () => {
+      if (hoveredSamePath.value === option.path) {
+        hoveredSamePath.value = '';
+      }
+    }
+  }, [
     h('span', { class: 'status-dot' }),
     h('span', { class: 'node-name' }, option.label),
     h('span', { class: 'node-status' }, statusShortMap[option.status])
   ]);
+}
+
+function handleTreeScroll(side, event) {
+  if (isSyncingScroll) {
+    return;
+  }
+
+  const source = event?.target;
+  const target = side === 'left' ? rightTreeBodyRef.value : leftTreeBodyRef.value;
+  if (!source || !target) {
+    return;
+  }
+
+  isSyncingScroll = true;
+  target.scrollTop = source.scrollTop;
+  target.scrollLeft = source.scrollLeft;
+
+  requestAnimationFrame(() => {
+    isSyncingScroll = false;
+  });
 }
 
 function handleExpandedUpdate(keys) {
@@ -650,10 +834,6 @@ function handleRightSelected(keys, option) {
 function handleFileSelection(option) {
   const selected = Array.isArray(option) ? option[0] : option;
   if (!selected || selected.nodeType !== 'file') {
-    return;
-  }
-
-  if (selected.status === 'same') {
     return;
   }
 
@@ -766,7 +946,7 @@ async function openDiffModal(path) {
     >
 
     <div class="h-full flex flex-col space-y-2">
-      <div class="w-full h-7 flex items-center space-x-2 text-xs">
+      <div class="w-full h-8 flex items-center space-x-2 text-sm">
         <span
           class="legend-item status-total"
           :class="{ active: statusFilter === 'all' }"
@@ -794,99 +974,146 @@ async function openDiffModal(path) {
         ><i class="legend-dot"></i>相同 {{ stats.same }}</span>
       </div>
 
-      <n-alert v-if="loading" type="info" :show-icon="false">
-        {{ loadingText }}
-      </n-alert>
-
-      <div class="flex-1 min-h-0">
-        <SplitPanel>
+      <n-spin :show="loading" :description="loadingText || '处理中...'" class="folder-diff-spin flex-1 min-h-0">
+        <div class="h-full min-h-0">
+          <SplitPanel>
           <template #left>
-            <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
-              <div class="tree-header pb-2">
-                <n-button v-if="!hasLeftFolder" type="warning" dashed size="small" circle title="选择左侧目录" @click="pickLeftFolder">
-                  <template #icon>
-                    <n-icon>
-                      <FolderIcon />
-                    </n-icon>
+            <div class="h-full px-2">
+              <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
+                <div class="tree-header pb-2">
+                  <n-button v-if="!hasLeftFolder" type="warning" ghost size="small" circle title="选择左侧文件夹" @click="pickLeftFolder">
+                    <template #icon>
+                      <n-icon>
+                        <FolderIcon />
+                      </n-icon>
+                    </template>
+                  </n-button>
+                  <template v-else>
+                    <span class="tree-title" :title="leftFolderName">{{ leftFolderName }}</span>
+                    <div class="header-actions">
+                      <n-button quaternary size="small" title="展开全部" @click="expandSideAll('left')">
+                        <template #icon>
+                          <n-icon>
+                            <ExpandIcon />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                      <n-button quaternary size="small" title="折叠全部" @click="collapseSideAll('left')">
+                        <template #icon>
+                          <n-icon>
+                            <CollapseIcon />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                      <n-button quaternary size="small" title="刷新" @click="refreshSide('left')">
+                        <template #icon>
+                          <n-icon>
+                            <RefreshIcon />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                    <n-button quaternary size="small" @click="clearSideFolder('left')">X</n-button>
+                    </div>
                   </template>
-                </n-button>
-                <template v-else>
-                  <span class="tree-title" :title="leftFolderName">{{ leftFolderName }}</span>
-                  <n-button quaternary size="small" @click="clearSideFolder('left')">X</n-button>
-                </template>
-              </div>
-              <div class="tree-body">
-                <n-tree
-                  v-if="leftTreeData.length"
-                  block-line
-                  block-node
-                  selectable
-                  :data="leftTreeData"
-                  :expanded-keys="leftExpandedKeys"
-                  :selected-keys="leftSelectedKeys"
-                  :render-label="renderTreeLabel"
-                  @update:expanded-keys="handleExpandedUpdate"
-                  @update:selected-keys="handleLeftSelected"
-                />
-                <div v-else class="empty-tip">请选择目录</div>
+                </div>
+                <div ref="leftTreeBodyRef" class="tree-body" @scroll="(e) => handleTreeScroll('left', e)">
+                  <n-tree
+                    v-if="leftTreeData.length"
+                    show-line
+                    block-line
+                    block-node
+                    selectable
+                    :data="leftTreeData"
+                    :expanded-keys="leftExpandedKeys"
+                    :selected-keys="leftSelectedKeys"
+                    :render-label="renderTreeLabel"
+                    @update:expanded-keys="handleExpandedUpdate"
+                    @update:selected-keys="handleLeftSelected"
+                  />
+                  <div v-else class="empty-tip">请选择文件夹</div>
+                </div>
               </div>
             </div>
           </template>
 
           <template #right>
-            <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
-              <div class="tree-header pb-2">
-                <n-button v-if="!hasRightFolder" type="primary" dashed size="small" circle title="选择右侧目录" @click="pickRightFolder">
-                  <template #icon>
-                    <n-icon>
-                      <FolderIcon />
-                    </n-icon>
+            <div class="h-full px-2">
+              <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
+                <div class="tree-header pb-2">
+                  <n-button v-if="!hasRightFolder" type="primary" ghost size="small" circle title="选择右侧文件夹" @click="pickRightFolder">
+                    <template #icon>
+                      <n-icon>
+                        <FolderIcon />
+                      </n-icon>
+                    </template>
+                  </n-button>
+                  <template v-else>
+                    <span class="tree-title" :title="rightFolderName">{{ rightFolderName }}</span>
+                    <div class="header-actions">
+                      <n-button quaternary size="small" title="展开全部" @click="expandSideAll('right')">
+                        <template #icon>
+                          <n-icon>
+                            <ExpandIcon />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                      <n-button quaternary size="small" title="折叠全部" @click="collapseSideAll('right')">
+                        <template #icon>
+                          <n-icon>
+                            <CollapseIcon />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                      <n-button quaternary size="small" title="刷新" @click="refreshSide('right')">
+                        <template #icon>
+                          <n-icon>
+                            <RefreshIcon />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                    <n-button quaternary size="small" @click="clearSideFolder('right')">X</n-button>
+                    </div>
                   </template>
-                </n-button>
-                <template v-else>
-                  <span class="tree-title" :title="rightFolderName">{{ rightFolderName }}</span>
-                  <n-button quaternary size="small" @click="clearSideFolder('right')">X</n-button>
-                </template>
-              </div>
-              <div class="tree-body">
-                <n-tree
-                  v-if="rightTreeData.length"
-                  block-line
-                  block-node
-                  selectable
-                  :data="rightTreeData"
-                  :expanded-keys="rightExpandedKeys"
-                  :selected-keys="rightSelectedKeys"
-                  :render-label="renderTreeLabel"
-                  @update:expanded-keys="handleExpandedUpdate"
-                  @update:selected-keys="handleRightSelected"
-                />
-                <div v-else class="empty-tip">请选择目录</div>
+                </div>
+                <div ref="rightTreeBodyRef" class="tree-body" @scroll="(e) => handleTreeScroll('right', e)">
+                  <n-tree
+                    v-if="rightTreeData.length"
+                    show-line
+                    block-line
+                    block-node
+                    selectable
+                    :data="rightTreeData"
+                    :expanded-keys="rightExpandedKeys"
+                    :selected-keys="rightSelectedKeys"
+                    :render-label="renderTreeLabel"
+                    @update:expanded-keys="handleExpandedUpdate"
+                    @update:selected-keys="handleRightSelected"
+                  />
+                  <div v-else class="empty-tip">请选择文件夹</div>
+                </div>
               </div>
             </div>
           </template>
-        </SplitPanel>
-      </div>
+          </SplitPanel>
+        </div>
+      </n-spin>
     </div>
 
     <n-modal v-model:show="modalVisible" :mask-closable="true">
       <n-card
         class="diff-modal"
         :title="modalTitle"
+        :content-style="{
+          height: 'calc(100% - 42px)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }"
         size="small"
         closable
         @close="modalVisible = false"
       >
-        <div class="w-full h-full flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center justify-end">
-            <n-select
-              v-model:value="outputFormat"
-              :options="outputFormatOptions"
-              :style="{ width: '220px' }"
-              :disabled="previewType !== 'diff'"
-            />
-          </div>
-
+        <div class="w-full flex-1 min-h-0 flex flex-col gap-2">
           <div class="flex-1 min-h-0 overflow-auto diff-preview-area">
             <div v-if="previewLoading" class="text-sm text-gray-500">正在读取文件内容...</div>
             <n-alert v-else-if="previewType !== 'diff'" type="info" :show-icon="false">
@@ -896,7 +1123,7 @@ async function openDiffModal(path) {
               v-else
               :old-string="leftText"
               :new-string="rightText"
-              :output-format="outputFormat"
+              output-format="side-by-side"
             />
           </div>
         </div>
@@ -906,6 +1133,22 @@ async function openDiffModal(path) {
 </template>
 
 <style scoped>
+
+.folder-diff-spin {
+  height: 100%;
+}
+
+.folder-diff-spin :deep(.n-spin-container),
+.folder-diff-spin :deep(.n-spin-body),
+.folder-diff-spin :deep(.n-spin-content) {
+  height: 100%;
+  min-height: 0;
+}
+
+.folder-diff-spin :deep(.n-spin-content) {
+  display: flex;
+  flex-direction: column;
+}
 
 .tree-header {
   flex: 0 0 auto;
@@ -929,6 +1172,12 @@ async function openDiffModal(path) {
   white-space: nowrap;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .tree-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -946,7 +1195,9 @@ async function openDiffModal(path) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
   border-radius: 4px;
   border: 1px solid #e5e7eb;
   cursor: pointer;
@@ -959,8 +1210,7 @@ async function openDiffModal(path) {
 }
 
 .legend-item.active {
-  border-color: #111827;
-  box-shadow: inset 0 0 0 1px #111827;
+  font-weight: 600;
 }
 
 .legend-dot {
@@ -974,11 +1224,41 @@ async function openDiffModal(path) {
   background: #6b7280;
 }
 
+.legend-item.status-total.active {
+  border-color: #6b7280;
+  box-shadow: inset 0 0 0 1px #6b7280;
+}
+
+.legend-item.status-left-only.active {
+  border-color: #f59e0b;
+  box-shadow: inset 0 0 0 1px #f59e0b;
+}
+
+.legend-item.status-right-only.active {
+  border-color: #3b82f6;
+  box-shadow: inset 0 0 0 1px #3b82f6;
+}
+
+.legend-item.status-modified.active {
+  border-color: #ef4444;
+  box-shadow: inset 0 0 0 1px #ef4444;
+}
+
+.legend-item.status-same.active {
+  border-color: #10b981;
+  box-shadow: inset 0 0 0 1px #10b981;
+}
+
 :deep(.tree-node-label) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   width: 100%;
+}
+
+:deep(.tree-node-label.is-sync-hover) {
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 4px;
 }
 
 :deep(.tree-node-label .status-dot) {
@@ -1046,6 +1326,15 @@ async function openDiffModal(path) {
   height: min(760px, 90vh);
 }
 
+.diff-modal :deep(.n-card__content) {
+  min-height: 0;
+}
+
+.diff-preview-area {
+  max-width: 100%;
+  overflow: auto;
+}
+
 .diff-preview-area :deep(.blob-code-inner),
 .diff-preview-area :deep(.file-header) {
   font-family: Monaco, Consolas, 'Courier New', monospace !important;
@@ -1055,5 +1344,7 @@ async function openDiffModal(path) {
 
 .diff-preview-area :deep(.code-diff-view) {
   width: 100% !important;
+  max-width: 100%;
+  overflow: auto;
 }
 </style>
