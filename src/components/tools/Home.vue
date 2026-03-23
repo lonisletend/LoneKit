@@ -76,6 +76,13 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.03.24',
+    version: 'v0.7.3',
+    added: [
+      '新增文本计数工具，支持字符数、单词数、行数、段落数、UTF-8 字节数、阅读时长统计。',
+    ],
+  },
+  {
     date: '2026.03.23',
     version: 'v0.7.2',
     added: [

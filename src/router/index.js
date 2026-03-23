@@ -24,6 +24,11 @@ const routes = [
         component: () => import("/src/components/tools/UUIDTool.vue"),
       },
       {
+        path: "/textCount",
+        name: "TextCountTool",
+        component: () => import("/src/components/wrapper/TextCountToolWrapper.vue"),
+      },
+      {
         path: "/jsonFormatWrapper",
         name: "JsonFormatWrapper",
         component: () => import("/src/components/wrapper/JsonFormatWrapper.vue"),

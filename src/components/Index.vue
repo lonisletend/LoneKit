@@ -177,6 +177,21 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
+          name: "TextCountTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "文本计数" }
+    ),
+    key: "text-count-tool",
+    icon: renderIcon(CodeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
           name: "UUIDTool",
           params: {
           }
