@@ -44,8 +44,8 @@
 
 <script setup>
 import router from "../router";
-import { h, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { h, ref, watch } from "vue";
+import { RouterLink, useRoute } from "vue-router";
 import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
 import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
@@ -297,6 +297,34 @@ const menuOptions = ref([
 const activeKey = ref(null);
 const collapsed = ref(false);
 const version = packageJson.version;
+const route = useRoute();
+
+const routeNameToMenuKey = {
+  TimeTool: "time-tool",
+  CommonFormatWrapper: "common-format-wrapper",
+  JsonFormatWrapper: "json-format-wrapper",
+  XmlFormatWrapper: "xml-format-wrapper",
+  SQLFormatWrapper: "sql-format-wrapper",
+  DiffToolWrapper: "diff-tool",
+  DiffTool: "diff-tool",
+  FolderDiffToolWrapper: "folder-diff-tool",
+  TextCountTool: "text-count-tool",
+  UUIDTool: "uuid-tool",
+  Md5Tool: "md5-tool",
+  Base64Tool: "base64-tool",
+  StringHexTool: "string-hex-tool",
+  QrCodeTool: "qr-code-tool",
+  QRCodeReaderTool: "qr-code-reader-tool",
+  BarcodeTool: "barcode-tool",
+};
+
+watch(
+  () => route.name,
+  (name) => {
+    activeKey.value = routeNameToMenuKey[name] || null;
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
