@@ -5,10 +5,10 @@ import { NButton, NInput, NTag, NRadioGroup, NRadioButton, NColorPicker } from "
 import QrcodeVue from 'qrcode.vue'
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
+import { useSyncedScroll } from '../../composables/useSyncedScroll';
+import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 
 const { notify, readFromClipboard } = useCommon();
-
-const entries = ref([createEntry()]);
 
 const size = ref(200);
 const sizeOptions = ref([
@@ -40,41 +40,7 @@ const cardStyle = computed(() => ({
   height: `${cardHeight.value}px`,
 }));
 
-const leftScrollRef = ref(null);
-const rightScrollRef = ref(null);
-const suppressLeftScroll = ref(false);
-const suppressRightScroll = ref(false);
-
-function handleScroll(side, event) {
-  if (side === 'left' && suppressLeftScroll.value) {
-    return;
-  }
-
-  if (side === 'right' && suppressRightScroll.value) {
-    return;
-  }
-
-  const target = side === 'left' ? rightScrollRef.value : leftScrollRef.value;
-  if (!target) {
-    return;
-  }
-
-  if (side === 'left') {
-    suppressRightScroll.value = true;
-  } else {
-    suppressLeftScroll.value = true;
-  }
-
-  target.scrollTop = event.target.scrollTop;
-
-  requestAnimationFrame(() => {
-    if (side === 'left') {
-      suppressRightScroll.value = false;
-    } else {
-      suppressLeftScroll.value = false;
-    }
-  });
-}
+const { leftScrollRef, rightScrollRef, handleScroll } = useSyncedScroll();
 
 function createEntry(content = '') {
   return {
@@ -87,24 +53,12 @@ function hasContent(entry) {
   return !!entry.content?.trim();
 }
 
-function ensureEntries() {
-  if (entries.value.length === 0) {
-    entries.value.push(createEntry());
-  }
-
-  // Keep a single trailing blank entry for continuous input.
-  while (
-    entries.value.length > 1 &&
-    !hasContent(entries.value[entries.value.length - 1]) &&
-    !hasContent(entries.value[entries.value.length - 2])
-  ) {
-    entries.value.pop();
-  }
-
-  if (hasContent(entries.value[entries.value.length - 1])) {
-    entries.value.push(createEntry());
-  }
-}
+const {
+  entries,
+  ensureEntries,
+  removeEntry: removeEntryBase,
+  resetEntries,
+} = useAutoAppendEntries(createEntry, hasContent);
 
 function handleEntryInput(index, val) {
   entries.value[index].content = val ?? '';
@@ -112,12 +66,7 @@ function handleEntryInput(index, val) {
 }
 
 function removeEntry(index) {
-  if (entries.value.length === 1) {
-    entries.value = [createEntry()];
-    return;
-  }
-  entries.value.splice(index, 1);
-  ensureEntries();
+  removeEntryBase(index);
 }
 
 async function readClipboard() {
@@ -136,14 +85,14 @@ async function readClipboard() {
 }
 
 function showExample() {
-  entries.value = [
+  resetEntries([
     createEntry('https://kit.lonestack.com'),
     createEntry(),
-  ];
+  ]);
 }
 
 function clear() {
-  entries.value = [createEntry()];
+  resetEntries();
 }
 
 </script>
