@@ -1,27 +1,14 @@
 <script setup>
 
-import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, NRadioGroup, NRadioButton, NColorPicker} from "naive-ui";
+import { computed, ref } from "vue";
+import { NButton, NInput, NTag, NRadioGroup, NRadioButton, NColorPicker } from "naive-ui";
 import QrcodeVue from 'qrcode.vue'
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 
-const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { notify, readFromClipboard } = useCommon();
 
-const source = ref();
-const example = ref('test');
-const target = ref();
-const targetList = ref([]);
-
-const lineMode = ref('multi');
-const lineModeOptions = ref([
-  {label: '多行', value: 'multi'},
-  {label: '整体', value: 'single'},
-]);
-
-watch(lineMode, () => {
-  clear();
-})
+const entries = ref([createEntry()]);
 
 const size = ref(200);
 const sizeOptions = ref([
@@ -31,35 +18,132 @@ const sizeOptions = ref([
 ])
 const color = ref('#18A058');
 
-function handleChange(val) {
-  if (!val) {
-    targetList.value = [];
+const cardHeight = computed(() => {
+  const map = {
+    100: 220,
+    200: 320,
+    300: 420,
+  };
+  return map[size.value] ?? 320;
+});
+
+const inputRows = computed(() => {
+  const map = {
+    100: 6,
+    200: 10,
+    300: 14,
+  };
+  return map[size.value] ?? 10;
+});
+
+const cardStyle = computed(() => ({
+  height: `${cardHeight.value}px`,
+}));
+
+const leftScrollRef = ref(null);
+const rightScrollRef = ref(null);
+const suppressLeftScroll = ref(false);
+const suppressRightScroll = ref(false);
+
+function handleScroll(side, event) {
+  if (side === 'left' && suppressLeftScroll.value) {
     return;
   }
-  if (lineMode.value === 'single') {
-    targetList.value = [source.value];
-  } else {
-    targetList.value = source.value.split('\n').filter(item => item);
+
+  if (side === 'right' && suppressRightScroll.value) {
+    return;
   }
-  // console.log('targetList ==> ', JSON.stringify(targetList.value));
+
+  const target = side === 'left' ? rightScrollRef.value : leftScrollRef.value;
+  if (!target) {
+    return;
+  }
+
+  if (side === 'left') {
+    suppressRightScroll.value = true;
+  } else {
+    suppressLeftScroll.value = true;
+  }
+
+  target.scrollTop = event.target.scrollTop;
+
+  requestAnimationFrame(() => {
+    if (side === 'left') {
+      suppressRightScroll.value = false;
+    } else {
+      suppressLeftScroll.value = false;
+    }
+  });
+}
+
+function createEntry(content = '') {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    content,
+  };
+}
+
+function hasContent(entry) {
+  return !!entry.content?.trim();
+}
+
+function ensureEntries() {
+  if (entries.value.length === 0) {
+    entries.value.push(createEntry());
+  }
+
+  // Keep a single trailing blank entry for continuous input.
+  while (
+    entries.value.length > 1 &&
+    !hasContent(entries.value[entries.value.length - 1]) &&
+    !hasContent(entries.value[entries.value.length - 2])
+  ) {
+    entries.value.pop();
+  }
+
+  if (hasContent(entries.value[entries.value.length - 1])) {
+    entries.value.push(createEntry());
+  }
+}
+
+function handleEntryInput(index, val) {
+  entries.value[index].content = val ?? '';
+  ensureEntries();
+}
+
+function removeEntry(index) {
+  if (entries.value.length === 1) {
+    entries.value = [createEntry()];
+    return;
+  }
+  entries.value.splice(index, 1);
+  ensureEntries();
 }
 
 async function readClipboard() {
   const text = await readFromClipboard();
   if (text) {
-    source.value = text;
-    handleChange(source.value);
+    const lastIndex = entries.value.length - 1;
+    if (!hasContent(entries.value[lastIndex])) {
+      entries.value[lastIndex].content = text;
+    } else {
+      entries.value.push(createEntry(text));
+    }
+    ensureEntries();
+  } else {
+    notify('warning', '剪贴板中没有可用文本');
   }
 }
 
 function showExample() {
-  source.value = 'https://kit.lonestack.com';
-  handleChange(source.value);
+  entries.value = [
+    createEntry('https://kit.lonestack.com'),
+    createEntry(),
+  ];
 }
 
 function clear() {
-  source.value = null;
-  handleChange(source.value);
+  entries.value = [createEntry()];
 }
 
 </script>
@@ -71,14 +155,34 @@ function clear() {
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="warning">输入</n-tag>
-            <n-select v-model:value="lineMode" :options="lineModeOptions" :style="{width: '80px'}" />
             <n-button @click="readClipboard">剪贴板</n-button>
             <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">清空</n-button>
+            <n-button @click="clear">删除全部</n-button>
           </div>
-          <div class="w-full h-full text-xl">
-            <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                     placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
+          <div
+            ref="leftScrollRef"
+            class="w-full h-full overflow-auto space-y-3"
+            @scroll="handleScroll('left', $event)"
+          >
+            <div v-for="(entry, index) in entries" :key="entry.id" class="relative rounded" :style="cardStyle">
+              <div class="entry-delete-btn">
+                <n-button
+                  size="small"
+                  @click="removeEntry(index)"
+                  :disabled="entries.length === 1"
+                >
+                  删除
+                </n-button>
+              </div>
+              <n-input
+                v-model:value="entry.content"
+                type="textarea"
+                class="w-full h-full entry-input"
+                :autosize="{ minRows: inputRows, maxRows: inputRows }"
+                placeholder="输入字符串（支持换行，整体生成一个二维码）"
+                @input="val => handleEntryInput(index, val)"
+              />
+            </div>
           </div>
         </div>
       </template>
@@ -93,13 +197,22 @@ function clear() {
               :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
             />
           </div>
-          <div class="w-full h-full p-1 text-lg transition border border-gray-300 rounded overflow-auto">
-            <div v-for="(target, index) in targetList" :key="index" class="w-full mb-4">
-              <div class="flex my-1 justify-center">
-                <qrcode-vue :value="target" :size="size" level="H" :foreground="color" />
+          <div
+            ref="rightScrollRef"
+            class="w-full h-full text-lg transition overflow-auto space-y-3"
+            @scroll="handleScroll('right', $event)"
+          >
+            <div v-for="entry in entries" :key="entry.id" class="w-full border border-gray-200 rounded p-2" :style="cardStyle">
+              <div v-if="hasContent(entry)" class="h-full flex flex-col">
+                <div class="flex-1 flex justify-center items-center overflow-hidden">
+                  <qrcode-vue :value="entry.content" :size="size" level="H" :foreground="color" />
+                </div>
+                <div class="text-sm whitespace-pre-wrap break-all text-center max-h-20 overflow-auto w-full px-2">
+                  {{ entry.content }}
+                </div>
               </div>
-              <div class="flex justify-center">
-                {{ target }}
+              <div v-else class="h-full border border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 text-sm">
+                待输入
               </div>
             </div>
           </div>
@@ -110,5 +223,17 @@ function clear() {
 </template>
 
 <style scoped>
+
+.entry-delete-btn {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  z-index: 10;
+}
+
+.entry-input :deep(textarea) {
+  padding-right: 60px;
+  padding-bottom: 30px;
+}
 
 </style>
