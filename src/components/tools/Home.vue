@@ -76,6 +76,14 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.04.02',
+    version: 'v0.8.1',
+    added: [
+      '时间戳转换工具升级为多 Tab 模式，支持同屏并行处理多组时间任务。',
+      '时间工具新增「时间间隔计算」与「时间推移计算」两大功能块，支持开始/结束时间差值、方向推移计算与一键复制。',
+    ],
+  },
+  {
     date: '2026.03.25',
     version: 'v0.8.0',
     added: [

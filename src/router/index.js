@@ -16,7 +16,7 @@ const routes = [
       {
         path: "/time",
         name: "TimeTool",
-        component: () => import("/src/components/tools/TimeTool.vue"),
+        component: () => import("/src/components/wrapper/TimeToolWrapper.vue"),
       },
       {
         path: "/uuid",

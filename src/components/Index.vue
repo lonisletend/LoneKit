@@ -72,21 +72,6 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
-          name: "TimeTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "时间戳转换" }
-    ),
-    key: "time-tool",
-    icon: renderIcon(TimeIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
           name: "CommonFormatWrapper",
           params: {
           }
@@ -141,6 +126,21 @@ const menuOptions = ref([
     ),
     key: "sql-format-wrapper",
     icon: renderIcon(SQLIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "TimeTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "时间处理" }
+    ),
+    key: "time-tool",
+    icon: renderIcon(TimeIcon)
   },
   {
     label: () => h(
