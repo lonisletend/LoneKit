@@ -76,6 +76,14 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.04.15',
+    version: 'v0.8.2',
+    added: [
+      '条形码生成工具、二维码生成工具，结果列表支持单项复制图片到剪贴板。',
+      '条形码生成工具、二维码生成工具，新增「导出 Excel」功能，导出包含文本与对应图片的 Excel 文件。',
+    ],
+  },
+  {
     date: '2026.04.02',
     version: 'v0.8.1',
     added: [
