@@ -83,9 +83,47 @@ export function useCommon() {
     }
   }
 
+  /**
+   * 复制指定容器内的 canvas 元素为图片到剪贴板
+   * @param {string} containerId - 包含 canvas 的容器元素 ID
+   * @param {string} successMessage - 成功提示消息
+   * @param {string} errorMessage - 失败提示消息
+   */
+  async function copyCanvasImage(containerId, successMessage = '图片已复制到剪贴板!', errorMessage = '复制失败') {
+    const container = document.getElementById(containerId);
+    if (!container) {
+      notify('warning', '没有可复制的内容');
+      return false;
+    }
+    const canvas = container.querySelector('canvas');
+    if (!canvas) {
+      notify('warning', '没有可复制的内容');
+      return false;
+    }
+    try {
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png');
+      });
+      if (!blob) {
+        notify('error', '生成图片失败');
+        return false;
+      }
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      notify('success', successMessage);
+      return true;
+    } catch (e) {
+      console.error('复制图片到剪贴板失败:', e);
+      notify('error', errorMessage);
+      return false;
+    }
+  }
+
   return {
     notify,
     copyToClipboard,
+    copyCanvasImage,
     readClipboard,
     readFromClipboard: readClipboard  // 别名，避免函数名冲突
   };

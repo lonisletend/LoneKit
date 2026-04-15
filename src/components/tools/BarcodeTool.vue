@@ -7,7 +7,7 @@ import { useCommon } from '../../composables/useCommon';
 import { useSyncedScroll } from '../../composables/useSyncedScroll';
 import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 
-const { notify, readFromClipboard } = useCommon();
+const { notify, readFromClipboard, copyCanvasImage } = useCommon();
 
 const height = ref(150);
 const sizeOptions = ref([
@@ -230,13 +230,16 @@ function clear() {
             class="w-full h-full text-lg transition overflow-auto space-y-3"
             @scroll="handleScroll('right', $event)"
           >
-            <div v-for="entry in entries" :key="entry.id" class="w-full border border-gray-200 rounded p-2" :style="cardStyle">
+            <div v-for="entry in entries" :key="entry.id" class="w-full border border-gray-200 rounded p-2 relative" :style="cardStyle">
               <div v-if="hasContent(entry)" class="h-full flex flex-col">
-                <div class="flex-1 flex justify-center items-center overflow-hidden">
+                <div class="entry-copy-btn">
+                  <n-button size="small" @click="copyCanvasImage(`barcode-${entry.id}`, '条形码图片已复制到剪贴板!')">复制</n-button>
+                </div>
+                <div class="flex-1 flex justify-center items-center overflow-hidden" :id="`barcode-${entry.id}`">
                   <vue-barcode :value="entry.content" :options="{ displayValue: false, lineColor: color, height: barcodeSize.height, width: barcodeSize.width }"></vue-barcode>
                 </div>
                 <div class="text-sm whitespace-pre-wrap break-all text-center max-h-20 overflow-auto w-full px-2">
-                  {{ entry.content }}
+                {{ entry.content }}
                 </div>
               </div>
               <div v-else class="h-full border border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 text-sm">
@@ -253,6 +256,13 @@ function clear() {
 <style scoped>
 
 .entry-delete-btn {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  z-index: 10;
+}
+
+.entry-copy-btn {
   position: absolute;
   right: 5px;
   bottom: 5px;
