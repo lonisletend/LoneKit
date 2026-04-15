@@ -1,7 +1,7 @@
 <script setup>
 
-import { computed, ref } from "vue";
-import { NButton, NInput, NTag, NRadioGroup, NRadioButton, NColorPicker } from "naive-ui";
+import { computed, ref, watch } from "vue";
+import { NButton, NInput, NSwitch, NTag, NRadioGroup, NRadioButton, NColorPicker } from "naive-ui";
 import QrcodeVue from 'qrcode.vue'
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
@@ -17,6 +17,8 @@ const sizeOptions = ref([
   {label: '大', value: 300},
 ])
 const color = ref('#18A058');
+const isBatchInput = ref(false);
+const batchInputText = ref('');
 
 const cardHeight = computed(() => {
   const map = {
@@ -69,9 +71,50 @@ function removeEntry(index) {
   removeEntryBase(index);
 }
 
+function parseBatchLines(text) {
+  return (text ?? '')
+    .split(/\r\n|\r|\n/)
+    .filter(line => line.trim() !== '');
+}
+
+function applyBatchInput(text) {
+  const lines = parseBatchLines(text);
+  if (lines.length === 0) {
+    resetEntries();
+    return;
+  }
+  resetEntries(lines.map(line => createEntry(line)));
+}
+
+function onBatchInputChange(val) {
+  batchInputText.value = val ?? '';
+  applyBatchInput(batchInputText.value);
+}
+
+function syncBatchInputFromEntries() {
+  batchInputText.value = entries.value
+    .filter(entry => hasContent(entry))
+    .map(entry => entry.content)
+    .join('\n');
+}
+
+watch(isBatchInput, (enabled) => {
+  if (!enabled) {
+    return;
+  }
+  syncBatchInputFromEntries();
+  applyBatchInput(batchInputText.value);
+});
+
 async function readClipboard() {
   const text = await readFromClipboard();
   if (text) {
+    if (isBatchInput.value) {
+      batchInputText.value = text;
+      applyBatchInput(batchInputText.value);
+      return;
+    }
+
     const lastIndex = entries.value.length - 1;
     if (!hasContent(entries.value[lastIndex])) {
       entries.value[lastIndex].content = text;
@@ -85,6 +128,12 @@ async function readClipboard() {
 }
 
 function showExample() {
+  if (isBatchInput.value) {
+    batchInputText.value = 'https://kit.lonestack.com\nLoneKit';
+    applyBatchInput(batchInputText.value);
+    return;
+  }
+
   resetEntries([
     createEntry('https://kit.lonestack.com'),
     createEntry(),
@@ -92,6 +141,12 @@ function showExample() {
 }
 
 function clear() {
+  if (isBatchInput.value) {
+    batchInputText.value = '';
+    applyBatchInput(batchInputText.value);
+    return;
+  }
+
   resetEntries();
 }
 
@@ -107,8 +162,13 @@ function clear() {
             <n-button @click="readClipboard">剪贴板</n-button>
             <n-button @click="showExample">示例</n-button>
             <n-button @click="clear">删除全部</n-button>
+            <n-switch v-model:value="isBatchInput" size="large">
+              <template #checked>批量输入</template>
+              <template #unchecked>批量输入</template>
+            </n-switch>
           </div>
           <div
+            v-if="!isBatchInput"
             ref="leftScrollRef"
             class="w-full h-full overflow-auto space-y-3"
             @scroll="handleScroll('left', $event)"
@@ -132,6 +192,15 @@ function clear() {
                 @input="val => handleEntryInput(index, val)"
               />
             </div>
+          </div>
+          <div v-else class="w-full h-full">
+            <n-input
+              v-model:value="batchInputText"
+              type="textarea"
+              class="w-full h-full batch-input"
+              placeholder="每行一条内容，按换行分割生成多个二维码"
+              @input="onBatchInputChange"
+            />
           </div>
         </div>
       </template>
@@ -183,6 +252,10 @@ function clear() {
 .entry-input :deep(textarea) {
   padding-right: 60px;
   padding-bottom: 30px;
+}
+
+.batch-input :deep(textarea) {
+  height: 100%;
 }
 
 </style>

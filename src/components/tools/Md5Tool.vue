@@ -1,7 +1,7 @@
 <script setup>
 
-import { computed } from "vue";
-import { NButton, NInput, NTag } from "naive-ui";
+import { computed, ref, watch } from "vue";
+import { NButton, NInput, NSwitch, NTag } from "naive-ui";
 import md5 from 'blueimp-md5';
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
@@ -12,6 +12,9 @@ const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 const cardHeight = 220;
 const inputRows = 6;
+const isBatchInput = ref(false);
+const batchSourceText = ref('');
+const batchTargetText = ref('');
 
 const { leftScrollRef, rightScrollRef, handleScroll } = useSyncedScroll();
 
@@ -45,9 +48,51 @@ function removeRow(index) {
   removeEntry(index);
 }
 
+function parseBatchLines(text) {
+  return (text ?? '')
+    .split(/\r\n|\r|\n/)
+    .filter(line => line.trim() !== '');
+}
+
+function syncBatchTextsFromEntries() {
+  const activeEntries = entries.value.filter(hasContent);
+  batchSourceText.value = activeEntries.map(item => item.source).join('\n');
+  batchTargetText.value = activeEntries.map(item => item.target).join('\n');
+}
+
+function applyBatchSource(text) {
+  const lines = parseBatchLines(text);
+  if (lines.length === 0) {
+    resetEntries();
+    batchTargetText.value = '';
+    return;
+  }
+  resetEntries(lines.map(line => createEntry(line)));
+  batchTargetText.value = lines.map(line => md5(line)).join('\n');
+}
+
+function onBatchSourceInput(value) {
+  batchSourceText.value = value ?? '';
+  applyBatchSource(batchSourceText.value);
+}
+
+watch(isBatchInput, enabled => {
+  if (!enabled) {
+    return;
+  }
+  syncBatchTextsFromEntries();
+  applyBatchSource(batchSourceText.value);
+});
+
 async function readClipboard() {
   const text = await readFromClipboard();
   if (text) {
+    if (isBatchInput.value) {
+      batchSourceText.value = text;
+      applyBatchSource(batchSourceText.value);
+      return;
+    }
+
     const lastIndex = entries.value.length - 1;
     if (!hasContent(entries.value[lastIndex])) {
       entries.value[lastIndex].source = text;
@@ -62,6 +107,12 @@ async function readClipboard() {
 }
 
 function showExample() {
+  if (isBatchInput.value) {
+    batchSourceText.value = 'test\nLoneKit';
+    applyBatchSource(batchSourceText.value);
+    return;
+  }
+
   resetEntries([
     createEntry('test'),
     createEntry(),
@@ -69,6 +120,12 @@ function showExample() {
 }
 
 function clear() {
+  if (isBatchInput.value) {
+    batchSourceText.value = '';
+    applyBatchSource(batchSourceText.value);
+    return;
+  }
+
   resetEntries();
 }
 
@@ -92,8 +149,13 @@ function copyValue(value) {
             <n-button @click="readClipboard">剪贴板</n-button>
             <n-button @click="showExample">示例</n-button>
             <n-button @click="clear">删除全部</n-button>
+            <n-switch v-model:value="isBatchInput" size="large">
+              <template #checked>批量输入</template>
+              <template #unchecked>批量输入</template>
+            </n-switch>
           </div>
           <div
+            v-if="!isBatchInput"
             ref="leftScrollRef"
             class="w-full h-full overflow-auto space-y-3"
             @scroll="handleScroll('left', $event)"
@@ -129,6 +191,15 @@ function copyValue(value) {
               />
             </div>
           </div>
+          <div v-else class="w-full h-full">
+            <n-input
+              v-model:value="batchSourceText"
+              type="textarea"
+              class="w-full h-full batch-input"
+              placeholder="每行一条内容，按换行分割批量加密"
+              @input="onBatchSourceInput"
+            />
+          </div>
         </div>
       </template>
       <template #right>
@@ -138,6 +209,7 @@ function copyValue(value) {
             <n-button @click="copyValue(allResults)">复制全部</n-button>
           </div>
           <div
+            v-if="!isBatchInput"
             ref="rightScrollRef"
             class="w-full h-full text-lg transition overflow-auto space-y-3"
             @scroll="handleScroll('right', $event)"
@@ -173,6 +245,15 @@ function copyValue(value) {
               />
             </div>
           </div>
+          <div v-else class="w-full h-full">
+            <n-input
+              :value="batchTargetText"
+              type="textarea"
+              class="w-full h-full batch-input"
+              placeholder="批量加密结果"
+              :readonly="true"
+            />
+          </div>
         </div>
       </template>
     </SplitPanel>
@@ -193,6 +274,10 @@ function copyValue(value) {
 .entry-input :deep(textarea) {
   padding-right: 128px;
   padding-bottom: 30px;
+}
+
+.batch-input :deep(textarea) {
+  height: 100%;
 }
 
 </style>
