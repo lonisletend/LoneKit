@@ -8,7 +8,7 @@ import { useCommon } from '../../composables/useCommon';
 import { useSyncedScroll } from '../../composables/useSyncedScroll';
 import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 
-const { notify, readFromClipboard, copyCanvasImage } = useCommon();
+const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
 
 const size = ref(200);
 const sizeOptions = ref([
@@ -150,6 +150,16 @@ function clear() {
   resetEntries();
 }
 
+function exportToExcel() {
+  const activeEntries = entries.value.filter(hasContent);
+  exportCanvasToExcel(activeEntries, 'qrcode-', {
+    sheetName: '二维码',
+    textHeader: '二维码文本',
+    imageHeader: '二维码图片',
+    filePrefix: '二维码',
+  });
+}
+
 </script>
 
 <template>
@@ -214,6 +224,7 @@ function clear() {
             <n-color-picker v-model:value="color" :style="{width: '80px'}"
               :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
             />
+            <n-button @click="exportToExcel">导出 Excel</n-button>
           </div>
           <div
             ref="rightScrollRef"

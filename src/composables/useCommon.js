@@ -1,5 +1,6 @@
 import { useNotification } from "naive-ui";
 import { writeText, readText } from "@tauri-apps/plugin-clipboard-manager";
+import ExcelJS from 'exceljs';
 
 /**
  * 通用工具 Composable
@@ -120,10 +121,79 @@ export function useCommon() {
     }
   }
 
+  /**
+   * 将包含 canvas 图片的条目列表导出为 Excel 文件
+   * @param {Array<{id: string, content: string}>} items - 条目列表，每项包含 id 和 content
+   * @param {string} containerIdPrefix - 容器 ID 前缀，与 entry.id 拼接查找 canvas
+   * @param {object} options - 可选配置
+   * @param {string} options.sheetName - 工作表名称，默认 '导出数据'
+   * @param {string} options.textHeader - 文本列表头，默认 '文本'
+   * @param {string} options.imageHeader - 图片列表头，默认 '图片'
+   * @param {string} options.filePrefix - 文件名前缀，默认 '导出'
+   */
+  async function exportCanvasToExcel(items, containerIdPrefix, options = {}) {
+    const { sheetName = '导出数据', textHeader = '文本', imageHeader = '图片', filePrefix = '导出' } = options;
+    if (!items || items.length === 0) {
+      notify('warning', '没有可导出的内容');
+      return;
+    }
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet(sheetName);
+
+      sheet.columns = [
+        { header: textHeader, key: 'text', width: 40 },
+        { header: imageHeader, key: 'image', width: 50 },
+      ];
+      sheet.getRow(1).font = { bold: true };
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const container = document.getElementById(`${containerIdPrefix}${item.id}`);
+        const canvas = container?.querySelector('canvas');
+        if (!canvas) continue;
+
+        const rowIndex = i + 2;
+        const row = sheet.getRow(rowIndex);
+        row.getCell(1).value = item.content;
+
+        const dataUrl = canvas.toDataURL('image/png');
+        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+        const imageId = workbook.addImage({ base64, extension: 'png' });
+
+        const imgHeight = canvas.height;
+        const imgWidth = canvas.width;
+        const rowHeight = Math.max(60, Math.round(imgHeight * 0.75));
+        row.height = rowHeight;
+
+        sheet.addImage(imageId, {
+          tl: { col: 1, row: rowIndex - 1 },
+          ext: { width: imgWidth, height: imgHeight },
+        });
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ts = new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/[\/:\s]/g, '');
+      a.download = `${filePrefix}_${ts}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      notify('success', '导出成功!');
+    } catch (e) {
+      console.error('导出 Excel 失败:', e);
+      notify('error', '导出失败');
+    }
+  }
+
   return {
     notify,
     copyToClipboard,
     copyCanvasImage,
+    exportCanvasToExcel,
     readClipboard,
     readFromClipboard: readClipboard  // 别名，避免函数名冲突
   };
