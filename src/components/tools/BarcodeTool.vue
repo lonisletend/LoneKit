@@ -1,11 +1,12 @@
 <script setup>
 
 import { computed, ref, watch } from "vue";
-import { NButton, NInput, NSwitch, NTag, NRadioGroup, NRadioButton, NColorPicker } from "naive-ui";
+import { NButton, NInput, NSwitch, NTag, NRadioGroup, NRadioButton, NColorPicker, NSelect } from "naive-ui";
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 import { useSyncedScroll } from '../../composables/useSyncedScroll';
 import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
+import JsBarcode from 'jsbarcode';
 
 const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
 
@@ -27,8 +28,52 @@ const barcodeSize = computed(() => ({
 }));
 
 const color = ref('#18A058');
+const barcodeFormat = ref('CODE128');
+const formatOptions = [
+  { label: 'CODE128', value: 'CODE128' },
+  { label: 'CODE39', value: 'CODE39' },
+  { label: 'EAN13', value: 'EAN13' },
+  { label: 'EAN8', value: 'EAN8' },
+  { label: 'UPC', value: 'UPC' },
+  { label: 'ITF14', value: 'ITF14' },
+  { label: 'MSI', value: 'MSI' },
+  { label: 'Pharmacode', value: 'pharmacode' },
+  { label: 'Codabar', value: 'codabar' },
+];
+const formatHints = {
+  CODE128: '支持所有 ASCII 字符',
+  CODE39: '仅支持大写字母 A-Z、数字 0-9 及 - . $ / + % 空格',
+  EAN13: '需要 12 或 13 位纯数字',
+  EAN8: '需要 7 或 8 位纯数字',
+  UPC: '需要 11 或 12 位纯数字',
+  ITF14: '需要 13 或 14 位纯数字', 
+  MSI: '仅支持纯数字',
+  pharmacode: '仅支持 3~131070 之间的整数',
+  codabar: '数字 0-9、特殊字符 - $ : / . + 及起止符 A/B/C/D',
+};
+const formatExamples = {
+  CODE128: ['https://kit.lonestack.com', 'LoneKit'],
+  CODE39: ['LONEKIT', 'HELLO-2024'],
+  EAN13: ['5901234123457', '4006381333931'],
+  EAN8: ['96385074', '55123457'],
+  UPC: ['012345678905', '036000291452'],
+  ITF14: ['98249880215004', '15400141288763'],
+  MSI: ['80523', '1234567'],
+  pharmacode: ['1234', '5678'],
+  codabar: ['A12345B', 'C$25.00D'],
+};
 const isBatchInput = ref(false);
 const batchInputText = ref('');
+
+function isValidBarcode(text) {
+  try {
+    const canvas = document.createElement('canvas');
+    JsBarcode(canvas, text, { format: barcodeFormat.value });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const cardHeight = computed(() => {
   const map = {
@@ -138,14 +183,15 @@ async function readClipboard() {
 }
 
 function showExample() {
+  const examples = formatExamples[barcodeFormat.value] || formatExamples.CODE128;
   if (isBatchInput.value) {
-    batchInputText.value = 'https://kit.lonestack.com\nLoneKit';
+    batchInputText.value = examples.join('\n');
     applyBatchInput(batchInputText.value);
     return;
   }
 
   resetEntries([
-    createEntry('https://kit.lonestack.com'),
+    ...examples.map(text => createEntry(text)),
     createEntry(),
   ]);
 }
@@ -161,7 +207,7 @@ function clear() {
 }
 
 function exportToExcel() {
-  const activeEntries = entries.value.filter(hasContent);
+  const activeEntries = entries.value.filter(e => hasContent(e) && isValidBarcode(e.content));
   exportCanvasToExcel(activeEntries, 'barcode-', {
     sheetName: '条形码',
     textHeader: '条码文本',
@@ -234,6 +280,7 @@ function exportToExcel() {
             <n-color-picker v-model:value="color" :style="{width: '80px'}"
               :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
             />
+            <n-select v-model:value="barcodeFormat" :options="formatOptions" :style="{width: '130px'}" />
             <n-button @click="exportToExcel">导出 Excel</n-button>
           </div>
           <div
@@ -243,11 +290,17 @@ function exportToExcel() {
           >
             <div v-for="entry in entries" :key="entry.id" class="w-full border border-gray-200 rounded p-2 relative" :style="cardStyle">
               <div v-if="hasContent(entry)" class="h-full flex flex-col">
-                <div class="entry-copy-btn">
-                  <n-button size="small" @click="copyCanvasImage(`barcode-${entry.id}`, '条形码图片已复制到剪贴板!')">复制</n-button>
-                </div>
-                <div class="flex-1 flex justify-center items-center overflow-hidden" :id="`barcode-${entry.id}`">
-                  <vue-barcode :value="entry.content" :options="{ displayValue: false, lineColor: color, height: barcodeSize.height, width: barcodeSize.width }"></vue-barcode>
+                <template v-if="isValidBarcode(entry.content)">
+                  <div class="entry-copy-btn">
+                    <n-button size="small" @click="copyCanvasImage(`barcode-${entry.id}`, '条形码图片已复制到剪贴板!')">复制</n-button>
+                  </div>
+                  <div class="flex-1 flex justify-center items-center overflow-hidden" :id="`barcode-${entry.id}`">
+                    <vue-barcode :key="`${entry.id}-${barcodeFormat}`" :value="entry.content" :options="{ format: barcodeFormat, displayValue: false, lineColor: color, height: barcodeSize.height, width: barcodeSize.width }"></vue-barcode>
+                  </div>
+                </template>
+                <div v-else class="flex-1 flex flex-col justify-center items-center text-red-400 text-sm">
+                  <div>当前内容不支持 {{ barcodeFormat }} 格式</div>
+                  <div class="mt-1 text-gray-400 text-xs">{{ formatHints[barcodeFormat] }}</div>
                 </div>
                 <div class="text-sm whitespace-pre-wrap break-all text-center max-h-20 overflow-auto w-full px-2">
                 {{ entry.content }}

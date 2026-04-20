@@ -54,12 +54,11 @@ import DiffIcon from "./icons/DiffIcon.vue";
 import SQLIcon from "./icons/SQLIcon.vue";
 import StringHexIcon from "./icons/StringHexIcon.vue";
 import QRCodeIcon from "./icons/QRCodeIcon.vue";
-import QRCodeReaderIcon from "./icons/QRCodeReaderIcon.vue";
 import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
-import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon } from '@vicons/fluent';
+import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon } from '@vicons/fluent';
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -185,7 +184,7 @@ const menuOptions = ref([
       { default: () => "文本计数" }
     ),
     key: "text-count-tool",
-    icon: renderIcon(CodeIcon)
+    icon: renderIcon(TextCountIcon)
   },
   {
     label: () => h(
@@ -292,6 +291,21 @@ const menuOptions = ref([
     key: "barcode-tool",
     icon: renderIcon(BarcodeIcon)
   },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "BarcodeReaderTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "条形码识别" }
+    ),
+    key: "barcode-reader-tool",
+    icon: renderIcon(BarcodeReaderIcon)
+  },
 
 ]);
 const activeKey = ref(null);
@@ -316,6 +330,7 @@ const routeNameToMenuKey = {
   QrCodeTool: "qr-code-tool",
   QRCodeReaderTool: "qr-code-reader-tool",
   BarcodeTool: "barcode-tool",
+  BarcodeReaderTool: "barcode-reader-tool",
 };
 
 watch(

@@ -69,6 +69,11 @@ const routes = [
         component: () => import("/src/components/tools/BarcodeTool.vue"),
       },
       {
+        path: "/barcode-reader",
+        name: "BarcodeReaderTool",
+        component: () => import("/src/components/tools/BarcodeReaderTool.vue"),
+      },
+      {
         path: "/sqlFormatWrapper",
         name: "SQLFormatWrapper",
         component: () => import("/src/components/wrapper/SQLFormatWrapper.vue"),

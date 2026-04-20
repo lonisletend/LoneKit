@@ -1,8 +1,8 @@
 <script setup>
 import { ref, nextTick } from "vue";
-import { NButton, NCard, NUpload, NUploadDragger, NIcon, NText, NTag, NEmpty } from "naive-ui";
+import { NButton, NCard, NUpload, NIcon, NText, NTag, NEmpty } from "naive-ui";
 import { CloudUploadOutline } from "@vicons/ionicons5";
-import QrScanner from 'qr-scanner';
+import { readBarcodesFromImageFile } from 'zxing-wasm/reader';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
 
@@ -13,7 +13,7 @@ const isProcessing = ref(false);
 
 const { notify, copyToClipboard } = useCommon();
 
-// 处理图片文件并识别二维码（通用逻辑）
+// 处理图片文件并识别条形码（通用逻辑）
 async function processImageFile(imageFile) {
   // 防止重复处理
   if (isProcessing.value) return;
@@ -35,15 +35,23 @@ async function processImageFile(imageFile) {
       reader.readAsDataURL(imageFile);
     });
     
-    // 识别二维码
-    const qrResult = await QrScanner.scanImage(imageFile);
-    const resultText = typeof qrResult === 'string' ? qrResult : qrResult.data;
+    // 识别条形码
+    const results = await readBarcodesFromImageFile(imageFile, {
+      tryHarder: true,
+    });
+    
+    if (!results || results.length === 0) {
+      throw new Error('No barcode found');
+    }
+    
+    const barcode = results[0];
     
     // 添加到历史记录（添加到数组末尾）
     historyList.value.push({
       id: Date.now(),
       imageUrl: imageDataUrl,
-      result: resultText,
+      result: barcode.text,
+      format: barcode.format,
       timestamp: new Date().toLocaleString()
     });
     
@@ -51,14 +59,14 @@ async function processImageFile(imageFile) {
     
     // 滚动到底部
     await nextTick();
-    const leftScroll = document.querySelector('.history-scroll-left');
-    const rightScroll = document.querySelector('.history-scroll-right');
+    const leftScroll = document.querySelector('.barcode-scroll-left');
+    const rightScroll = document.querySelector('.barcode-scroll-right');
     if (leftScroll) leftScroll.scrollTop = leftScroll.scrollHeight;
     if (rightScroll) rightScroll.scrollTop = rightScroll.scrollHeight;
     
   } catch (error) {
     console.error('识别失败:', error);
-    notify('error', '未能识别二维码，请确保图片包含清晰的二维码');
+    notify('error', '未能识别条形码，请确保图片包含清晰的条形码');
   } finally {
     isLoading.value = false;
     isProcessing.value = false;
@@ -166,7 +174,7 @@ function syncScroll(e, target) {
             <n-button @click="clearAll" :disabled="historyList.length === 0">删除全部</n-button>
           </div>
           
-          <div class="flex-1 overflow-auto history-scroll-left" @scroll="syncScroll($event, '.history-scroll-right')">
+          <div class="flex-1 overflow-auto barcode-scroll-left" @scroll="syncScroll($event, '.barcode-scroll-right')">
             <!-- 历史记录 -->
             <div v-if="historyList.length > 0" class="space-y-4 mb-4">
               <div 
@@ -184,7 +192,7 @@ function syncScroll(e, target) {
                 <n-card size="small">
                   <img 
                     :src="item.imageUrl" 
-                    alt="二维码图片" 
+                    alt="条形码图片" 
                     class="w-full h-auto"
                     style="max-height: 200px; object-fit: contain;"
                   />
@@ -226,7 +234,7 @@ function syncScroll(e, target) {
             <n-tag size="large" type="success">识别结果</n-tag>
           </div>
           
-          <div class="flex-1 overflow-auto history-scroll-right" @scroll="syncScroll($event, '.history-scroll-left')">
+          <div class="flex-1 overflow-auto barcode-scroll-right" @scroll="syncScroll($event, '.barcode-scroll-left')">
             <!-- 历史记录结果 -->
             <div v-if="historyList.length > 0" class="space-y-4 mb-4">
               <div 
@@ -241,17 +249,23 @@ function syncScroll(e, target) {
                 >
                   复制
                 </n-button>
+                <n-tag v-if="item.format" size="small" type="info"
+                  style="position: absolute; top: 8px; right: 8px; z-index: 10;">
+                  {{ item.format }}
+                </n-tag>
                 <n-card size="small">
                   <div class="result-text whitespace-pre-wrap break-all">
-                    <a 
-                      v-if="isURL(item.result)" 
-                      :href="item.result" 
-                      target="_blank" 
-                      class="result-link"
-                    >
-                      {{ item.result }}
-                    </a>
-                    <span v-else>{{ item.result }}</span>
+                    <div>
+                      <a 
+                        v-if="isURL(item.result)" 
+                        :href="item.result" 
+                        target="_blank" 
+                        class="result-link"
+                      >
+                        {{ item.result }}
+                      </a>
+                      <span v-else>{{ item.result }}</span>
+                    </div>
                   </div>
                 </n-card>
               </div>

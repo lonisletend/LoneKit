@@ -76,6 +76,19 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.04.21',
+    version: 'v0.9.0',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.0',
+    added: [
+      '新增条形码识别工具，支持上传、粘贴、拖拽图片识别多种条形码格式，并显示识别到的格式标签。',
+      '条形码生成工具新增格式选择器，支持 CODE128、CODE39、EAN13、EAN8、UPC、ITF14、MSI、Pharmacode、Codabar 共 9 种格式。',
+    ],
+    optimized: [
+      '侧边栏二维码识别、条形码识别、文本计数图标更换为 Fluent 图标库，统一视觉风格。',
+      '二维码识别、条形码识别工具操作按钮从右上角移至右下角，提升交互一致性。',
+    ],
+  },
+  {
     date: '2026.04.15',
     version: 'v0.8.2',
     added: [
