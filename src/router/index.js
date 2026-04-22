@@ -16,7 +16,17 @@ const routes = [
       {
         path: "/time",
         name: "TimeTool",
-        component: () => import("/src/components/tools/TimeTool.vue"),
+        component: () => import("/src/components/wrapper/TimeToolWrapper.vue"),
+      },
+      {
+        path: "/uuid",
+        name: "UUIDTool",
+        component: () => import("/src/components/tools/UUIDTool.vue"),
+      },
+      {
+        path: "/textCount",
+        name: "TextCountTool",
+        component: () => import("/src/components/wrapper/TextCountToolWrapper.vue"),
       },
       {
         path: "/jsonFormatWrapper",
@@ -59,6 +69,11 @@ const routes = [
         component: () => import("/src/components/tools/BarcodeTool.vue"),
       },
       {
+        path: "/barcode-reader",
+        name: "BarcodeReaderTool",
+        component: () => import("/src/components/tools/BarcodeReaderTool.vue"),
+      },
+      {
         path: "/sqlFormatWrapper",
         name: "SQLFormatWrapper",
         component: () => import("/src/components/wrapper/SQLFormatWrapper.vue"),
@@ -74,9 +89,19 @@ const routes = [
         component: () => import("/src/components/wrapper/DiffToolWrapper.vue"),
       },
       {
+        path: "/folderDiffWrapper",
+        name: "FolderDiffToolWrapper",
+        component: () => import("/src/components/wrapper/FolderDiffToolWrapper.vue"),
+      },
+      {
         path: "/commonFormatWrapper",
         name: "CommonFormatWrapper",
         component: () => import("/src/components/wrapper/CommonFormatWrapper.vue"),
+      },
+      {
+        path: "/sendpay",
+        name: "SendpayDisplayWrapper",
+        component: () => import("/src/components/wrapper/SendpayDisplayWrapper.vue"),
       },
     ],
   },

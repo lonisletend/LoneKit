@@ -1,31 +1,17 @@
 <script setup>
 
-import {ref, watch} from "vue";
-import {NButton, NInput, NSelect, NTag, NRadioGroup, NRadioButton, NColorPicker} from "naive-ui";
+import { computed, ref, watch } from "vue";
+import { NButton, NInput, NSwitch, NTag, NRadioGroup, NRadioButton, NColorPicker, NSelect } from "naive-ui";
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
+import { useSyncedScroll } from '../../composables/useSyncedScroll';
+import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
+import JsBarcode from 'jsbarcode';
 
-const { notify, copyToClipboard, readFromClipboard } = useCommon();
-
-const source = ref();
-const example = ref('test');
-const target = ref();
-const targetList = ref([]);
-
-const lineMode = ref('multi');
-const lineModeOptions = ref([
-  {label: '多行', value: 'multi'},
-  {label: '整体', value: 'single'},
-]);
-
-watch(lineMode, () => {
-  clear();
-})
-
-const size = ref({width: 2, height: 150});
+const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
 
 const height = ref(150);
-const heightOptions = ref([
+const sizeOptions = ref([
   {label: '小', value: 100},
   {label: '中', value: 150},
   {label: '大', value: 200},
@@ -35,43 +21,200 @@ const heightWidthMap = {
   150: 2,
   200: 3,
 }
-watch(height, (val) => {
-  size.value.height = val;
-  size.value.width = heightWidthMap[val];
-});
 
+const barcodeSize = computed(() => ({
+  height: height.value,
+  width: heightWidthMap[height.value] ?? 2,
+}));
 
 const color = ref('#18A058');
+const barcodeFormat = ref('CODE128');
+const formatOptions = [
+  { label: 'CODE128', value: 'CODE128' },
+  { label: 'CODE39', value: 'CODE39' },
+  { label: 'EAN13', value: 'EAN13' },
+  { label: 'EAN8', value: 'EAN8' },
+  { label: 'UPC', value: 'UPC' },
+  { label: 'ITF14', value: 'ITF14' },
+  { label: 'MSI', value: 'MSI' },
+  { label: 'Pharmacode', value: 'pharmacode' },
+  { label: 'Codabar', value: 'codabar' },
+];
+const formatHints = {
+  CODE128: '支持所有 ASCII 字符',
+  CODE39: '仅支持大写字母 A-Z、数字 0-9 及 - . $ / + % 空格',
+  EAN13: '需要 12 或 13 位纯数字',
+  EAN8: '需要 7 或 8 位纯数字',
+  UPC: '需要 11 或 12 位纯数字',
+  ITF14: '需要 13 或 14 位纯数字', 
+  MSI: '仅支持纯数字',
+  pharmacode: '仅支持 3~131070 之间的整数',
+  codabar: '数字 0-9、特殊字符 - $ : / . + 及起止符 A/B/C/D',
+};
+const formatExamples = {
+  CODE128: ['https://kit.lonestack.com', 'LoneKit'],
+  CODE39: ['LONEKIT', 'HELLO-2024'],
+  EAN13: ['5901234123457', '4006381333931'],
+  EAN8: ['96385074', '55123457'],
+  UPC: ['012345678905', '036000291452'],
+  ITF14: ['98249880215004', '15400141288763'],
+  MSI: ['80523', '1234567'],
+  pharmacode: ['1234', '5678'],
+  codabar: ['A12345B', 'C$25.00D'],
+};
+const isBatchInput = ref(false);
+const batchInputText = ref('');
 
-function handleChange(val) {
-  if (!val) {
-    targetList.value = [];
+function isValidBarcode(text) {
+  try {
+    const canvas = document.createElement('canvas');
+    JsBarcode(canvas, text, { format: barcodeFormat.value });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const cardHeight = computed(() => {
+  const map = {
+    100: 220,
+    150: 280,
+    200: 340,
+  };
+  return map[height.value] ?? 280;
+});
+
+const inputRows = computed(() => {
+  const map = {
+    100: 6,
+    150: 8,
+    200: 10,
+  };
+  return map[height.value] ?? 8;
+});
+
+const cardStyle = computed(() => ({
+  height: `${cardHeight.value}px`,
+}));
+
+const { leftScrollRef, rightScrollRef, handleScroll } = useSyncedScroll();
+
+function createEntry(content = '') {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    content,
+  };
+}
+
+function hasContent(entry) {
+  return !!entry.content?.trim();
+}
+
+const {
+  entries,
+  ensureEntries,
+  removeEntry: removeEntryBase,
+  resetEntries,
+} = useAutoAppendEntries(createEntry, hasContent);
+
+function handleEntryInput(index, val) {
+  entries.value[index].content = val ?? '';
+  ensureEntries();
+}
+
+function removeEntry(index) {
+  removeEntryBase(index);
+}
+
+function parseBatchLines(text) {
+  return (text ?? '')
+    .split(/\r\n|\r|\n/)
+    .filter(line => line.trim() !== '');
+}
+
+function applyBatchInput(text) {
+  const lines = parseBatchLines(text);
+  if (lines.length === 0) {
+    resetEntries();
     return;
   }
-  if (lineMode.value === 'single') {
-    targetList.value = [source.value];
-  } else {
-    targetList.value = source.value.split('\n').filter(item => item);
-  }
-  // console.log('targetList ==> ', JSON.stringify(targetList.value));
+  resetEntries(lines.map(line => createEntry(line)));
 }
+
+function onBatchInputChange(val) {
+  batchInputText.value = val ?? '';
+  applyBatchInput(batchInputText.value);
+}
+
+function syncBatchInputFromEntries() {
+  batchInputText.value = entries.value
+    .filter(entry => hasContent(entry))
+    .map(entry => entry.content)
+    .join('\n');
+}
+
+watch(isBatchInput, (enabled) => {
+  if (!enabled) {
+    return;
+  }
+  syncBatchInputFromEntries();
+  applyBatchInput(batchInputText.value);
+});
 
 async function readClipboard() {
   const text = await readFromClipboard();
   if (text) {
-    source.value = text;
-    handleChange(source.value);
+    if (isBatchInput.value) {
+      batchInputText.value = text;
+      applyBatchInput(batchInputText.value);
+      return;
+    }
+
+    const lastIndex = entries.value.length - 1;
+    if (!hasContent(entries.value[lastIndex])) {
+      entries.value[lastIndex].content = text;
+    } else {
+      entries.value.push(createEntry(text));
+    }
+    ensureEntries();
+  } else {
+    notify('warning', '剪贴板中没有可用文本');
   }
 }
 
 function showExample() {
-  source.value = 'https://kit.lonestack.com';
-  handleChange(source.value);
+  const examples = formatExamples[barcodeFormat.value] || formatExamples.CODE128;
+  if (isBatchInput.value) {
+    batchInputText.value = examples.join('\n');
+    applyBatchInput(batchInputText.value);
+    return;
+  }
+
+  const example = examples[0] ?? '';
+  resetEntries([
+    createEntry(example),
+    createEntry(),
+  ]);
 }
 
 function clear() {
-  source.value = null;
-  handleChange(source.value);
+  if (isBatchInput.value) {
+    batchInputText.value = '';
+    applyBatchInput(batchInputText.value);
+    return;
+  }
+
+  resetEntries();
+}
+
+function exportToExcel() {
+  const activeEntries = entries.value.filter(e => hasContent(e) && isValidBarcode(e.content));
+  exportCanvasToExcel(activeEntries, 'barcode-', {
+    sheetName: '条形码',
+    textHeader: '条码文本',
+    imageHeader: '条形码图片',
+    filePrefix: '条形码',
+  });
 }
 
 </script>
@@ -83,14 +226,48 @@ function clear() {
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="warning">输入</n-tag>
-            <n-select v-model:value="lineMode" :options="lineModeOptions" :style="{width: '80px'}" />
             <n-button @click="readClipboard">剪贴板</n-button>
             <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">清空</n-button>
+            <n-button @click="clear">删除全部</n-button>
+            <n-switch v-model:value="isBatchInput" size="large">
+              <template #checked>批量输入</template>
+              <template #unchecked>批量输入</template>
+            </n-switch>
           </div>
-          <div class="w-full h-full text-xl">
-            <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                     placeholder="输入字符串" @input="val => handleChange(val, 1)"/>
+          <div
+            v-if="!isBatchInput"
+            ref="leftScrollRef"
+            class="w-full h-full overflow-auto space-y-3"
+            @scroll="handleScroll('left', $event)"
+          >
+            <div v-for="(entry, index) in entries" :key="entry.id" class="relative rounded" :style="cardStyle">
+              <div class="entry-delete-btn">
+                <n-button
+                  size="small"
+                  @click="removeEntry(index)"
+                  :disabled="entries.length === 1"
+                >
+                  删除
+                </n-button>
+              </div>
+              <n-input
+                v-model:value="entry.content"
+                type="textarea"
+                class="w-full h-full entry-input"
+                :autosize="{ minRows: inputRows, maxRows: inputRows }"
+                placeholder="输入字符串（支持换行，整体生成一个条形码）"
+                @input="val => handleEntryInput(index, val)"
+              />
+            </div>
+          </div>
+          <div v-else class="w-full h-full">
+            <n-input
+              v-model:value="batchInputText"
+              type="textarea"
+              class="w-full h-full batch-input"
+              placeholder="每行一条内容，按换行分割生成多个条形码"
+              @input="onBatchInputChange"
+            />
           </div>
         </div>
       </template>
@@ -99,19 +276,39 @@ function clear() {
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="success">结果</n-tag>
             <n-radio-group v-model:value="height" name="sizeRadioGroup">
-              <n-radio-button v-for="(item, index) in heightOptions" :key="index" :value="item.value" :label="item.label"/>
+              <n-radio-button v-for="(item, index) in sizeOptions" :key="index" :value="item.value" :label="item.label"/>
             </n-radio-group>
             <n-color-picker v-model:value="color" :style="{width: '80px'}"
               :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
             />
+            <n-select v-model:value="barcodeFormat" :options="formatOptions" :style="{width: '130px'}" />
+            <n-button @click="exportToExcel">导出 Excel</n-button>
           </div>
-          <div class="w-full h-full p-1 text-lg transition border border-gray-300 rounded overflow-auto">
-            <div v-for="(target, index) in targetList" :key="index" class="w-full mb-4">
-              <div class="flex my-1 justify-center">
-                <vue-barcode :value="target" :options="{ displayValue: false, lineColor: color, height: size.height, width: size.width }"></vue-barcode>
+          <div
+            ref="rightScrollRef"
+            class="w-full h-full text-lg transition overflow-auto space-y-3"
+            @scroll="handleScroll('right', $event)"
+          >
+            <div v-for="entry in entries" :key="entry.id" class="w-full border border-gray-200 rounded p-2 relative" :style="cardStyle">
+              <div v-if="hasContent(entry)" class="h-full flex flex-col">
+                <template v-if="isValidBarcode(entry.content)">
+                  <div class="entry-copy-btn">
+                    <n-button size="small" @click="copyCanvasImage(`barcode-${entry.id}`, '条形码图片已复制到剪贴板!')">复制</n-button>
+                  </div>
+                  <div class="flex-1 flex justify-center items-center overflow-hidden" :id="`barcode-${entry.id}`">
+                    <vue-barcode :key="`${entry.id}-${barcodeFormat}`" :value="entry.content" :options="{ format: barcodeFormat, displayValue: false, lineColor: color, height: barcodeSize.height, width: barcodeSize.width }"></vue-barcode>
+                  </div>
+                </template>
+                <div v-else class="flex-1 flex flex-col justify-center items-center text-red-400 text-sm">
+                  <div>当前内容不支持 {{ barcodeFormat }} 格式</div>
+                  <div class="mt-1 text-gray-400 text-xs">{{ formatHints[barcodeFormat] }}</div>
+                </div>
+                <div class="text-sm whitespace-pre-wrap break-all text-center max-h-20 overflow-auto w-full px-2">
+                {{ entry.content }}
+                </div>
               </div>
-              <div class="flex justify-center">
-                {{ target }}
+              <div v-else class="h-full border border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 text-sm">
+                待输入
               </div>
             </div>
           </div>
@@ -122,5 +319,28 @@ function clear() {
 </template>
 
 <style scoped>
+
+.entry-delete-btn {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  z-index: 10;
+}
+
+.entry-copy-btn {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  z-index: 10;
+}
+
+.entry-input :deep(textarea) {
+  padding-right: 60px;
+  padding-bottom: 30px;
+}
+
+.batch-input :deep(textarea) {
+  height: 100%;
+}
 
 </style>

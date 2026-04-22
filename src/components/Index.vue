@@ -44,8 +44,8 @@
 
 <script setup>
 import router from "../router";
-import { h, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { h, ref, watch } from "vue";
+import { RouterLink, useRoute } from "vue-router";
 import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
 import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
@@ -54,12 +54,12 @@ import DiffIcon from "./icons/DiffIcon.vue";
 import SQLIcon from "./icons/SQLIcon.vue";
 import StringHexIcon from "./icons/StringHexIcon.vue";
 import QRCodeIcon from "./icons/QRCodeIcon.vue";
-import QRCodeReaderIcon from "./icons/QRCodeReaderIcon.vue";
 import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
-import { Flash24Filled as FlashIcon } from '@vicons/fluent';
+import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon } from '@vicons/fluent';
+import { FlagOutline } from '@vicons/ionicons5';
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -67,21 +67,6 @@ function renderIcon(icon) {
 
 // const message = useMessage();
 const menuOptions = ref([
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "TimeTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "时间戳转换" }
-    ),
-    key: "time-tool",
-    icon: renderIcon(TimeIcon)
-  },
   {
     label: () => h(
       RouterLink,
@@ -127,7 +112,7 @@ const menuOptions = ref([
     key: "xml-format-wrapper",
     icon: renderIcon(CodeIcon)
   },
-    {
+  {
     label: () => h(
       RouterLink,
       {
@@ -147,6 +132,21 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
+          name: "TimeTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "时间处理" }
+    ),
+    key: "time-tool",
+    icon: renderIcon(TimeIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
           name: "DiffToolWrapper",
           params: {
           }
@@ -156,6 +156,51 @@ const menuOptions = ref([
     ),
     key: "diff-tool",
     icon: renderIcon(DiffIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "FolderDiffToolWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "文件夹对比" }
+    ),
+    key: "folder-diff-tool",
+    icon: renderIcon(FolderDiffIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "TextCountTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "文本计数" }
+    ),
+    key: "text-count-tool",
+    icon: renderIcon(TextCountIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "UUIDTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "UUID" }
+    ),
+    key: "uuid-tool",
+    icon: renderIcon(UUIDIcon)
   },
   {
     label: () => h(
@@ -247,11 +292,71 @@ const menuOptions = ref([
     key: "barcode-tool",
     icon: renderIcon(BarcodeIcon)
   },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "BarcodeReaderTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "条形码识别" }
+    ),
+    key: "barcode-reader-tool",
+    icon: renderIcon(BarcodeReaderIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "SendpayDisplayWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "Sendpay" }
+    ),
+    key: "sendpay-display-tool",
+    icon: renderIcon(FlagOutline)
+  },
 
 ]);
 const activeKey = ref(null);
 const collapsed = ref(false);
 const version = packageJson.version;
+const route = useRoute();
+
+const routeNameToMenuKey = {
+  TimeTool: "time-tool",
+  CommonFormatWrapper: "common-format-wrapper",
+  JsonFormatWrapper: "json-format-wrapper",
+  XmlFormatWrapper: "xml-format-wrapper",
+  SQLFormatWrapper: "sql-format-wrapper",
+  DiffToolWrapper: "diff-tool",
+  DiffTool: "diff-tool",
+  FolderDiffToolWrapper: "folder-diff-tool",
+  TextCountTool: "text-count-tool",
+  UUIDTool: "uuid-tool",
+  Md5Tool: "md5-tool",
+  Base64Tool: "base64-tool",
+  StringHexTool: "string-hex-tool",
+  QrCodeTool: "qr-code-tool",
+  QRCodeReaderTool: "qr-code-reader-tool",
+  BarcodeTool: "barcode-tool",
+  BarcodeReaderTool: "barcode-reader-tool",
+  SendpayDisplayWrapper: "sendpay-display-tool",
+};
+
+watch(
+  () => route.name,
+  (name) => {
+    activeKey.value = routeNameToMenuKey[name] || null;
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
