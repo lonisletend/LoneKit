@@ -190,8 +190,9 @@ function showExample() {
     return;
   }
 
+  const example = examples[0] ?? '';
   resetEntries([
-    ...examples.map(text => createEntry(text)),
+    createEntry(example),
     createEntry(),
   ]);
 }

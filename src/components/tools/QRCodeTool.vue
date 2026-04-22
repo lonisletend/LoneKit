@@ -16,6 +16,7 @@ const sizeOptions = ref([
   {label: '中', value: 200},
   {label: '大', value: 300},
 ])
+const qrExamples = ['https://kit.lonestack.com', 'LoneKit'];
 const color = ref('#18A058');
 const isBatchInput = ref(false);
 const batchInputText = ref('');
@@ -128,14 +129,15 @@ async function readClipboard() {
 }
 
 function showExample() {
+  const example = qrExamples[0] ?? '';
   if (isBatchInput.value) {
-    batchInputText.value = 'https://kit.lonestack.com\nLoneKit';
+    batchInputText.value = qrExamples.join('\n');
     applyBatchInput(batchInputText.value);
     return;
   }
 
   resetEntries([
-    createEntry('https://kit.lonestack.com'),
+    createEntry(example),
     createEntry(),
   ]);
 }
