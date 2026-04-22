@@ -59,6 +59,7 @@ import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
 import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon } from '@vicons/fluent';
+import { FlagOutline } from '@vicons/ionicons5';
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -306,6 +307,21 @@ const menuOptions = ref([
     key: "barcode-reader-tool",
     icon: renderIcon(BarcodeReaderIcon)
   },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
+          name: "SendpayDisplayWrapper",
+          params: {
+          }
+        }
+      },
+      { default: () => "Sendpay" }
+    ),
+    key: "sendpay-display-tool",
+    icon: renderIcon(FlagOutline)
+  },
 
 ]);
 const activeKey = ref(null);
@@ -331,6 +347,7 @@ const routeNameToMenuKey = {
   QRCodeReaderTool: "qr-code-reader-tool",
   BarcodeTool: "barcode-tool",
   BarcodeReaderTool: "barcode-reader-tool",
+  SendpayDisplayWrapper: "sendpay-display-tool",
 };
 
 watch(

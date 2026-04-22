@@ -82,6 +82,7 @@ const changeLogs = ref([
     added: [
       '新增条形码识别工具，支持上传、粘贴、拖拽图片识别多种条形码格式，并显示识别到的格式标签。',
       '条形码生成工具新增格式选择器，支持 CODE128、CODE39、EAN13、EAN8、UPC、ITF14、MSI、Pharmacode、Codabar 共 9 种格式。',
+      '新增 Sendpay 展示工具，支持展示、修改、解释配置匹配等。一定是你用过最好用的 Sendpay 展示工具！',
     ],
     optimized: [
       '侧边栏二维码识别、条形码识别、文本计数图标更换为 Fluent 图标库，统一视觉风格。',

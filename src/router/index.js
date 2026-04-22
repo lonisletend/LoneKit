@@ -98,6 +98,11 @@ const routes = [
         name: "CommonFormatWrapper",
         component: () => import("/src/components/wrapper/CommonFormatWrapper.vue"),
       },
+      {
+        path: "/sendpay",
+        name: "SendpayDisplayWrapper",
+        component: () => import("/src/components/wrapper/SendpayDisplayWrapper.vue"),
+      },
     ],
   },
 ];
