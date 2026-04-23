@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
-import { NButton, NEmpty, NInput, NModal, NSelect, NTag } from "naive-ui";
+import { NButton, NEmpty, NIcon, NInput, NModal, NSelect, NTag } from "naive-ui";
+import { ChevronDownCircleOutline, ChevronUpCircleOutline } from "@vicons/ionicons5";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
 
@@ -19,6 +20,7 @@ const selectedProfileId = ref(null);
 const editingProfiles = ref([]);
 const editingPosition = ref(null);
 const editingValue = ref("");
+const expandedCompareRows = ref({});
 
 const formatOptions = [
   { label: "Json", value: FORMAT_JSON },
@@ -247,14 +249,34 @@ const explanationRows = computed(() => {
         return null;
       }
 
+      const matchedKey = actualValueCandidates.find((key) => !!item.valueExplainMap[key]);
+      const otherValueEntries = Object.entries(item.valueExplainMap)
+        .filter(([key, text]) => key !== matchedKey && typeof text === "string" && text)
+        .map(([key, text]) => ({
+          value: key,
+          explanation: text,
+        }));
+
+      const rowKey = `${item.label}|${actualValue}`;
+
       return {
+        rowKey,
         positionLabel: item.label,
         value: actualValue,
         explanation,
+        otherValueEntries,
       };
     })
     .filter((item) => item !== null);
 });
+
+function toggleCompareRow(rowKey) {
+  expandedCompareRows.value[rowKey] = !expandedCompareRows.value[rowKey];
+}
+
+function isCompareRowExpanded(rowKey) {
+  return !!expandedCompareRows.value[rowKey];
+}
 
 function getDefaultConfigText() {
   return `{
@@ -525,13 +547,16 @@ function cancelEdit() {
   editingValue.value = "";
 }
 
-function saveEdit() {
+function saveEdit(silent = false) {
   if (editingPosition.value === null) {
     return;
   }
 
   if (!/^\d$/.test(editingValue.value)) {
-    notify("warning", "只能输入 1 位数字");
+    if (!silent) {
+      notify("warning", "只能输入 1 位数字");
+    }
+    cancelEdit();
     return;
   }
 
@@ -623,7 +648,7 @@ refreshUrlProfilesOnLoad();
                         maxlength="1"
                         inputmode="numeric"
                         @input="onEditInput"
-                        @blur="cancelEdit"
+                        @blur="saveEdit(true)"
                         @keydown.enter.prevent="saveEdit"
                       />
                       <span v-else>{{ item.value }}</span>
@@ -648,8 +673,27 @@ refreshUrlProfilesOnLoad();
             </div>
             <div v-else class="space-y-2">
               <div v-for="row in explanationRows" :key="`${row.positionLabel}-${row.value}`" class="explain-item">
-                <div class="explain-head">第 {{ row.positionLabel }} 位 = {{ row.value }}</div>
+                <div class="explain-head">
+                  <span>第 {{ row.positionLabel }} 位 = {{ row.value }}</span>
+                  <button
+                    v-if="row.otherValueEntries.length"
+                    type="button"
+                    class="explain-toggle-btn"
+                    @click.stop="toggleCompareRow(row.rowKey)"
+                  >
+                    <n-icon class="explain-toggle-icon">
+                      <ChevronUpCircleOutline v-if="isCompareRowExpanded(row.rowKey)" />
+                      <ChevronDownCircleOutline v-else />
+                    </n-icon>
+                  </button>
+                </div>
                 <div class="explain-body">{{ row.explanation }}</div>
+                <div v-if="row.otherValueEntries.length && isCompareRowExpanded(row.rowKey)" class="explain-compare-list">
+                  <div v-for="item in row.otherValueEntries" :key="item.value" class="explain-compare-item">
+                    <div class="explain-compare-key">{{ item.value }}</div>
+                    <div class="explain-compare-text">{{ item.explanation }}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -789,6 +833,9 @@ refreshUrlProfilesOnLoad();
   font-size: 13px;
   padding: 6px 8px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .explain-body {
@@ -797,6 +844,54 @@ refreshUrlProfilesOnLoad();
   font-size: 13px;
   padding: 8px;
   line-height: 1.5;
+}
+
+.explain-toggle-btn {
+  border: none;
+  background: transparent;
+  color: #2d6a4f;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.explain-toggle-btn:hover {
+  color: #1b4332;
+}
+
+.explain-toggle-icon {
+  font-size: 16px;
+}
+
+.explain-compare-list {
+  border-top: 1px dashed #b7e4c7;
+  background: #fbfffc;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.explain-compare-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+}
+
+.explain-compare-key {
+  min-width: 36px;
+  color: #2d6a4f;
+  font-weight: 600;
+}
+
+.explain-compare-text {
+  color: #52796f;
+  line-height: 1.4;
 }
 
 .profile-select {
