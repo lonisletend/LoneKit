@@ -115,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { defineAsyncComponent, ref, watch } from "vue";
 import { NInput, NTag, NButton } from "naive-ui";
 import { 
   Copy24Regular as CopyIcon,
@@ -124,9 +124,15 @@ import {
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
 
-import { JsonFormat, XmlFormat } from 'lone-format';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
+
+const loadLoneFormat = () => Promise.all([
+  import('lone-format/lone-format.css'),
+  import('lone-format')
+]).then(([, m]) => m);
+const JsonFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.JsonFormat));
+const XmlFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.XmlFormat));
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 

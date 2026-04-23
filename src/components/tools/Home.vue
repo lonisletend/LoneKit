@@ -75,6 +75,15 @@ import { ref } from "vue";
 import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
+   {
+    date: '2026.04.21',
+    version: 'v0.9.1',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.1',
+    optimized: [
+      'Sendpay 工具，优化编辑体验，增加同标位匹配对比展示。',
+      '优化打包配置，大幅减小js包体积，提升启动性能。',
+    ],
+  },
   {
     date: '2026.04.21',
     version: 'v0.9.0',

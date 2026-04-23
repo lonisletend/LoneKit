@@ -1,6 +1,5 @@
 import { useNotification } from "naive-ui";
 import { writeText, readText } from "@tauri-apps/plugin-clipboard-manager";
-import ExcelJS from 'exceljs';
 
 /**
  * 通用工具 Composable
@@ -139,6 +138,7 @@ export function useCommon() {
     }
 
     try {
+      const { default: ExcelJS } = await import('exceljs');
       const workbook = new ExcelJS.Workbook();
       const sheet = workbook.addWorksheet(sheetName);
 

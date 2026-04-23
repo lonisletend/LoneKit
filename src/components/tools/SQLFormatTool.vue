@@ -1,15 +1,20 @@
 <script setup>
 
-import {ref} from "vue";
+import { computed, defineAsyncComponent, ref } from "vue";
 import {NButton, NInput, NTag, useNotification} from "naive-ui";
 import { 
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
 
-import { SqlFormat } from 'lone-format'
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon'
+
+const loadLoneFormat = () => Promise.all([
+  import('lone-format/lone-format.css'),
+  import('lone-format')
+]).then(([, m]) => m);
+const SqlFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.SqlFormat));
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
@@ -19,6 +24,7 @@ defineOptions({
 
 const source = ref();
 const customSqlFormatRef = ref(null)
+const hasSourceContent = computed(() => !!source.value?.trim());
 
 async function readClipboard() {
   const text = await readFromClipboard();
@@ -95,8 +101,16 @@ function collapseAll() {
             </n-button>
           </div>
           <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
-            <SqlFormat class="w-full h-full"
-            ref="customSqlFormatRef" v-model="source" theme="min-light"/>
+            <SqlFormat
+              v-if="hasSourceContent"
+              class="w-full h-full"
+              ref="customSqlFormatRef"
+              v-model="source"
+              theme="min-light"
+            />
+            <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+              输入内容后加载格式化视图
+            </div>
           </div>
         </div>
       </template>
