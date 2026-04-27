@@ -75,7 +75,16 @@ import { ref } from "vue";
 import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
-   {
+  {
+    date: '2026.04.28',
+    version: 'v0.9.2',
+    added: [
+      'Sendpay 工具新增 sendpayMap 解析支持，支持与 sendpay 同时输入并联合匹配解释。',
+      'Sendpay 匹配解释区新增「所有解释」模式，未匹配项支持红色高亮与展开查看。',
+      'Sendpay 匹配解释支持「展开全部/折叠全部」，并支持解释文本中的 \\n 自动换行展示。',
+    ],
+  },
+  {
     date: '2026.04.21',
     version: 'v0.9.1',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.1',
