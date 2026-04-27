@@ -88,6 +88,65 @@ function normalizeExplainConfig(value) {
   return isObject(value) ? value : {};
 }
 
+function parseExplainConfigPayload(payload) {
+  if (!isObject(payload)) {
+    return {
+      ok: false,
+      message: "配置内容必须是 JSON 对象",
+      config: {},
+      title: "",
+      nameLocked: false,
+      raw: payload,
+    };
+  }
+
+  const hasTitle = Object.prototype.hasOwnProperty.call(payload, "title");
+  const hasConfig = Object.prototype.hasOwnProperty.call(payload, "config");
+
+  if (hasTitle || hasConfig) {
+    const title = String(payload.title || "").trim();
+    if (!title) {
+      return {
+        ok: false,
+        message: "新版本配置缺少有效 title",
+        config: {},
+        title: "",
+        nameLocked: false,
+        raw: payload,
+      };
+    }
+
+    if (!isObject(payload.config)) {
+      return {
+        ok: false,
+        message: "新版本配置中的 config 必须是 JSON 对象",
+        config: {},
+        title: "",
+        nameLocked: false,
+        raw: payload,
+      };
+    }
+
+    return {
+      ok: true,
+      message: "",
+      config: normalizeExplainConfig(payload.config),
+      title,
+      nameLocked: true,
+      raw: payload,
+    };
+  }
+
+  return {
+    ok: true,
+    message: "",
+    config: normalizeExplainConfig(payload),
+    title: "",
+    nameLocked: false,
+    raw: payload,
+  };
+}
+
 function normalizeFormat(value) {
   return String(value || FORMAT_JSON).toUpperCase() === FORMAT_URL ? FORMAT_URL : FORMAT_JSON;
 }
@@ -103,20 +162,33 @@ function makeDefaultProfileName(index) {
 function createProfile(partial = {}, index = 0) {
   const id = Number.isFinite(Number(partial.id)) ? Number(partial.id) : Date.now() + index;
   const format = normalizeFormat(partial.format);
+  const parsedPayload = parseExplainConfigPayload(partial.config);
+  const fallbackName = makeDefaultProfileName(index);
+  const baseName = String(partial.name || fallbackName).trim() || fallbackName;
+  const nameLocked = !!partial.nameLocked || (parsedPayload.ok && parsedPayload.nameLocked);
+
   return {
     id,
-    name: String(partial.name || makeDefaultProfileName(index)).trim() || makeDefaultProfileName(index),
+    name: parsedPayload.ok && parsedPayload.nameLocked ? parsedPayload.title : baseName,
+    nameLocked,
     format,
     url: format === FORMAT_URL ? String(partial.url || "").trim() : "",
-    config: normalizeExplainConfig(partial.config),
+    config: parsedPayload.ok ? parsedPayload.config : {},
   };
 }
 
 function toEditingProfile(profile, index = 0) {
   const normalized = createProfile(profile, index);
+  const configTextPayload = normalized.nameLocked
+    ? {
+      title: normalized.name,
+      config: normalized.config,
+    }
+    : normalized.config;
+
   return {
     ...normalized,
-    configText: JSON.stringify(normalized.config, null, 2),
+    configText: JSON.stringify(configTextPayload, null, 2),
   };
 }
 
@@ -541,11 +613,18 @@ async function fetchProfileConfigByUrl(profile) {
     }
 
     const data = await response.json();
-    if (!isObject(data)) {
-      return { ok: false, message: `配置「${profile.name}」拉取失败: 内容不是 JSON 对象` };
+    const parsed = parseExplainConfigPayload(data);
+    if (!parsed.ok) {
+      return { ok: false, message: `配置「${profile.name}」拉取失败: ${parsed.message}` };
     }
 
-    return { ok: true, config: data };
+    return {
+      ok: true,
+      config: parsed.config,
+      title: parsed.title,
+      nameLocked: parsed.nameLocked,
+      raw: parsed.raw,
+    };
   } catch {
     return { ok: false, message: `配置「${profile.name}」拉取失败，请检查 URL 或跨域策略` };
   }
@@ -567,6 +646,10 @@ async function refreshUrlProfilesOnLoad() {
     const result = await fetchProfileConfigByUrl(nextProfiles[i]);
     if (result.ok) {
       nextProfiles[i].config = normalizeExplainConfig(result.config);
+      nextProfiles[i].nameLocked = !!result.nameLocked;
+      if (result.nameLocked && result.title) {
+        nextProfiles[i].name = result.title;
+      }
       changed = true;
     }
   }
@@ -615,7 +698,11 @@ async function pullProfileConfig(profile) {
     return;
   }
 
-  profile.configText = JSON.stringify(result.config, null, 2);
+  profile.configText = JSON.stringify(result.raw, null, 2);
+  if (result.nameLocked && result.title) {
+    profile.name = result.title;
+  }
+  profile.nameLocked = !!result.nameLocked;
   notify("success", `配置「${profile.name}」拉取成功`);
 }
 
@@ -634,13 +721,21 @@ async function saveConfig() {
           return;
         }
         normalized.config = normalizeExplainConfig(pulled.config);
+        normalized.nameLocked = !!pulled.nameLocked;
+        if (pulled.nameLocked && pulled.title) {
+          normalized.name = pulled.title;
+        }
       } else {
-        const parsedConfig = JSON.parse(profile.configText || "{}");
-        if (!isObject(parsedConfig)) {
-          notify("warning", `配置「${normalized.name}」内容必须是 JSON 对象`);
+        const parsedPayload = parseExplainConfigPayload(JSON.parse(profile.configText || "{}"));
+        if (!parsedPayload.ok) {
+          notify("warning", `配置「${normalized.name}」${parsedPayload.message}`);
           return;
         }
-        normalized.config = parsedConfig;
+        normalized.config = parsedPayload.config;
+        normalized.nameLocked = !!parsedPayload.nameLocked;
+        if (parsedPayload.nameLocked && parsedPayload.title) {
+          normalized.name = parsedPayload.title;
+        }
       }
 
       nextProfiles.push(normalized);
@@ -941,7 +1036,12 @@ refreshUrlProfilesOnLoad();
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-              <n-input v-model:value="profile.name" class="config-setting-input" placeholder="配置名称" />
+              <n-input
+                v-model:value="profile.name"
+                class="config-setting-input"
+                placeholder="配置名称"
+                :readonly="profile.nameLocked"
+              />
               <n-select
                 v-model:value="profile.format"
                 :options="formatOptions"

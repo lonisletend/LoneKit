@@ -82,6 +82,7 @@ const changeLogs = ref([
       'Sendpay 工具新增 sendpayMap 解析支持，支持与 sendpay 同时输入并联合匹配解释。',
       'Sendpay 匹配解释区新增「所有解释」模式，未匹配项支持红色高亮与展开查看。',
       'Sendpay 匹配解释支持「展开全部/折叠全部」，并支持解释文本中的 \\n 自动换行展示。',
+      'Sendpay 解释配置支持配置文件固定标题，方便复用。',
     ],
   },
   {
