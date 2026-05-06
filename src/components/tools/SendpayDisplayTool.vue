@@ -23,6 +23,8 @@ const selectedProfileId = ref(null);
 const editingProfiles = ref([]);
 const editingPosition = ref(null);
 const editingValue = ref("");
+const editingMapPosition = ref(null);
+const editingMapValue = ref("");
 const expandedCompareRows = ref({});
 
 const formatOptions = [
@@ -824,6 +826,59 @@ function saveEdit(silent = false) {
   cancelEdit();
 }
 
+function startMapEdit(position, currentValue) {
+  editingMapPosition.value = position;
+  editingMapValue.value = String(currentValue ?? "");
+  nextTick(() => {
+    const el = document.getElementById(`map-edit-${position}`);
+    if (!el) {
+      return;
+    }
+    el.focus();
+    el.select();
+  });
+}
+
+function onMapEditInput(event) {
+  const value = String(event.target?.value ?? "");
+  editingMapValue.value = value;
+  if (event.target) {
+    event.target.value = value;
+  }
+}
+
+function cancelMapEdit() {
+  editingMapPosition.value = null;
+  editingMapValue.value = "";
+}
+
+function saveMapEdit(silent = false) {
+  if (editingMapPosition.value === null) {
+    return;
+  }
+
+  const newValue = editingMapValue.value.trim();
+  if (!newValue) {
+    if (!silent) {
+      notify("warning", "只能输入非空值");
+    }
+    cancelMapEdit();
+    return;
+  }
+
+  try {
+    const text = String(sendpayMapInput.value ?? "").trim();
+    const parsed = text ? JSON.parse(text) : {};
+    parsed[editingMapPosition.value] = newValue;
+    sendpayMapInput.value = JSON.stringify(parsed);
+  } catch {
+    if (!silent) {
+      notify("error", "sendpayMap JSON 格式错误，修改失败");
+    }
+  }
+  cancelMapEdit();
+}
+
 function handleProfilesSync() {
   loadProfilesFromStorage();
 }
@@ -950,7 +1005,18 @@ refreshUrlProfilesOnLoad();
                         <td class="pair-position">{{ item.position }}</td>
                       </tr>
                       <tr>
-                        <td class="pair-value">{{ item.value }}</td>
+                        <td class="pair-value" @dblclick="startMapEdit(item.position, item.value)">
+                          <input
+                            v-if="editingMapPosition === item.position"
+                            :id="`map-edit-${item.position}`"
+                            class="pair-value-editor"
+                            :value="editingMapValue"
+                            @input="onMapEditInput"
+                            @blur="saveMapEdit(true)"
+                            @keydown.enter.prevent="saveMapEdit"
+                          />
+                          <span v-else>{{ item.value }}</span>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -1105,7 +1171,7 @@ refreshUrlProfilesOnLoad();
 }
 
 .map-pair-table .pair-value {
-  cursor: default;
+  cursor: text;
 }
 
 .pair-position {
