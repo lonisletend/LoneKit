@@ -29,7 +29,7 @@
     "js-base64": "^3.7.5",
     "jsbarcode": "^3.11.6",
     "jsonpath": "^1.1.1",
-    "lone-format": "^0.12.0",
+    "lone-format": "^0.12.1",
     "qr-scanner": "^1.4.2",
     "qrcode.vue": "^3.4.1",
     "v-code-diff": "^1.13.1",

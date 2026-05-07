@@ -80,7 +80,8 @@ const changeLogs = ref([
     version: 'v0.9.3',
     fixed: [
       '通用格式化工具，修复同名标签嵌套时 XML 片段识别错误的问题，解析引擎从正则匹配升级为深度追踪算法。',
-      'Sendpay 工具，修复了 sendpayMap 不能编辑的问题。',
+      'Sendpay 工具，修复了 sendpayMap 展示不能编辑的问题。',
+      '升级 lone-format@0.12.1，修复了 XML 格式化同级多个重名标签自闭合标签识别有问题的情况。',
     ],
   },
   {
