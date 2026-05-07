@@ -76,6 +76,14 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.05.07',
+    version: 'v0.9.3',
+    fixed: [
+      '通用格式化工具，修复同名标签嵌套时 XML 片段识别错误的问题，解析引擎从正则匹配升级为深度追踪算法。',
+      'Sendpay 工具，修复了 sendpayMap 不能编辑的问题。',
+    ],
+  },
+  {
     date: '2026.04.28',
     version: 'v0.9.2',
     added: [

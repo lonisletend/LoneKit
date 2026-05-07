@@ -306,6 +306,92 @@ function findJsonMatches(text) {
   return matches;
 }
 
+// 查找单个 XML 元素（支持同名标签任意层级嵌套）
+function findXmlElement(text, start) {
+  if (start >= text.length || text[start] !== '<') return null;
+
+  let i = start + 1;
+  if (i < text.length && (text[i] === '?' || text[i] === '!' || text[i] === '/')) return null;
+
+  let tagName = '';
+  while (i < text.length && /[\w:.-]/.test(text[i])) tagName += text[i++];
+  if (!tagName) return null;
+
+  // 跳过属性，处理引号字符串
+  let inStr = false, strCh = '';
+  while (i < text.length) {
+    const ch = text[i];
+    if (inStr) {
+      if (ch === strCh) inStr = false;
+    } else if (ch === '"' || ch === "'") {
+      inStr = true; strCh = ch;
+    } else if (ch === '/' && text[i + 1] === '>') {
+      return { end: i + 2 }; // 自闭合标签
+    } else if (ch === '>') {
+      break;
+    }
+    i++;
+  }
+  if (i >= text.length) return null;
+  i++; // 跳过 '>'
+
+  // 用深度计数跟踪同名标签的嵌套
+  let depth = 1;
+  while (i < text.length && depth > 0) {
+    const lt = text.indexOf('<', i);
+    if (lt === -1) break;
+    i = lt;
+
+    if (text[i + 1] === '/') {
+      let k = i + 2, name = '';
+      while (k < text.length && /[\w:.-]/.test(text[k])) name += text[k++];
+      if (name === tagName) {
+        while (k < text.length && text[k] !== '>') k++;
+        if (k < text.length) { depth--; i = k + 1; continue; }
+      }
+    } else if (text[i + 1] !== '?' && text[i + 1] !== '!') {
+      let k = i + 1, name = '';
+      while (k < text.length && /[\w:.-]/.test(text[k])) name += text[k++];
+      if (name === tagName && k < text.length && /[\s>\/]/.test(text[k])) depth++;
+    }
+    i++;
+  }
+
+  return depth === 0 ? { end: i } : null;
+}
+
+// 查找所有 XML 匹配（支持同名标签任意层级嵌套）
+function findXmlMatches(text) {
+  const matches = [];
+  let i = 0;
+
+  while (i < text.length) {
+    const lt = text.indexOf('<', i);
+    if (lt === -1) break;
+
+    let start = lt;
+    let elementStart = lt;
+
+    // 处理可选的 XML 声明 <?xml...?>
+    if (text.startsWith('<?xml', lt)) {
+      const declEnd = text.indexOf('?>', lt);
+      if (declEnd === -1) { i = lt + 1; continue; }
+      elementStart = declEnd + 2;
+      while (elementStart < text.length && /\s/.test(text[elementStart])) elementStart++;
+    }
+
+    const result = findXmlElement(text, elementStart);
+    if (result && result.end > elementStart) {
+      matches.push({ start, end: result.end, content: text.substring(start, result.end), type: 'xml' });
+      i = result.end;
+    } else {
+      i = lt + 1;
+    }
+  }
+
+  return matches;
+}
+
 // 解析输入文本，提取 JSON 和 XML
 function resolveText(text) {
   if (!text || text.trim() === '') {
@@ -314,27 +400,12 @@ function resolveText(text) {
 
   const segments = [];
   let currentIndex = 0;
-  
-  // 查找 JSON（使用新的括号匹配算法）
+
+  // 查找 JSON（使用括号匹配算法）
   const jsonMatches = findJsonMatches(text);
-  
-  // 正则匹配 XML 标签（支持可选的 XML 声明）
-  // 匹配：可选的 <?xml...?> 声明 + XML 标签
-  const xmlPattern = /(?:<\?xml[^?]*\?>\s*)?(?:<(\w+)[^>]*>.*?<\/\1>|<\w+[^>]*\/>)/gs;
-  const xmlMatches = [];
-  
-  let xmlMatch;
-  while ((xmlMatch = xmlPattern.exec(text)) !== null) {
-    // 如果匹配到内容不为空
-    if (xmlMatch[0].trim()) {
-      xmlMatches.push({
-        start: xmlMatch.index,
-        end: xmlMatch.index + xmlMatch[0].length,
-        content: xmlMatch[0],
-        type: 'xml'
-      });
-    }
-  }
+
+  // 查找 XML（使用深度追踪算法，支持同名标签嵌套）
+  const xmlMatches = findXmlMatches(text);
   
   // 合并所有匹配
   const allMatches = [...jsonMatches, ...xmlMatches];
