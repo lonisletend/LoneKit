@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
-import { NButton, NEmpty, NInput, NModal, NSelect, NTag } from "naive-ui";
+import { NButton, NEmpty, NIcon, NInput, NModal, NSelect, NSwitch, NTag } from "naive-ui";
+import { ChevronDownCircleOutline, ChevronUpCircleOutline } from "@vicons/ionicons5";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
 
@@ -13,12 +14,18 @@ const FORMAT_JSON = "JSON";
 const FORMAT_URL = "URL";
 
 const sendpayInput = ref("");
+const sendpayMapEnabled = ref(false);
+const sendpayMapInput = ref("");
+const allExplainEnabled = ref(false);
 const showConfigModal = ref(false);
 const configProfiles = ref([]);
 const selectedProfileId = ref(null);
 const editingProfiles = ref([]);
 const editingPosition = ref(null);
 const editingValue = ref("");
+const editingMapPosition = ref(null);
+const editingMapValue = ref("");
+const expandedCompareRows = ref({});
 
 const formatOptions = [
   { label: "Json", value: FORMAT_JSON },
@@ -33,12 +40,113 @@ function handleSendpayInput(value) {
   sendpayInput.value = normalizeSendpay(value);
 }
 
+function parseSendpayMap(raw) {
+  const text = String(raw ?? "").trim();
+  if (!text) {
+    return {
+      map: {},
+      error: "",
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(text);
+    if (!isObject(parsed)) {
+      return {
+        map: {},
+        error: "sendpayMap 需为 JSON 对象",
+      };
+    }
+
+    const nextMap = {};
+    Object.entries(parsed).forEach(([key, value]) => {
+      const normalizedKey = String(key ?? "").trim();
+      if (!normalizedKey) {
+        return;
+      }
+
+      if (typeof value === "string" || typeof value === "number") {
+        nextMap[normalizedKey] = String(value).trim();
+      }
+    });
+
+    return {
+      map: nextMap,
+      error: "",
+    };
+  } catch {
+    return {
+      map: {},
+      error: "sendpayMap JSON 解析失败",
+    };
+  }
+}
+
 function isObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
 function normalizeExplainConfig(value) {
   return isObject(value) ? value : {};
+}
+
+function parseExplainConfigPayload(payload) {
+  if (!isObject(payload)) {
+    return {
+      ok: false,
+      message: "配置内容必须是 JSON 对象",
+      config: {},
+      title: "",
+      nameLocked: false,
+      raw: payload,
+    };
+  }
+
+  const hasTitle = Object.prototype.hasOwnProperty.call(payload, "title");
+  const hasConfig = Object.prototype.hasOwnProperty.call(payload, "config");
+
+  if (hasTitle || hasConfig) {
+    const title = String(payload.title || "").trim();
+    if (!title) {
+      return {
+        ok: false,
+        message: "新版本配置缺少有效 title",
+        config: {},
+        title: "",
+        nameLocked: false,
+        raw: payload,
+      };
+    }
+
+    if (!isObject(payload.config)) {
+      return {
+        ok: false,
+        message: "新版本配置中的 config 必须是 JSON 对象",
+        config: {},
+        title: "",
+        nameLocked: false,
+        raw: payload,
+      };
+    }
+
+    return {
+      ok: true,
+      message: "",
+      config: normalizeExplainConfig(payload.config),
+      title,
+      nameLocked: true,
+      raw: payload,
+    };
+  }
+
+  return {
+    ok: true,
+    message: "",
+    config: normalizeExplainConfig(payload),
+    title: "",
+    nameLocked: false,
+    raw: payload,
+  };
 }
 
 function normalizeFormat(value) {
@@ -56,20 +164,33 @@ function makeDefaultProfileName(index) {
 function createProfile(partial = {}, index = 0) {
   const id = Number.isFinite(Number(partial.id)) ? Number(partial.id) : Date.now() + index;
   const format = normalizeFormat(partial.format);
+  const parsedPayload = parseExplainConfigPayload(partial.config);
+  const fallbackName = makeDefaultProfileName(index);
+  const baseName = String(partial.name || fallbackName).trim() || fallbackName;
+  const nameLocked = !!partial.nameLocked || (parsedPayload.ok && parsedPayload.nameLocked);
+
   return {
     id,
-    name: String(partial.name || makeDefaultProfileName(index)).trim() || makeDefaultProfileName(index),
+    name: parsedPayload.ok && parsedPayload.nameLocked ? parsedPayload.title : baseName,
+    nameLocked,
     format,
     url: format === FORMAT_URL ? String(partial.url || "").trim() : "",
-    config: normalizeExplainConfig(partial.config),
+    config: parsedPayload.ok ? parsedPayload.config : {},
   };
 }
 
 function toEditingProfile(profile, index = 0) {
   const normalized = createProfile(profile, index);
+  const configTextPayload = normalized.nameLocked
+    ? {
+      title: normalized.name,
+      config: normalized.config,
+    }
+    : normalized.config;
+
   return {
     ...normalized,
-    configText: JSON.stringify(normalized.config, null, 2),
+    configText: JSON.stringify(configTextPayload, null, 2),
   };
 }
 
@@ -89,6 +210,21 @@ const profileOptions = computed(() => {
 });
 
 const sendpayValue = computed(() => normalizeSendpay(sendpayInput.value));
+const sendpayMapResult = computed(() => parseSendpayMap(sendpayMapInput.value));
+const sendpayMapError = computed(() => {
+  if (!sendpayMapEnabled.value) {
+    return "";
+  }
+  return sendpayMapResult.value.error;
+});
+const activeSendpayMap = computed(() => {
+  if (!sendpayMapEnabled.value || sendpayMapError.value) {
+    return {};
+  }
+  return sendpayMapResult.value.map;
+});
+const hasSendpayMapEntries = computed(() => Object.keys(activeSendpayMap.value).length > 0);
+const hasExplainInput = computed(() => !!sendpayValue.value || hasSendpayMapEntries.value);
 
 const sendpayPairs = computed(() => {
   return sendpayValue.value.split("").map((value, index) => ({
@@ -97,8 +233,19 @@ const sendpayPairs = computed(() => {
   }));
 });
 
+const sendpayMapPairs = computed(() => {
+  return Object.entries(activeSendpayMap.value)
+    .map(([position, value]) => ({
+      position: String(position),
+      value: String(value),
+    }))
+    .sort((a, b) => a.position.localeCompare(b.position, "zh-Hans-CN", { numeric: true }));
+});
+
 function buildValueExplainMap(configItem) {
   const valueExplainMap = {};
+
+  const normalizeExplainText = (text) => String(text).replace(/\\n/g, "\n");
 
   if (Array.isArray(configItem)) {
     configItem.forEach((item) => {
@@ -107,7 +254,7 @@ function buildValueExplainMap(configItem) {
       }
       Object.entries(item).forEach(([code, desc]) => {
         if (typeof desc === "string") {
-          valueExplainMap[String(code)] = desc;
+          valueExplainMap[String(code)] = normalizeExplainText(desc);
         }
       });
     });
@@ -117,7 +264,7 @@ function buildValueExplainMap(configItem) {
   if (configItem && typeof configItem === "object" && !Array.isArray(configItem)) {
     Object.entries(configItem).forEach(([code, desc]) => {
       if (typeof desc === "string") {
-        valueExplainMap[String(code)] = desc;
+        valueExplainMap[String(code)] = normalizeExplainText(desc);
       }
     });
   }
@@ -177,6 +324,10 @@ function parsePositionSpec(positionKey) {
   };
 }
 
+function normalizeExplainValue(value) {
+  return String(value ?? "").replace(/\s+/g, "");
+}
+
 const parsedConfigEntries = computed(() => {
   const config = selectedExplainConfig.value || {};
   return Object.keys(config)
@@ -190,6 +341,7 @@ const parsedConfigEntries = computed(() => {
 
       return {
         ...positionSpec,
+        rawKey: String(positionKey || "").trim(),
         valueExplainMap,
       };
     })
@@ -202,59 +354,156 @@ const parsedConfigEntries = computed(() => {
     });
 });
 
+function collectSourceValues(item) {
+  const sourceValues = [];
+
+  const mapValue = activeSendpayMap.value[item.rawKey] ?? activeSendpayMap.value[item.label];
+  if (mapValue !== undefined && mapValue !== null && String(mapValue).trim() !== "") {
+    sourceValues.push({
+      source: "sendpayMap",
+      value: String(mapValue).trim(),
+    });
+  }
+
+  if (item.mode === "combo") {
+    const digits = item.positions
+      .map((position) => sendpayValue.value[position - 1])
+      .filter((char) => char !== undefined);
+
+    if (digits.length === item.positions.length) {
+      sourceValues.push({
+        source: "sendpay",
+        value: digits.join(","),
+      });
+    }
+  } else {
+    const startIndex = item.start - 1;
+    const endIndex = item.end;
+    const actualValue = sendpayValue.value.slice(startIndex, endIndex);
+    const expectedLength = item.end - item.start + 1;
+
+    if (actualValue && actualValue.length === expectedLength) {
+      sourceValues.push({
+        source: "sendpay",
+        value: actualValue,
+      });
+    }
+  }
+
+  return sourceValues;
+}
+
+function buildCandidateEntries(item, sourceValues) {
+  return sourceValues.flatMap((itemValue) => {
+    const candidates = [itemValue.value, normalizeExplainValue(itemValue.value)];
+    if (item.mode === "combo") {
+      candidates.push(itemValue.value.replace(/\s+/g, "").replace(/,/g, ""));
+    }
+
+    return candidates
+      .filter((candidate, index, arr) => candidate && arr.indexOf(candidate) === index)
+      .map((candidate) => ({
+        source: itemValue.source,
+        displayValue: itemValue.value,
+        candidate,
+      }));
+  });
+}
+
+const resolvedExplanationRows = computed(() => {
+  return parsedConfigEntries.value.map((item) => {
+    const sourceValues = collectSourceValues(item);
+    const candidateEntries = buildCandidateEntries(item, sourceValues);
+    const matchedEntry = candidateEntries.find((entry) => !!item.valueExplainMap[entry.candidate]);
+    const explanation = matchedEntry ? item.valueExplainMap[matchedEntry.candidate] : "";
+    const allValueEntries = Object.entries(item.valueExplainMap)
+      .filter(([, text]) => typeof text === "string" && text)
+      .map(([key, text]) => ({
+        value: key,
+        explanation: text,
+      }));
+
+    const sourceLabels = Array.from(new Set(sourceValues.map((entry) => entry.source)));
+    const sourceLabel = sourceLabels.length > 1 ? "sendpay + sendpayMap" : (sourceLabels[0] || "-");
+
+    if (!matchedEntry || !explanation) {
+      const attemptedValues = sourceValues.map((entry) => `${entry.source}: ${entry.value}`);
+      return {
+        rowKey: `${item.rawKey}|unmatched`,
+        positionLabel: item.label,
+        value: attemptedValues.length ? attemptedValues.join(" / ") : "-",
+        sourceLabel,
+        explanation: attemptedValues.length ? "当前输入未匹配到解释" : "当前无可用于匹配的输入值",
+        expandValueEntries: allValueEntries,
+        matched: false,
+      };
+    }
+
+    const matchedKey = matchedEntry.candidate;
+    const otherValueEntries = allValueEntries.filter((entry) => entry.value !== matchedKey);
+
+    return {
+      rowKey: `${item.rawKey}|${matchedEntry.source}|${matchedEntry.displayValue}`,
+      positionLabel: item.label,
+      value: matchedEntry.displayValue,
+      sourceLabel,
+      explanation,
+      expandValueEntries: otherValueEntries,
+      matched: true,
+    };
+  });
+});
+
 const explanationRows = computed(() => {
-  if (!sendpayValue.value) {
+  if (!hasExplainInput.value) {
     return [];
   }
 
-  return parsedConfigEntries.value
-    .map((item) => {
-      let actualValue = "";
-      let actualValueCandidates = [];
-
-      if (item.mode === "combo") {
-        const digits = item.positions
-          .map((position) => sendpayValue.value[position - 1])
-          .filter((char) => char !== undefined);
-
-        if (digits.length !== item.positions.length) {
-          return null;
-        }
-
-        actualValue = digits.join(",");
-        actualValueCandidates = [
-          actualValue,
-          actualValue.replace(/\s+/g, ""),
-          digits.join(""),
-        ];
-      } else {
-        const startIndex = item.start - 1;
-        const endIndex = item.end;
-        actualValue = sendpayValue.value.slice(startIndex, endIndex);
-        const expectedLength = item.end - item.start + 1;
-
-        if (!actualValue || actualValue.length !== expectedLength) {
-          return null;
-        }
-
-        actualValueCandidates = [actualValue, actualValue.replace(/\s+/g, "")];
-      }
-
-      const explanation = actualValueCandidates
-        .map((key) => item.valueExplainMap[key])
-        .find((text) => !!text);
-      if (!explanation) {
-        return null;
-      }
-
-      return {
-        positionLabel: item.label,
-        value: actualValue,
-        explanation,
-      };
-    })
-    .filter((item) => item !== null);
+  return resolvedExplanationRows.value.filter((row) => row.matched);
 });
+
+const displayExplanationRows = computed(() => {
+  if (allExplainEnabled.value) {
+    return resolvedExplanationRows.value;
+  }
+  return explanationRows.value;
+});
+
+const expandableRowKeys = computed(() => {
+  return displayExplanationRows.value
+    .filter((row) => row.expandValueEntries.length)
+    .map((row) => row.rowKey);
+});
+
+const allRowsExpanded = computed(() => {
+  const keys = expandableRowKeys.value;
+  if (!keys.length) {
+    return false;
+  }
+  return keys.every((rowKey) => !!expandedCompareRows.value[rowKey]);
+});
+
+function toggleCompareRow(rowKey) {
+  expandedCompareRows.value[rowKey] = !expandedCompareRows.value[rowKey];
+}
+
+function toggleAllCompareRows() {
+  const keys = expandableRowKeys.value;
+  if (!keys.length) {
+    return;
+  }
+
+  const nextExpanded = !allRowsExpanded.value;
+  const nextRows = { ...expandedCompareRows.value };
+  keys.forEach((rowKey) => {
+    nextRows[rowKey] = nextExpanded;
+  });
+  expandedCompareRows.value = nextRows;
+}
+
+function isCompareRowExpanded(rowKey) {
+  return !!expandedCompareRows.value[rowKey];
+}
 
 function getDefaultConfigText() {
   return `{
@@ -366,11 +615,18 @@ async function fetchProfileConfigByUrl(profile) {
     }
 
     const data = await response.json();
-    if (!isObject(data)) {
-      return { ok: false, message: `配置「${profile.name}」拉取失败: 内容不是 JSON 对象` };
+    const parsed = parseExplainConfigPayload(data);
+    if (!parsed.ok) {
+      return { ok: false, message: `配置「${profile.name}」拉取失败: ${parsed.message}` };
     }
 
-    return { ok: true, config: data };
+    return {
+      ok: true,
+      config: parsed.config,
+      title: parsed.title,
+      nameLocked: parsed.nameLocked,
+      raw: parsed.raw,
+    };
   } catch {
     return { ok: false, message: `配置「${profile.name}」拉取失败，请检查 URL 或跨域策略` };
   }
@@ -392,6 +648,10 @@ async function refreshUrlProfilesOnLoad() {
     const result = await fetchProfileConfigByUrl(nextProfiles[i]);
     if (result.ok) {
       nextProfiles[i].config = normalizeExplainConfig(result.config);
+      nextProfiles[i].nameLocked = !!result.nameLocked;
+      if (result.nameLocked && result.title) {
+        nextProfiles[i].name = result.title;
+      }
       changed = true;
     }
   }
@@ -440,7 +700,11 @@ async function pullProfileConfig(profile) {
     return;
   }
 
-  profile.configText = JSON.stringify(result.config, null, 2);
+  profile.configText = JSON.stringify(result.raw, null, 2);
+  if (result.nameLocked && result.title) {
+    profile.name = result.title;
+  }
+  profile.nameLocked = !!result.nameLocked;
   notify("success", `配置「${profile.name}」拉取成功`);
 }
 
@@ -459,13 +723,21 @@ async function saveConfig() {
           return;
         }
         normalized.config = normalizeExplainConfig(pulled.config);
+        normalized.nameLocked = !!pulled.nameLocked;
+        if (pulled.nameLocked && pulled.title) {
+          normalized.name = pulled.title;
+        }
       } else {
-        const parsedConfig = JSON.parse(profile.configText || "{}");
-        if (!isObject(parsedConfig)) {
-          notify("warning", `配置「${normalized.name}」内容必须是 JSON 对象`);
+        const parsedPayload = parseExplainConfigPayload(JSON.parse(profile.configText || "{}"));
+        if (!parsedPayload.ok) {
+          notify("warning", `配置「${normalized.name}」${parsedPayload.message}`);
           return;
         }
-        normalized.config = parsedConfig;
+        normalized.config = parsedPayload.config;
+        normalized.nameLocked = !!parsedPayload.nameLocked;
+        if (parsedPayload.nameLocked && parsedPayload.title) {
+          normalized.name = parsedPayload.title;
+        }
       }
 
       nextProfiles.push(normalized);
@@ -492,10 +764,14 @@ async function readClipboard() {
 
 function showExample() {
   sendpayInput.value = Array.from({ length: 256 }, (_, index) => String(index % 10)).join("");
+  if (sendpayMapEnabled.value) {
+    sendpayMapInput.value = '{"520":"1","1002":"6","1024":9}';
+  }
 }
 
 function clearAll() {
   sendpayInput.value = "";
+  sendpayMapInput.value = "";
 }
 
 function startEdit(position, currentValue) {
@@ -525,13 +801,16 @@ function cancelEdit() {
   editingValue.value = "";
 }
 
-function saveEdit() {
+function saveEdit(silent = false) {
   if (editingPosition.value === null) {
     return;
   }
 
   if (!/^\d$/.test(editingValue.value)) {
-    notify("warning", "只能输入 1 位数字");
+    if (!silent) {
+      notify("warning", "只能输入 1 位数字");
+    }
+    cancelEdit();
     return;
   }
 
@@ -545,6 +824,59 @@ function saveEdit() {
   chars[idx] = editingValue.value;
   sendpayInput.value = chars.join("");
   cancelEdit();
+}
+
+function startMapEdit(position, currentValue) {
+  editingMapPosition.value = position;
+  editingMapValue.value = String(currentValue ?? "");
+  nextTick(() => {
+    const el = document.getElementById(`map-edit-${position}`);
+    if (!el) {
+      return;
+    }
+    el.focus();
+    el.select();
+  });
+}
+
+function onMapEditInput(event) {
+  const value = String(event.target?.value ?? "");
+  editingMapValue.value = value;
+  if (event.target) {
+    event.target.value = value;
+  }
+}
+
+function cancelMapEdit() {
+  editingMapPosition.value = null;
+  editingMapValue.value = "";
+}
+
+function saveMapEdit(silent = false) {
+  if (editingMapPosition.value === null) {
+    return;
+  }
+
+  const newValue = editingMapValue.value.trim();
+  if (!newValue) {
+    if (!silent) {
+      notify("warning", "只能输入非空值");
+    }
+    cancelMapEdit();
+    return;
+  }
+
+  try {
+    const text = String(sendpayMapInput.value ?? "").trim();
+    const parsed = text ? JSON.parse(text) : {};
+    parsed[editingMapPosition.value] = newValue;
+    sendpayMapInput.value = JSON.stringify(parsed);
+  } catch {
+    if (!silent) {
+      notify("error", "sendpayMap JSON 格式错误，修改失败");
+    }
+  }
+  cancelMapEdit();
 }
 
 function handleProfilesSync() {
@@ -580,8 +912,28 @@ refreshUrlProfilesOnLoad();
           <n-button @click="readClipboard">剪贴板</n-button>
           <n-button @click="showExample">示例</n-button>
           <n-button @click="clearAll">清空</n-button>
+          <n-switch v-model:value="sendpayMapEnabled" size="large">
+              <template #checked>sendpayMap</template>
+              <template #unchecked>sendpayMap</template>
+            </n-switch>
         </div>
         <div class="flex items-center gap-2">
+          <n-switch v-model:value="allExplainEnabled" size="large">
+            <template #checked>所有解释</template>
+            <template #unchecked>所有解释</template>
+          </n-switch>
+          <n-button
+            quaternary
+            circle
+            size="small"
+            :disabled="!expandableRowKeys.length"
+            @click="toggleAllCompareRows"
+          >
+            <n-icon class="explain-toggle-icon">
+              <ChevronUpCircleOutline v-if="allRowsExpanded" />
+              <ChevronDownCircleOutline v-else />
+            </n-icon>
+          </n-button>
           <n-select
             v-model:value="selectedProfileId"
             class="profile-select"
@@ -601,55 +953,124 @@ refreshUrlProfilesOnLoad();
         placeholder="输入订单 sendpay 信息"
         @input="handleSendpayInput"
       />
+      <n-input
+        v-if="sendpayMapEnabled"
+        v-model:value="sendpayMapInput"
+        class="sendpay-input"
+        type="textarea"
+        :autosize="{ minRows: 2, maxRows: 6 }"
+        placeholder='输入 sendpayMap，例如：{"520":"1","1002":"6","1024":9}'
+      />
+      <div v-if="sendpayMapEnabled && sendpayMapError" class="text-xs text-red-500">
+        {{ sendpayMapError }}
+      </div>
     </div>
 
     <div class="flex-1 min-h-0">
       <SplitPanel :default-size="0.75" :min="0.5" :max="0.9">
         <template #left>
-          <div class="h-full p-2 border border-green-100 rounded bg-green-50/30 overflow-auto">
-            <div v-if="sendpayPairs.length" class="pair-grid">
-              <table v-for="item in sendpayPairs" :key="item.position" class="pair-table">
-                <tbody>
-                  <tr>
-                    <td class="pair-position">{{ item.position }}</td>
-                  </tr>
-                  <tr>
-                    <td class="pair-value" @dblclick="startEdit(item.position, item.value)">
-                      <input
-                        v-if="editingPosition === item.position"
-                        :id="`pair-edit-${item.position}`"
-                        class="pair-value-editor"
-                        :value="editingValue"
-                        maxlength="1"
-                        inputmode="numeric"
-                        @input="onEditInput"
-                        @blur="cancelEdit"
-                        @keydown.enter.prevent="saveEdit"
-                      />
-                      <span v-else>{{ item.value }}</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="h-full p-2 border border-green-100 rounded overflow-auto">
+            <div v-if="sendpayPairs.length || sendpayMapPairs.length" class="space-y-3">
+              <div v-if="sendpayPairs.length" class="pair-grid">
+                <table v-for="item in sendpayPairs" :key="item.position" class="pair-table">
+                  <tbody>
+                    <tr>
+                      <td class="pair-position">{{ item.position }}</td>
+                    </tr>
+                    <tr>
+                      <td class="pair-value" @dblclick="startEdit(item.position, item.value)">
+                        <input
+                          v-if="editingPosition === item.position"
+                          :id="`pair-edit-${item.position}`"
+                          class="pair-value-editor"
+                          :value="editingValue"
+                          maxlength="1"
+                          inputmode="numeric"
+                          @input="onEditInput"
+                          @blur="saveEdit(true)"
+                          @keydown.enter.prevent="saveEdit"
+                        />
+                        <span v-else>{{ item.value }}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div v-if="sendpayMapPairs.length" class="space-y-1">
+                <div class="pair-grid">
+                  <table v-for="item in sendpayMapPairs" :key="item.position" class="pair-table map-pair-table">
+                    <tbody>
+                      <tr>
+                        <td class="pair-position">{{ item.position }}</td>
+                      </tr>
+                      <tr>
+                        <td class="pair-value" @dblclick="startMapEdit(item.position, item.value)">
+                          <input
+                            v-if="editingMapPosition === item.position"
+                            :id="`map-edit-${item.position}`"
+                            class="pair-value-editor"
+                            :value="editingMapValue"
+                            @input="onMapEditInput"
+                            @blur="saveMapEdit(true)"
+                            @keydown.enter.prevent="saveMapEdit"
+                          />
+                          <span v-else>{{ item.value }}</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
             <div v-else class="h-full flex items-center justify-center">
-              <n-empty description="请输入 sendpay 信息" />
+              <n-empty description="请输入 sendpay 或 sendpayMap 信息" />
             </div>
           </div>
         </template>
 
         <template #right>
-          <div class="h-full p-2 border border-green-100 rounded bg-green-50/20 overflow-auto">
-            <div v-if="!sendpayValue" class="h-full flex items-center justify-center">
-              <n-empty description="输入 sendpay 后展示解释" />
+          <div class="h-full p-2 border border-green-100 rounded overflow-auto">
+            <div v-if="!parsedConfigEntries.length" class="h-full flex items-center justify-center">
+              <n-empty description="当前配置暂无可展示解释" />
             </div>
-            <div v-else-if="!explanationRows.length" class="h-full flex items-center justify-center">
+            <div v-else-if="!allExplainEnabled && !hasExplainInput" class="h-full flex items-center justify-center">
+              <n-empty description="输入 sendpay 或 sendpayMap 后展示解释" />
+            </div>
+            <div v-else-if="!displayExplanationRows.length" class="h-full flex items-center justify-center">
               <n-empty description="当前配置中无可匹配解释" />
             </div>
             <div v-else class="space-y-2">
-              <div v-for="row in explanationRows" :key="`${row.positionLabel}-${row.value}`" class="explain-item">
-                <div class="explain-head">第 {{ row.positionLabel }} 位 = {{ row.value }}</div>
+              <div
+                v-for="row in displayExplanationRows"
+                :key="row.rowKey"
+                :class="['explain-item', { 'explain-item-unmatched': allExplainEnabled && !row.matched }]"
+              >
+                <div class="explain-head">
+                  <span>
+                    第 {{ row.positionLabel }} 位
+                    <template v-if="row.matched"> = {{ row.value }} ({{ row.sourceLabel }})</template>
+                    <template v-else> (未匹配)</template>
+                  </span>
+                  <button
+                    v-if="row.expandValueEntries.length"
+                    type="button"
+                    class="explain-toggle-btn"
+                    @click.stop="toggleCompareRow(row.rowKey)"
+                  >
+                    <n-icon class="explain-toggle-icon">
+                      <ChevronUpCircleOutline v-if="isCompareRowExpanded(row.rowKey)" />
+                      <ChevronDownCircleOutline v-else />
+                    </n-icon>
+                  </button>
+                </div>
                 <div class="explain-body">{{ row.explanation }}</div>
+                <div v-if="row.expandValueEntries.length && isCompareRowExpanded(row.rowKey)" class="explain-compare-list">
+                  <div v-for="item in row.expandValueEntries" :key="item.value" class="explain-compare-item">
+                    <div class="explain-compare-key">{{ item.value }}</div>
+                    <div class="explain-compare-text">{{ item.explanation }}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -681,7 +1102,12 @@ refreshUrlProfilesOnLoad();
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-              <n-input v-model:value="profile.name" class="config-setting-input" placeholder="配置名称" />
+              <n-input
+                v-model:value="profile.name"
+                class="config-setting-input"
+                placeholder="配置名称"
+                :readonly="profile.nameLocked"
+              />
               <n-select
                 v-model:value="profile.format"
                 :options="formatOptions"
@@ -722,6 +1148,12 @@ refreshUrlProfilesOnLoad();
   gap: 6px;
 }
 
+.map-title {
+  font-size: 12px;
+  color: #2d6a4f;
+  font-weight: 600;
+}
+
 .pair-table {
   width: 100%;
   border-collapse: collapse;
@@ -736,6 +1168,10 @@ refreshUrlProfilesOnLoad();
   padding: 4px 6px;
   text-align: center;
   font-size: 12px;
+}
+
+.map-pair-table .pair-value {
+  cursor: text;
 }
 
 .pair-position {
@@ -783,12 +1219,19 @@ refreshUrlProfilesOnLoad();
   overflow: hidden;
 }
 
+.explain-item-unmatched {
+  border-color: #f4a5a5;
+}
+
 .explain-head {
   background: #d8f3dc;
   color: #1b4332;
   font-size: 13px;
   padding: 6px 8px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .explain-body {
@@ -797,10 +1240,83 @@ refreshUrlProfilesOnLoad();
   font-size: 13px;
   padding: 8px;
   line-height: 1.5;
+  white-space: pre-line;
+}
+
+.explain-item-unmatched .explain-head {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.explain-item-unmatched .explain-body {
+  background: #fff5f5;
+  color: #b91c1c;
+}
+
+.explain-toggle-btn {
+  border: none;
+  background: transparent;
+  color: #2d6a4f;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.explain-toggle-btn:hover {
+  color: #1b4332;
+}
+
+.explain-item-unmatched .explain-toggle-btn {
+  color: #b91c1c;
+}
+
+.explain-item-unmatched .explain-toggle-btn:hover {
+  color: #991b1b;
+}
+
+.explain-toggle-icon {
+  font-size: 20px;
+}
+
+.explain-compare-list {
+  border-top: 1px dashed #b7e4c7;
+  background: #fbfffc;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.explain-item-unmatched .explain-compare-list {
+  border-top-color: #fecaca;
+  background: #fffafa;
+}
+
+.explain-compare-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+}
+
+.explain-compare-key {
+  min-width: 36px;
+  color: #2d6a4f;
+  font-weight: 600;
+}
+
+.explain-compare-text {
+  color: #52796f;
+  line-height: 1.4;
+  white-space: pre-line;
 }
 
 .profile-select {
-  width: 230px;
+  width: 200px;
 }
 
 .sendpay-input :deep(textarea::selection) {

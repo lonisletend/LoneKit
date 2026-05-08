@@ -51,8 +51,16 @@
         </div>
         <!-- 可滚动的输出区域 -->
         <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
-          <JsonFormat class="w-full h-full"
-          ref="customJsonFormatRef" v-model="sourceJson" theme="min-light" />
+          <JsonFormat
+            v-if="hasSourceContent"
+            class="w-full h-full"
+            ref="customJsonFormatRef"
+            v-model="sourceJson"
+            theme="min-light"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+            输入内容后加载格式化视图
+          </div>
         </div>
       </div>
     </template>
@@ -61,7 +69,7 @@
 
 <script setup>
 
-import {ref, watch} from "vue";
+import { computed, defineAsyncComponent, ref, watch } from "vue";
 import {NInput, NInputGroup, NSelect, NTag, NButton} from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
@@ -69,9 +77,14 @@ import {
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
 import jsonpath from 'jsonpath';
-import { JsonFormat } from 'lone-format'
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
+
+const loadLoneFormat = () => Promise.all([
+  import('lone-format/lone-format.css'),
+  import('lone-format')
+]).then(([, m]) => m);
+const JsonFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.JsonFormat));
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
@@ -90,6 +103,7 @@ const jsonObject = ref();
 const filterType = ref('jsonpath');
 const filterExpression = ref('');
 const isSorted = ref(false);
+const hasSourceContent = computed(() => !!sourceJson.value?.trim());
 
 // 过滤类型选项
 const filterTypeOptions = [

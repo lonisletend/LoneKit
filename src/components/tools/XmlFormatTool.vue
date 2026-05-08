@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref, watch } from "vue";
+import { computed, defineAsyncComponent, ref, watch } from "vue";
 import { NButton, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
@@ -8,9 +8,14 @@ import {
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
 
-import { XmlFormat } from 'lone-format';
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
+
+const loadLoneFormat = () => Promise.all([
+  import('lone-format/lone-format.css'),
+  import('lone-format')
+]).then(([, m]) => m);
+const XmlFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.XmlFormat));
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
@@ -20,6 +25,7 @@ const customXmlFormatRef = ref(null);
 const filterType = ref('xpath');
 const filterExpression = ref('');
 const isSorted = ref(false);
+const hasSourceContent = computed(() => !!source.value?.trim());
 
 // 过滤类型选项
 const filterTypeOptions = [
@@ -158,7 +164,16 @@ function toggleSort() {
           </n-input-group>
         </div>
         <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
-          <XmlFormat class="w-full h-full" ref="customXmlFormatRef" v-model="source" theme="min-light"/>
+          <XmlFormat
+            v-if="hasSourceContent"
+            class="w-full h-full"
+            ref="customXmlFormatRef"
+            v-model="source"
+            theme="min-light"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+            输入内容后加载格式化视图
+          </div>
         </div>
       </div>
     </template>
