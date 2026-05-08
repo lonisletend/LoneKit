@@ -76,6 +76,34 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.05.07',
+    version: 'v0.9.3',
+    fixed: [
+      '通用格式化工具，修复同名标签嵌套时 XML 片段识别错误的问题，解析引擎从正则匹配升级为深度追踪算法。',
+      'Sendpay 工具，修复了 sendpayMap 展示不能编辑的问题。',
+      '升级 lone-format@0.12.1，修复了 XML 格式化同级多个重名标签自闭合标签识别有问题的情况。',
+    ],
+  },
+  {
+    date: '2026.04.28',
+    version: 'v0.9.2',
+    added: [
+      'Sendpay 工具新增 sendpayMap 解析支持，支持与 sendpay 同时输入并联合匹配解释。',
+      'Sendpay 匹配解释区新增「所有解释」模式，未匹配项支持红色高亮与展开查看。',
+      'Sendpay 匹配解释支持「展开全部/折叠全部」，并支持解释文本中的 \\n 自动换行展示。',
+      'Sendpay 解释配置支持配置文件固定标题，方便复用。',
+    ],
+  },
+  {
+    date: '2026.04.21',
+    version: 'v0.9.1',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.1',
+    optimized: [
+      'Sendpay 工具，优化编辑体验，增加同标位匹配对比展示。',
+      '优化打包配置，大幅减小js包体积，提升启动性能。',
+    ],
+  },
+  {
     date: '2026.04.21',
     version: 'v0.9.0',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.0',
