@@ -13,7 +13,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-22.04, windows-latest]
+        include:
+          - platform: macos-latest
+            tauriTarget: universal-apple-darwin
+            rustTargets: aarch64-apple-darwin,x86_64-apple-darwin
+          - platform: macos-latest
+            tauriTarget: aarch64-apple-darwin
+            rustTargets: aarch64-apple-darwin
+          - platform: macos-latest
+            tauriTarget: x86_64-apple-darwin
+            rustTargets: x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            tauriTarget: ''
+            rustTargets: ''
+          - platform: windows-latest
+            tauriTarget: ''
+            rustTargets: ''
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -28,7 +43,7 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.rustTargets }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -55,4 +70,4 @@ jobs:
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
+          args: ${{ matrix.tauriTarget != '' && format('--target {0}', matrix.tauriTarget) || '' }}
