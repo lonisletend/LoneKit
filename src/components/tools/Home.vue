@@ -76,6 +76,17 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.05.17',
+    version: 'v0.9.4',
+    added: [
+      '新增 Unicode 工具，支持 Unicode 编码/解码、批量输入、剪贴板读取与逐项操作。',
+      'MD5、Base64、Unicode、字符串16进制工具新增快捷键：在非批量模式下按 Ctrl/Cmd + Enter 可快速跳转到下一输入框。',
+    ],
+    optimized: [
+      '统一规范工具路由 URL，采用更简短命名，并保留旧路由别名兼容访问。',
+    ],
+  },
+  {
     date: '2026.05.07',
     version: 'v0.9.3',
     fixed: [
@@ -97,7 +108,6 @@ const changeLogs = ref([
   {
     date: '2026.04.21',
     version: 'v0.9.1',
-    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.1',
     optimized: [
       'Sendpay 工具，优化编辑体验，增加同标位匹配对比展示。',
       '优化打包配置，大幅减小js包体积，提升启动性能。',
