@@ -237,6 +237,21 @@ const menuOptions = ref([
       RouterLink,
       {
         to: {
+          name: "UnicodeTool",
+          params: {
+          }
+        }
+      },
+      { default: () => "Unicode" }
+    ),
+    key: "unicode-tool",
+    icon: renderIcon(StringHexIcon)
+  },
+  {
+    label: () => h(
+      RouterLink,
+      {
+        to: {
           name: "StringHexTool",
           params: {
           }
@@ -342,6 +357,7 @@ const routeNameToMenuKey = {
   UUIDTool: "uuid-tool",
   Md5Tool: "md5-tool",
   Base64Tool: "base64-tool",
+  UnicodeTool: "unicode-tool",
   StringHexTool: "string-hex-tool",
   QrCodeTool: "qr-code-tool",
   QRCodeReaderTool: "qr-code-reader-tool",

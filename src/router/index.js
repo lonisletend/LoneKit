@@ -5,11 +5,12 @@ import Index from "/src/components/Index.vue";
 const routes = [
   {
     path: "/",
-    redirect: "index",
+    redirect: "home",
     component: Index,
     children: [
       {
-        path: "/index",
+        path: "/home",
+        alias: ["/index"],
         name: "Index",
         component: () => import("/src/components/tools/Home.vue"),
       },
@@ -24,17 +25,20 @@ const routes = [
         component: () => import("/src/components/tools/UUIDTool.vue"),
       },
       {
-        path: "/textCount",
+        path: "/count",
+        alias: ["/textCount"],
         name: "TextCountTool",
         component: () => import("/src/components/wrapper/TextCountToolWrapper.vue"),
       },
       {
-        path: "/jsonFormatWrapper",
+        path: "/json",
+        alias: ["/jsonFormatWrapper"],
         name: "JsonFormatWrapper",
         component: () => import("/src/components/wrapper/JsonFormatWrapper.vue"),
       },
       {
-        path: "/xmlFormatWrapper",
+        path: "/xml",
+        alias: ["/xmlFormatWrapper"],
         name: "XmlFormatWrapper",
         component: () => import("/src/components/wrapper/XmlFormatWrapper.vue"),
       },
@@ -49,17 +53,25 @@ const routes = [
         component: () => import("/src/components/tools/Base64Tool.vue"),
       },
       {
-        path: "/stringHex",
+        path: "/unicode",
+        name: "UnicodeTool",
+        component: () => import("/src/components/tools/UnicodeTool.vue"),
+      },
+      {
+        path: "/hex",
+        alias: ["/stringHex"],
         name: "StringHexTool",
         component: () => import("/src/components/tools/StringHexTool.vue"),
       },
       {
         path: "/qrcode",
+        alias: ["/qr"],
         name: "QrCodeTool",
         component: () => import("/src/components/tools/QRCodeTool.vue"),
       },
       {
-        path: "/qrcode-reader",
+        path: "/qrcode-scan",
+        alias: ["/qr-scan", "/qrcode-reader"],
         name: "QRCodeReaderTool",
         component: () => import("/src/components/tools/QRCodeReaderTool.vue"),
       },
@@ -69,12 +81,14 @@ const routes = [
         component: () => import("/src/components/tools/BarcodeTool.vue"),
       },
       {
-        path: "/barcode-reader",
+        path: "/barcode-scan",
+        alias: ["/barcode-reader"],
         name: "BarcodeReaderTool",
         component: () => import("/src/components/tools/BarcodeReaderTool.vue"),
       },
       {
-        path: "/sqlFormatWrapper",
+        path: "/sql",
+        alias: ["/sqlFormatWrapper"],
         name: "SQLFormatWrapper",
         component: () => import("/src/components/wrapper/SQLFormatWrapper.vue"),
       },
@@ -84,17 +98,20 @@ const routes = [
         component: () => import("/src/components/tools/DiffTool.vue"),
       },
       {
-        path: "/diffWrapper",
+        path: "/diffs",
+        alias: ["/diffWrapper"],
         name: "DiffToolWrapper",
         component: () => import("/src/components/wrapper/DiffToolWrapper.vue"),
       },
       {
-        path: "/folderDiffWrapper",
+        path: "/folders",
+        alias: ["/folderDiffWrapper"],
         name: "FolderDiffToolWrapper",
         component: () => import("/src/components/wrapper/FolderDiffToolWrapper.vue"),
       },
       {
-        path: "/commonFormatWrapper",
+        path: "/format",
+        alias: ["/commonFormatWrapper"],
         name: "CommonFormatWrapper",
         component: () => import("/src/components/wrapper/CommonFormatWrapper.vue"),
       },

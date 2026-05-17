@@ -2,42 +2,70 @@
 
 import { computed, ref, watch } from "vue";
 import { NButton, NInput, NSwitch, NTag } from "naive-ui";
-import { encode, decode } from 'js-base64';
-import SplitPanel from '../common/SplitPanel.vue'
-import { useCommon } from '../../composables/useCommon';
-import { useSyncedScroll } from '../../composables/useSyncedScroll';
-import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
-import { useEntryJump } from '../../composables/useEntryJump';
+import SplitPanel from "../common/SplitPanel.vue";
+import { useCommon } from "../../composables/useCommon";
+import { useSyncedScroll } from "../../composables/useSyncedScroll";
+import { useAutoAppendEntries } from "../../composables/useAutoAppendEntries";
+import { useEntryJump } from "../../composables/useEntryJump";
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
 const cardHeight = 220;
 const inputRows = 6;
 const isBatchInput = ref(false);
-const batchSourceText = ref('');
-const batchTargetText = ref('');
+const batchSourceText = ref("");
+const batchTargetText = ref("");
 
 const { leftScrollRef, rightScrollRef, handleScroll } = useSyncedScroll();
 
+function toHex(value, width) {
+  return value.toString(16).toUpperCase().padStart(width, "0");
+}
+
 function safeEncode(value) {
   try {
-    return encode(value);
+    return Array.from(value ?? "")
+      .map((char) => {
+        const code = char.codePointAt(0);
+        if (code <= 0xffff) {
+          return `\\u${toHex(code, 4)}`;
+        }
+        const high = Math.floor((code - 0x10000) / 0x400) + 0xd800;
+        const low = ((code - 0x10000) % 0x400) + 0xdc00;
+        return `\\u${toHex(high, 4)}\\u${toHex(low, 4)}`;
+      })
+      .join("");
   } catch {
-    return '';
+    return "";
+  }
+}
+
+function decodeCodePoint(hex, fallback) {
+  const codePoint = Number.parseInt(hex, 16);
+  if (Number.isNaN(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {
+    return fallback;
+  }
+  try {
+    return String.fromCodePoint(codePoint);
+  } catch {
+    return fallback;
   }
 }
 
 function safeDecode(value) {
   try {
-    return decode(value);
+    return (value ?? "")
+      .replace(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex) => decodeCodePoint(hex, match))
+      .replace(/\\x([0-9a-fA-F]{2})/g, (match, hex) => decodeCodePoint(hex, match))
+      .replace(/\\u([0-9a-fA-F]{4})/g, (match, hex) => decodeCodePoint(hex, match));
   } catch {
-    return '';
+    return "";
   }
 }
 
-function createEntry(source = '', target = '') {
-  const normalizedSource = source ?? '';
-  const normalizedTarget = target ?? '';
+function createEntry(source = "", target = "") {
+  const normalizedSource = source ?? "";
+  const normalizedTarget = target ?? "";
   if (normalizedSource) {
     return {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -54,8 +82,8 @@ function createEntry(source = '', target = '') {
   }
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    source: '',
-    target: '',
+    source: "",
+    target: "",
   };
 }
 
@@ -66,20 +94,20 @@ function hasContent(entry) {
 const { entries, ensureEntries, removeEntry, resetEntries } = useAutoAppendEntries(createEntry, hasContent);
 const { setInputRef, handleJumpKeydown } = useEntryJump(ensureEntries);
 
-const allSource = computed(() => entries.value.filter(hasContent).map(item => item.source).join('\n'));
-const allTarget = computed(() => entries.value.filter(hasContent).map(item => item.target).join('\n'));
+const allSource = computed(() => entries.value.filter(hasContent).map((item) => item.source).join("\n"));
+const allTarget = computed(() => entries.value.filter(hasContent).map((item) => item.target).join("\n"));
 
 function handleSourceInput(index, value) {
-  const nextSource = value ?? '';
+  const nextSource = value ?? "";
   entries.value[index].source = nextSource;
-  entries.value[index].target = nextSource ? safeEncode(nextSource) : '';
+  entries.value[index].target = nextSource ? safeEncode(nextSource) : "";
   ensureEntries();
 }
 
 function handleTargetInput(index, value) {
-  const nextTarget = value ?? '';
+  const nextTarget = value ?? "";
   entries.value[index].target = nextTarget;
-  entries.value[index].source = nextTarget ? safeDecode(nextTarget) : '';
+  entries.value[index].source = nextTarget ? safeDecode(nextTarget) : "";
   ensureEntries();
 }
 
@@ -88,50 +116,50 @@ function removeRow(index) {
 }
 
 function parseBatchLines(text) {
-  return (text ?? '')
+  return (text ?? "")
     .split(/\r\n|\r|\n/)
-    .filter(line => line.trim() !== '');
+    .filter((line) => line.trim() !== "");
 }
 
 function syncBatchTextsFromEntries() {
   const activeEntries = entries.value.filter(hasContent);
-  batchSourceText.value = activeEntries.map(item => item.source).join('\n');
-  batchTargetText.value = activeEntries.map(item => item.target).join('\n');
+  batchSourceText.value = activeEntries.map((item) => item.source).join("\n");
+  batchTargetText.value = activeEntries.map((item) => item.target).join("\n");
 }
 
 function applyBatchSource(text) {
   const lines = parseBatchLines(text);
   if (lines.length === 0) {
     resetEntries();
-    batchTargetText.value = '';
+    batchTargetText.value = "";
     return;
   }
-  resetEntries(lines.map(line => createEntry(line, '')));
-  batchTargetText.value = lines.map(line => safeEncode(line)).join('\n');
+  resetEntries(lines.map((line) => createEntry(line, "")));
+  batchTargetText.value = lines.map((line) => safeEncode(line)).join("\n");
 }
 
 function applyBatchTarget(text) {
   const lines = parseBatchLines(text);
   if (lines.length === 0) {
     resetEntries();
-    batchSourceText.value = '';
+    batchSourceText.value = "";
     return;
   }
-  resetEntries(lines.map(line => createEntry('', line)));
-  batchSourceText.value = lines.map(line => safeDecode(line)).join('\n');
+  resetEntries(lines.map((line) => createEntry("", line)));
+  batchSourceText.value = lines.map((line) => safeDecode(line)).join("\n");
 }
 
 function onBatchSourceInput(value) {
-  batchSourceText.value = value ?? '';
+  batchSourceText.value = value ?? "";
   applyBatchSource(batchSourceText.value);
 }
 
 function onBatchTargetInput(value) {
-  batchTargetText.value = value ?? '';
+  batchTargetText.value = value ?? "";
   applyBatchTarget(batchTargetText.value);
 }
 
-watch(isBatchInput, enabled => {
+watch(isBatchInput, (enabled) => {
   if (!enabled) {
     return;
   }
@@ -159,7 +187,7 @@ async function readClipboardByType(type) {
         entries.value[lastIndex].source = text;
         entries.value[lastIndex].target = safeEncode(text);
       } else {
-        entries.value.push(createEntry(text, ''));
+        entries.value.push(createEntry(text, ""));
       }
     } else {
       const lastIndex = entries.value.length - 1;
@@ -167,44 +195,38 @@ async function readClipboardByType(type) {
         entries.value[lastIndex].target = text;
         entries.value[lastIndex].source = safeDecode(text);
       } else {
-        entries.value.push(createEntry('', text));
+        entries.value.push(createEntry("", text));
       }
     }
     ensureEntries();
   } else {
-    notify('warning', '剪贴板中没有可用文本');
+    notify("warning", "剪贴板中没有可用文本");
   }
 }
 
 function showExampleByType(type) {
   if (isBatchInput.value) {
     if (type === 1) {
-      batchSourceText.value = 'test\nLoneKit';
+      batchSourceText.value = "test\nLoneKit";
       applyBatchSource(batchSourceText.value);
     } else {
-      batchTargetText.value = 'dGVzdA==\nTG9uZUtpdA==';
+      batchTargetText.value = "\\u0074\\u0065\\u0073\\u0074\n\\u004C\\u006F\\u006E\\u0065\\u004B\\u0069\\u0074";
       applyBatchTarget(batchTargetText.value);
     }
     return;
   }
 
   if (type === 1) {
-    resetEntries([
-      createEntry('test', ''),
-      createEntry(),
-    ]);
+    resetEntries([createEntry("test", ""), createEntry()]);
   } else {
-    resetEntries([
-      createEntry('', 'dGVzdA=='),
-      createEntry(),
-    ]);
+    resetEntries([createEntry("", "\\u0074\\u0065\\u0073\\u0074"), createEntry()]);
   }
 }
 
 function clear() {
   if (isBatchInput.value) {
-    batchSourceText.value = '';
-    batchTargetText.value = '';
+    batchSourceText.value = "";
+    batchTargetText.value = "";
     resetEntries();
     return;
   }
@@ -215,18 +237,18 @@ function clear() {
 function copyValue(type) {
   const value = type === 1 ? allSource.value : allTarget.value;
   if (!value) {
-    notify('warning', '没有可复制内容');
+    notify("warning", "没有可复制内容");
     return;
   }
-  copyToClipboard(value, '复制成功!');
+  copyToClipboard(value, "复制成功!");
 }
 
 function copyEntryValue(value) {
   if (!value) {
-    notify('warning', '没有可复制内容');
+    notify("warning", "没有可复制内容");
     return;
   }
-  copyToClipboard(value, '复制成功!');
+  copyToClipboard(value, "复制成功!");
 }
 
 </script>
@@ -265,13 +287,13 @@ function copyEntryValue(value) {
               </div>
               <n-input
                 v-model:value="entry.source"
-                :ref="el => setInputRef('left', index, el)"
+                :ref="(el) => setInputRef('left', index, el)"
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
                 placeholder="输入原文字符串"
-                @input="val => handleSourceInput(index, val)"
-                @keydown="event => handleJumpKeydown(event, 'left', index)"
+                @input="(val) => handleSourceInput(index, val)"
+                @keydown="(event) => handleJumpKeydown(event, 'left', index)"
               />
             </div>
           </div>
@@ -312,13 +334,13 @@ function copyEntryValue(value) {
               </div>
               <n-input
                 v-model:value="entry.target"
-                :ref="el => setInputRef('right', index, el)"
+                :ref="(el) => setInputRef('right', index, el)"
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
-                placeholder="输入 Base64 字符串"
-                @input="val => handleTargetInput(index, val)"
-                @keydown="event => handleJumpKeydown(event, 'right', index)"
+                placeholder="输入 Unicode 字符串"
+                @input="(val) => handleTargetInput(index, val)"
+                @keydown="(event) => handleJumpKeydown(event, 'right', index)"
               />
             </div>
           </div>
@@ -327,7 +349,7 @@ function copyEntryValue(value) {
               v-model:value="batchTargetText"
               type="textarea"
               class="w-full h-full batch-input"
-              placeholder="每行一条 Base64，按换行分割批量解码"
+              placeholder="每行一条 Unicode，按换行分割批量解码"
               @input="onBatchTargetInput"
             />
           </div>

@@ -7,6 +7,7 @@ import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 import { useSyncedScroll } from '../../composables/useSyncedScroll';
 import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
+import { useEntryJump } from '../../composables/useEntryJump';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
@@ -31,6 +32,7 @@ function hasContent(entry) {
 }
 
 const { entries, ensureEntries, removeEntry, resetEntries } = useAutoAppendEntries(createEntry, hasContent);
+const { setInputRef, handleJumpKeydown } = useEntryJump(ensureEntries);
 
 const allResults = computed(() => entries.value
   .filter(hasContent)
@@ -183,11 +185,13 @@ function copyValue(value) {
               </div>
               <n-input
                 v-model:value="entry.source"
+                :ref="el => setInputRef('left', index, el)"
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
                 placeholder="输入字符串"
                 @input="val => handleSourceInput(index, val)"
+                @keydown="event => handleJumpKeydown(event, 'left', index)"
               />
             </div>
           </div>
