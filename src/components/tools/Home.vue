@@ -76,6 +76,13 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.05.21',
+    version: 'v0.9.5',
+    fixed: [
+      '升级 lone-format@0.13.0，优化了SQL格式化展示，修复了关键字识别，折叠展开等问题。',
+    ],
+  },
+  {
     date: '2026.05.17',
     version: 'v0.9.4',
     added: [

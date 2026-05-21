@@ -10,12 +10,7 @@ import {
 
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
-
-const loadLoneFormat = () => Promise.all([
-  import('lone-format/lone-format.css'),
-  import('lone-format')
-]).then(([, m]) => m);
-const XmlFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.XmlFormat));
+import { XmlFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
@@ -172,7 +167,7 @@ function toggleSort() {
             theme="min-light"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-            输入内容后加载格式化视图
+            <!-- 输入内容后加载格式化视图 -->
           </div>
         </div>
       </div>

@@ -126,13 +126,7 @@ import {
 
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
-
-const loadLoneFormat = () => Promise.all([
-  import('lone-format/lone-format.css'),
-  import('lone-format')
-]).then(([, m]) => m);
-const JsonFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.JsonFormat));
-const XmlFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.XmlFormat));
+import { JsonFormat, XmlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 
