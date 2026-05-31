@@ -28,11 +28,6 @@
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
           <n-tag size="large" type="success">输出</n-tag>
           <n-button @click="copyJson">复制</n-button>
-          <n-dropdown :options="moreOptions" @select="handleMoreSelect">
-            <n-button>
-              <template #icon><n-icon :component="ChevronDownOutline" /></template>
-            </n-button>
-          </n-dropdown>
           <n-button @click="collapseAll">
             <template #icon> <component :is="CollapseIcon" /> </template>
           </n-button>
@@ -42,6 +37,11 @@
           <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
             <template #icon> <component :is="SortIcon" /> </template>
           </n-button>
+          <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+            <n-button>
+              <template #icon><n-icon :component="ChevronDownOutline" /></template>
+            </n-button>
+          </n-dropdown>
           <n-input-group>
             <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '146px' }" />
             <n-input 
@@ -210,13 +210,15 @@ function collapseAll() {
   customJsonFormatRef.value?.collapseAll();
 }
 
-function sendToDiff() {
-  const json = customJsonFormatRef.value?.getFilteredJson() ?? customJsonFormatRef.value?.getParsedJson()
+async function sendToDiff() {
+  await customJsonFormatRef.value?.copyJson();
+  
+  const json = await readFromClipboard();
   if (json == null) {
     notify('warning', '没有可发送的内容')
     return
   }
-  send('DiffTool', JSON.stringify(json, null, 2))
+  send('DiffTool', json)
   notify('success', '已发送到文本对比，请点击菜单进入查看')
 }
 
