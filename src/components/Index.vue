@@ -249,13 +249,13 @@ watch(
   padding: 0;
   line-height: 1;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 400;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 :deep(.menu-favorite-star.is-outline) {
   color: transparent;
-  -webkit-text-stroke: 1.2px #16a34a;
+  -webkit-text-stroke: 1px #16a34a;
 }
 
 :deep(.menu-favorite-star.is-favorite) {
@@ -267,7 +267,7 @@ watch(
   transform: scale(1.08);
 }
 
-:deep(.menu-label-row:hover .menu-favorite-star),
+:deep(.menu-favorite-star:hover),
 :deep(.menu-favorite-star.is-favorite) {
   opacity: 1;
 }
