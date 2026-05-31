@@ -16,6 +16,7 @@
               <router-link to="/">Kit</router-link>
             </div>
             <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22"
+              @update:value="handleMenuUpdate"
               :options="menuOptions" />
           </div>
           <!-- 版本号显示 -->
@@ -45,7 +46,7 @@
 <script setup>
 import router from "../router";
 import { computed, h, ref, watch } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
 import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
@@ -66,7 +67,11 @@ function renderIcon(icon) {
 }
 
 // const message = useMessage();
-const MENU_FAVORITES_STORAGE_KEY = "lonekit.menuFavorites.default";
+function getFavoriteStorageKey() {
+  if (typeof window === "undefined") return "lonekit.menuFavorites.default";
+  const currentUser = localStorage.getItem("lonekit.currentUser") || "default";
+  return `lonekit.menuFavorites.${currentUser}`;
+}
 const rawMenuItems = [
   { key: "common-format-wrapper", routeName: "CommonFormatWrapper", title: "通用格式化", icon: FlashIcon },
   { key: "json-format-wrapper", routeName: "JsonFormatWrapper", title: "Json 格式化", icon: JsonIcon },
@@ -91,7 +96,7 @@ const rawMenuItems = [
 function readFavoriteMenuKeys() {
   if (typeof window === "undefined") return [];
   try {
-    const rawValue = localStorage.getItem(MENU_FAVORITES_STORAGE_KEY);
+    const rawValue = localStorage.getItem(getFavoriteStorageKey());
     if (!rawValue) return [];
     const parsed = JSON.parse(rawValue);
     if (!Array.isArray(parsed)) return [];
@@ -103,7 +108,8 @@ function readFavoriteMenuKeys() {
       }
     }
     return uniqueKeys;
-  } catch {
+  } catch (error) {
+    console.warn("[menu] 读取收藏菜单失败", error);
     return [];
   }
 }
@@ -112,7 +118,7 @@ const favoriteMenuKeys = ref(readFavoriteMenuKeys());
 
 function saveFavoriteMenuKeys() {
   if (typeof window === "undefined") return;
-  localStorage.setItem(MENU_FAVORITES_STORAGE_KEY, JSON.stringify(favoriteMenuKeys.value));
+  localStorage.setItem(getFavoriteStorageKey(), JSON.stringify(favoriteMenuKeys.value));
 }
 
 function toggleFavoriteMenu(key) {
@@ -150,27 +156,30 @@ const menuOptions = computed(() =>
       label: () =>
         h("div", { class: "menu-label-row" }, [
           h(
-            RouterLink,
+            "span",
             {
               class: "menu-label-link",
-              to: { name: item.routeName },
             },
-            { default: () => item.title }
+            item.title
           ),
           h(
             "button",
             {
               type: "button",
-              class: ["menu-favorite-star", { "is-favorite": isFavorite }],
+              class: ["menu-favorite-star", { "is-favorite": isFavorite, "is-outline": !isFavorite }],
               title: isFavorite ? "取消收藏" : "收藏",
               "aria-label": isFavorite ? "取消收藏" : "收藏",
+              onMousedown: (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              },
               onClick: (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 toggleFavoriteMenu(item.key);
               },
             },
-            isFavorite ? "★" : "☆"
+            "★"
           ),
         ]),
     };
@@ -187,6 +196,17 @@ const routeNameToMenuKey = rawMenuItems.reduce((map, item) => {
 }, {
   DiffTool: "diff-tool",
 });
+const menuKeyToRouteName = rawMenuItems.reduce((map, item) => {
+  map[item.key] = item.routeName;
+  return map;
+}, {});
+
+function handleMenuUpdate(key) {
+  const routeName = menuKeyToRouteName[key];
+  if (routeName && route.name !== routeName) {
+    router.push({ name: routeName });
+  }
+}
 
 watch(
   () => route.name,
@@ -203,7 +223,7 @@ watch(
   font-family: Monaco, Consolas, 'Courier New', monospace !important;
 }
 
-.menu-label-row {
+:deep(.menu-label-row) {
   width: 100%;
   display: flex;
   align-items: center;
@@ -211,7 +231,7 @@ watch(
   gap: 8px;
 }
 
-.menu-label-link {
+:deep(.menu-label-link) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -219,20 +239,36 @@ watch(
   text-decoration: none;
 }
 
-.menu-favorite-star {
+:deep(.menu-favorite-star) {
   flex-shrink: 0;
   border: none;
   background: transparent;
-  color: #fff;
+  color: #16a34a;
   cursor: pointer;
   opacity: 0;
   padding: 0;
   line-height: 1;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.menu-label-row:hover .menu-favorite-star,
-.menu-favorite-star.is-favorite {
+:deep(.menu-favorite-star.is-outline) {
+  color: transparent;
+  -webkit-text-stroke: 1.2px #16a34a;
+}
+
+:deep(.menu-favorite-star.is-favorite) {
+  color: #16a34a;
+  -webkit-text-stroke: 0;
+}
+
+:deep(.menu-favorite-star:hover) {
+  transform: scale(1.08);
+}
+
+:deep(.menu-label-row:hover .menu-favorite-star),
+:deep(.menu-favorite-star.is-favorite) {
   opacity: 1;
 }
 </style>
