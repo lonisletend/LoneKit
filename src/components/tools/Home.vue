@@ -76,6 +76,14 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.06.01',
+    version: 'v0.9.6',
+    added: [
+      '新增侧边栏菜单收藏功能，收藏项置顶，本地存储，终于可以根据个人常用项排序喽。🎉',
+      '新增工具间数据传递功能，JSON/XML 格式化结果支持一键发送到文本对比。',
+    ],
+  },
+  {
     date: '2026.05.21',
     version: 'v0.9.5',
     fixed: [
