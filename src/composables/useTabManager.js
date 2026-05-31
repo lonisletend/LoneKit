@@ -63,7 +63,7 @@ export function useTabManager(options) {
       componentCache[fullComponentName] = defineComponent({
         name: fullComponentName,
         setup() {
-          return () => h(component, { id: currentTab.id });
+          return () => h(component, { id: currentTab.id, initialData: currentTab.initialData ?? null });
         }
       });
     }
@@ -73,15 +73,17 @@ export function useTabManager(options) {
 
   /**
    * 添加新标签
+   * @param {*} [initialData=null] - 传给 Tool 组件的初始数据，通过 initialData prop 接收
    */
-  function handleAdd() {
+  function handleAdd(initialData = null) {
     // 获取当前所有 tab 的最大 ID，然后 +1
     const ids = tabs.value.map((tab) => tab.id);
     const newId = Math.max(...ids) + 1;
 
     const newTab = {
       id: newId,
-      name: `${tabNamePrefix} ${newId}`
+      name: `${tabNamePrefix} ${newId}`,
+      initialData
     };
     tabs.value.push(newTab);
 

@@ -1,12 +1,18 @@
 <script setup>
 
-import {ref} from "vue";
+import { onMounted, ref } from "vue";
 import {NButton, NButtonGroup, NInput, NSelect} from "naive-ui";
 import SplitPanel from '../common/SplitPanel.vue';
 import { CodeDiff } from 'v-code-diff'
 
 defineOptions({
   name: 'DiffTool'
+});
+
+const props = defineProps({
+  id: { type: Number, default: 0 },
+  // 由数据传输机制注入的初始数据，格式：{ left: string, right: string }
+  initialData: { type: Object, default: null }
 });
 
 const source = ref();
@@ -18,6 +24,11 @@ const outputFormatOptions = [
   { label: '并排（side-by-side）', value: 'side-by-side' },
   { label: '逐行（line-by-line）', value: 'line-by-line' }
 ];
+
+onMounted(() => {
+  if (props.initialData?.left) source.value = props.initialData.left
+  if (props.initialData?.right) target.value = props.initialData.right
+});
 
 function showExample() {
 }
