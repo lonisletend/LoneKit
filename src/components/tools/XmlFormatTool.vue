@@ -1,18 +1,21 @@
 <script setup>
 
-import { computed, defineAsyncComponent, ref, watch } from "vue";
-import { NButton, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
+import { computed, ref, watch } from "vue";
+import { NButton, NDropdown, NIcon, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
+import { ChevronDownOutline } from '@vicons/ionicons5';
 
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
+import { useDataTransfer } from '../../composables/useDataTransfer';
 import { XmlFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { send } = useDataTransfer();
 
 const source = ref();
 const target = ref();
@@ -112,6 +115,26 @@ function toggleSort() {
   }
 }
 
+async function sendToDiff() {
+  await customXmlFormatRef.value?.copyXml();
+
+  const xml = await readFromClipboard();
+  if (xml == null) {
+    notify('warning', '没有可发送的内容')
+    return
+  }
+  send('DiffTool', xml)
+  notify('success', '已发送到文本对比，请点击菜单进入查看')
+}
+
+const moreOptions = [
+  { label: '发送到文本对比', key: 'diff' }
+]
+
+function handleMoreSelect(key) {
+  if (key === 'diff') sendToDiff()
+}
+
 </script>
 
 <template>
@@ -146,6 +169,11 @@ function toggleSort() {
           <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
             <template #icon> <component :is="SortIcon" /> </template>
           </n-button>
+          <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+            <n-button>
+              <template #icon><n-icon :component="ChevronDownOutline" /></template>
+            </n-button>
+          </n-dropdown>
           <n-input-group>
             <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
             <n-input 
