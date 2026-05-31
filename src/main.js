@@ -3,6 +3,7 @@ import "./style.css";
 import App from "./App.vue";
 import router from "./router";
 import VueBarcode from '@chenfengyuan/vue-barcode';
+import 'lone-format/style.css';
 
 const app = createApp(App);
 app.use(router);
