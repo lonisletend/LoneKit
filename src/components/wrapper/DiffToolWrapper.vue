@@ -3,6 +3,7 @@ import DiffTool from '../tools/DiffTool.vue';
 import EditableTabLabel from '../common/EditableTabLabel.vue';
 import { NTabs, NTab } from "naive-ui";
 import { useTabManager } from '../../composables/useTabManager.js';
+import { useQueueConsumer } from '../../composables/useQueueConsumer.js';
 
 const {
   tabs,
@@ -22,6 +23,13 @@ const {
   component: DiffTool,
   tabNamePrefix: 'Diff',
   maxTabs: 10
+});
+
+// 每次进入（首次或 KeepAlive 激活）自动消费队列：每两条数据创建一个 Tab
+useQueueConsumer({
+  targetName: 'DiffTool',
+  batchSize: 2,
+  onCreate: (batch) => handleAdd({ left: batch[0] ?? '', right: batch[1] ?? '' })
 });
 
 </script>

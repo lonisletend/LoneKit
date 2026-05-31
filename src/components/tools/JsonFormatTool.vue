@@ -28,6 +28,11 @@
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
           <n-tag size="large" type="success">输出</n-tag>
           <n-button @click="copyJson">复制</n-button>
+          <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+            <n-button>
+              <template #icon><n-icon :component="ChevronDownOutline" /></template>
+            </n-button>
+          </n-dropdown>
           <n-button @click="collapseAll">
             <template #icon> <component :is="CollapseIcon" /> </template>
           </n-button>
@@ -70,18 +75,21 @@
 <script setup>
 
 import { computed, defineAsyncComponent, ref, watch } from "vue";
-import {NInput, NInputGroup, NSelect, NTag, NButton} from "naive-ui";
+import {NInput, NInputGroup, NSelect, NTag, NButton, NDropdown, NIcon} from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
+import { ChevronDownOutline } from '@vicons/ionicons5';
 import jsonpath from 'jsonpath';
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
+import { useDataTransfer } from '../../composables/useDataTransfer';
 import { JsonFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { send } = useDataTransfer();
 
 const props = defineProps({
   id: {
@@ -200,6 +208,24 @@ function expandAll() {
 
 function collapseAll() {
   customJsonFormatRef.value?.collapseAll();
+}
+
+function sendToDiff() {
+  const json = customJsonFormatRef.value?.getFilteredJson() ?? customJsonFormatRef.value?.getParsedJson()
+  if (json == null) {
+    notify('warning', '没有可发送的内容')
+    return
+  }
+  send('DiffTool', JSON.stringify(json, null, 2))
+  notify('success', '已发送到文本对比，请点击菜单进入查看')
+}
+
+const moreOptions = [
+  { label: '发送到文本对比', key: 'diff' }
+]
+
+function handleMoreSelect(key) {
+  if (key === 'diff') sendToDiff()
 }
 
 </script>
