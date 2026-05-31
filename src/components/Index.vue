@@ -44,7 +44,7 @@
 
 <script setup>
 import router from "../router";
-import { h, ref, watch } from "vue";
+import { computed, h, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
 import packageJson from "../../package.json";
@@ -66,305 +66,127 @@ function renderIcon(icon) {
 }
 
 // const message = useMessage();
-const menuOptions = ref([
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "CommonFormatWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "通用格式化" }
-    ),
-    key: "common-format-wrapper",
-    icon: renderIcon(FlashIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "JsonFormatWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "Json 格式化" }
-    ),
-    key: "json-format-wrapper",
-    icon: renderIcon(JsonIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "XmlFormatWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "XML 格式化" }
-    ),
-    key: "xml-format-wrapper",
-    icon: renderIcon(CodeIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "SQLFormatWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "SQL 格式化" }
-    ),
-    key: "sql-format-wrapper",
-    icon: renderIcon(SQLIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "TimeTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "时间处理" }
-    ),
-    key: "time-tool",
-    icon: renderIcon(TimeIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "DiffToolWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "文本对比" }
-    ),
-    key: "diff-tool",
-    icon: renderIcon(DiffIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "FolderDiffToolWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "文件夹对比" }
-    ),
-    key: "folder-diff-tool",
-    icon: renderIcon(FolderDiffIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "TextCountTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "文本计数" }
-    ),
-    key: "text-count-tool",
-    icon: renderIcon(TextCountIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "UUIDTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "UUID" }
-    ),
-    key: "uuid-tool",
-    icon: renderIcon(UUIDIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "Md5Tool",
-          params: {
-          }
-        }
-      },
-      { default: () => "Md5" }
-    ),
-    key: "md5-tool",
-    icon: renderIcon(Md5Icon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "Base64Tool",
-          params: {
-          }
-        }
-      },
-      { default: () => "Base64" }
-    ),
-    key: "base64-tool",
-    icon: renderIcon(Base64Icon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "UnicodeTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "Unicode" }
-    ),
-    key: "unicode-tool",
-    icon: renderIcon(StringHexIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "StringHexTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "字符串16进制" }
-    ),
-    key: "string-hex-tool",
-    icon: renderIcon(StringHexIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "QrCodeTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "二维码生成" }
-    ),
-    key: "qr-code-tool",
-    icon: renderIcon(QRCodeIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "QRCodeReaderTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "二维码识别" }
-    ),
-    key: "qr-code-reader-tool",
-    icon: renderIcon(QRCodeReaderIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "BarcodeTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "条形码生成" }
-    ),
-    key: "barcode-tool",
-    icon: renderIcon(BarcodeIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "BarcodeReaderTool",
-          params: {
-          }
-        }
-      },
-      { default: () => "条形码识别" }
-    ),
-    key: "barcode-reader-tool",
-    icon: renderIcon(BarcodeReaderIcon)
-  },
-  {
-    label: () => h(
-      RouterLink,
-      {
-        to: {
-          name: "SendpayDisplayWrapper",
-          params: {
-          }
-        }
-      },
-      { default: () => "Sendpay" }
-    ),
-    key: "sendpay-display-tool",
-    icon: renderIcon(FlagOutline)
-  },
+const MENU_FAVORITES_STORAGE_KEY = "lonekit.menuFavorites.default";
+const rawMenuItems = [
+  { key: "common-format-wrapper", routeName: "CommonFormatWrapper", title: "通用格式化", icon: FlashIcon },
+  { key: "json-format-wrapper", routeName: "JsonFormatWrapper", title: "Json 格式化", icon: JsonIcon },
+  { key: "xml-format-wrapper", routeName: "XmlFormatWrapper", title: "XML 格式化", icon: CodeIcon },
+  { key: "sql-format-wrapper", routeName: "SQLFormatWrapper", title: "SQL 格式化", icon: SQLIcon },
+  { key: "time-tool", routeName: "TimeTool", title: "时间处理", icon: TimeIcon },
+  { key: "diff-tool", routeName: "DiffToolWrapper", title: "文本对比", icon: DiffIcon },
+  { key: "folder-diff-tool", routeName: "FolderDiffToolWrapper", title: "文件夹对比", icon: FolderDiffIcon },
+  { key: "text-count-tool", routeName: "TextCountTool", title: "文本计数", icon: TextCountIcon },
+  { key: "uuid-tool", routeName: "UUIDTool", title: "UUID", icon: UUIDIcon },
+  { key: "md5-tool", routeName: "Md5Tool", title: "Md5", icon: Md5Icon },
+  { key: "base64-tool", routeName: "Base64Tool", title: "Base64", icon: Base64Icon },
+  { key: "unicode-tool", routeName: "UnicodeTool", title: "Unicode", icon: StringHexIcon },
+  { key: "string-hex-tool", routeName: "StringHexTool", title: "字符串16进制", icon: StringHexIcon },
+  { key: "qr-code-tool", routeName: "QrCodeTool", title: "二维码生成", icon: QRCodeIcon },
+  { key: "qr-code-reader-tool", routeName: "QRCodeReaderTool", title: "二维码识别", icon: QRCodeReaderIcon },
+  { key: "barcode-tool", routeName: "BarcodeTool", title: "条形码生成", icon: BarcodeIcon },
+  { key: "barcode-reader-tool", routeName: "BarcodeReaderTool", title: "条形码识别", icon: BarcodeReaderIcon },
+  { key: "sendpay-display-tool", routeName: "SendpayDisplayWrapper", title: "Sendpay", icon: FlagOutline },
+];
 
-]);
+function readFavoriteMenuKeys() {
+  if (typeof window === "undefined") return [];
+  try {
+    const rawValue = localStorage.getItem(MENU_FAVORITES_STORAGE_KEY);
+    if (!rawValue) return [];
+    const parsed = JSON.parse(rawValue);
+    if (!Array.isArray(parsed)) return [];
+    const validKeys = new Set(rawMenuItems.map((item) => item.key));
+    const uniqueKeys = [];
+    for (const key of parsed) {
+      if (typeof key === "string" && validKeys.has(key) && !uniqueKeys.includes(key)) {
+        uniqueKeys.push(key);
+      }
+    }
+    return uniqueKeys;
+  } catch {
+    return [];
+  }
+}
+
+const favoriteMenuKeys = ref(readFavoriteMenuKeys());
+
+function saveFavoriteMenuKeys() {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(MENU_FAVORITES_STORAGE_KEY, JSON.stringify(favoriteMenuKeys.value));
+}
+
+function toggleFavoriteMenu(key) {
+  const index = favoriteMenuKeys.value.indexOf(key);
+  if (index >= 0) {
+    favoriteMenuKeys.value.splice(index, 1);
+  } else {
+    favoriteMenuKeys.value.push(key);
+  }
+  saveFavoriteMenuKeys();
+}
+
+const sortedMenuItems = computed(() => {
+  const favoriteOrder = new Map(favoriteMenuKeys.value.map((key, index) => [key, index]));
+  const favoriteSet = new Set(favoriteMenuKeys.value);
+
+  return [...rawMenuItems].sort((a, b) => {
+    const aIsFavorite = favoriteSet.has(a.key);
+    const bIsFavorite = favoriteSet.has(b.key);
+    if (aIsFavorite && bIsFavorite) {
+      return favoriteOrder.get(a.key) - favoriteOrder.get(b.key);
+    }
+    if (aIsFavorite) return -1;
+    if (bIsFavorite) return 1;
+    return 0;
+  });
+});
+
+const menuOptions = computed(() =>
+  sortedMenuItems.value.map((item) => {
+    const isFavorite = favoriteMenuKeys.value.includes(item.key);
+    return {
+      key: item.key,
+      icon: renderIcon(item.icon),
+      label: () =>
+        h("div", { class: "menu-label-row" }, [
+          h(
+            RouterLink,
+            {
+              class: "menu-label-link",
+              to: { name: item.routeName },
+            },
+            { default: () => item.title }
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              class: ["menu-favorite-star", { "is-favorite": isFavorite }],
+              title: isFavorite ? "取消收藏" : "收藏",
+              "aria-label": isFavorite ? "取消收藏" : "收藏",
+              onClick: (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleFavoriteMenu(item.key);
+              },
+            },
+            isFavorite ? "★" : "☆"
+          ),
+        ]),
+    };
+  })
+);
 const activeKey = ref(null);
 const collapsed = ref(false);
 const version = packageJson.version;
 const route = useRoute();
 
-const routeNameToMenuKey = {
-  TimeTool: "time-tool",
-  CommonFormatWrapper: "common-format-wrapper",
-  JsonFormatWrapper: "json-format-wrapper",
-  XmlFormatWrapper: "xml-format-wrapper",
-  SQLFormatWrapper: "sql-format-wrapper",
-  DiffToolWrapper: "diff-tool",
+const routeNameToMenuKey = rawMenuItems.reduce((map, item) => {
+  map[item.routeName] = item.key;
+  return map;
+}, {
   DiffTool: "diff-tool",
-  FolderDiffToolWrapper: "folder-diff-tool",
-  TextCountTool: "text-count-tool",
-  UUIDTool: "uuid-tool",
-  Md5Tool: "md5-tool",
-  Base64Tool: "base64-tool",
-  UnicodeTool: "unicode-tool",
-  StringHexTool: "string-hex-tool",
-  QrCodeTool: "qr-code-tool",
-  QRCodeReaderTool: "qr-code-reader-tool",
-  BarcodeTool: "barcode-tool",
-  BarcodeReaderTool: "barcode-reader-tool",
-  SendpayDisplayWrapper: "sendpay-display-tool",
-};
+});
 
 watch(
   () => route.name,
@@ -379,5 +201,38 @@ watch(
 /* Logo字体样式 - 优先使用Monaco和Consolas */
 .font-logo {
   font-family: Monaco, Consolas, 'Courier New', monospace !important;
+}
+
+.menu-label-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.menu-label-link {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+
+.menu-favorite-star {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  padding: 0;
+  line-height: 1;
+  font-size: 14px;
+}
+
+.menu-label-row:hover .menu-favorite-star,
+.menu-favorite-star.is-favorite {
+  opacity: 1;
 }
 </style>
