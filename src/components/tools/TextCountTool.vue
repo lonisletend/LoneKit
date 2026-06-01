@@ -120,31 +120,31 @@ function copySource() {
           </div>
           <div class="flex-1 overflow-auto space-y-2 pr-1">
             <div class="stat-row">
-              <span class="text-gray-600">字符数</span>
+              <span class="text-slate-600 dark:text-slate-300">字符数</span>
               <span class="stat-value">{{ stats.chars }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-gray-600">字符数(不含空白)</span>
+              <span class="text-slate-600 dark:text-slate-300">字符数(不含空白)</span>
               <span class="stat-value">{{ stats.charsNoWhitespace }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-gray-600">单词数</span>
+              <span class="text-slate-600 dark:text-slate-300">单词数</span>
               <span class="stat-value">{{ stats.words }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-gray-600">行数</span>
+              <span class="text-slate-600 dark:text-slate-300">行数</span>
               <span class="stat-value">{{ stats.lines }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-gray-600">段落数</span>
+              <span class="text-slate-600 dark:text-slate-300">段落数</span>
               <span class="stat-value">{{ stats.paragraphs }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-gray-600">字节数(UTF-8)</span>
+              <span class="text-slate-600 dark:text-slate-300">字节数(UTF-8)</span>
               <span class="stat-value">{{ stats.bytes === 0 ? stats.bytes : `${stats.bytes} (${stats.bytesHuman})` }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-gray-600">预估阅读时长</span>
+              <span class="text-slate-600 dark:text-slate-300">预估阅读时长</span>
               <span class="stat-value">{{ stats.readingTime }}</span>
             </div>
           </div>
@@ -156,10 +156,10 @@ function copySource() {
 
 <style scoped>
 .stat-row {
-  @apply w-full flex items-center justify-between border border-gray-200 rounded px-3 py-2;
+  @apply w-full flex items-center justify-between border border-slate-200 dark:border-slate-700 rounded px-3 py-2;
 }
 
 .stat-value {
-  @apply text-base font-semibold text-green-600 tabular-nums;
+  @apply text-base font-semibold text-green-600 dark:text-green-400 tabular-nums;
 }
 </style>

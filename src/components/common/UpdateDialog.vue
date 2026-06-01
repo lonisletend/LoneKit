@@ -30,13 +30,13 @@
           <div v-else-if="status === 'found'" class="space-y-3">
             <div>
               <p class="text-base font-medium">发现新版本: {{ updateInfo.version }}</p>
-              <p class="text-sm text-gray-500" v-if="updateInfo.date">
+              <p class="text-sm text-slate-500 dark:text-slate-400" v-if="updateInfo.date">
                 发布日期: {{ formatDate(updateInfo.date) }}
               </p>
             </div>
             
-            <div v-if="updateInfo.body" class="bg-gray-50 p-2 rounded text-sm max-h-32 overflow-y-auto">
-              <p class="font-medium mb-1 text-xs">更新说明：</p>
+            <div v-if="updateInfo.body" class="bg-slate-100/80 dark:bg-slate-800/70 p-2 rounded text-sm max-h-32 overflow-y-auto">
+              <p class="font-medium mb-1 text-xs text-slate-700 dark:text-slate-200">更新说明：</p>
               <div class="whitespace-pre-wrap text-xs">{{ updateInfo.body }}</div>
             </div>
 
@@ -56,7 +56,7 @@
               :show-indicator="true"
               processing
             />
-            <p class="text-xs text-gray-500">
+            <p class="text-xs text-slate-500 dark:text-slate-400">
               {{ formatBytes(downloadedBytes) }} / {{ formatBytes(totalBytes) }}
             </p>
           </div>
@@ -372,6 +372,10 @@ defineExpose({
 
 .update-card {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:global(html.dark) .update-card {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
 .update-content {

@@ -35,14 +35,14 @@
           </n-button> 
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-auto border border-gray-300 rounded p-3 custom-show-area">
+        <div class="flex-1 w-full overflow-auto border border-slate-300 dark:border-slate-700 rounded p-3 custom-show-area">
           <div v-for="(segment, index) in parsedSegments" :key="index" class="mb-3">
             <!-- 普通文本 -->
-            <div v-if="segment.type === 'plainText'" class="text-gray-700 whitespace-pre-wrap">
+            <div v-if="segment.type === 'plainText'" class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
               {{ segment.content }}
             </div>
             <!-- JSON 格式化 -->
-            <div v-else-if="segment.type === 'json'" class="relative border border-blue-200 rounded format-block">
+            <div v-else-if="segment.type === 'json'" class="relative border border-blue-200 dark:border-blue-800 rounded format-block">
               <!-- 悬浮工具栏 -->
               <div class="absolute top-0 right-0 flex items-center space-x-1 format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200">
                 <n-tag size="small" type="info">JSON</n-tag>
@@ -70,12 +70,12 @@
               <JsonFormat 
                 :ref="el => setJsonFormatRef(el, index)"
                 :modelValue="segment.content" 
-                theme="min-light"
+                :theme="formatTheme"
                 class="w-full"
               />
             </div>
             <!-- XML 格式化 -->
-            <div v-else-if="segment.type === 'xml'" class="relative border border-green-200 rounded format-block">
+            <div v-else-if="segment.type === 'xml'" class="relative border border-green-200 dark:border-green-800 rounded format-block">
               <!-- 悬浮工具栏 -->
               <div class="absolute top-0 right-0 flex items-center space-x-1 format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200">
                 <n-tag size="small" type="success">XML</n-tag>
@@ -103,7 +103,7 @@
               <XmlFormat 
                 :ref="el => setXmlFormatRef(el, index)"
                 :modelValue="segment.content" 
-                theme="min-light"
+                :theme="formatTheme"
                 class="w-full"
               />
             </div>
@@ -115,7 +115,7 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent, ref, watch } from "vue";
+import { computed, defineAsyncComponent, ref, watch } from "vue";
 import { NInput, NTag, NButton } from "naive-ui";
 import { 
   Copy24Regular as CopyIcon,
@@ -126,6 +126,7 @@ import {
 
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
+import { useThemeMode } from "../../composables/useThemeMode";
 import { JsonFormat, XmlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
@@ -144,6 +145,8 @@ const jsonFormatRefs = ref({});
 const xmlFormatRefs = ref({});
 const jsonSortStates = ref({});
 const xmlSortStates = ref({});
+const { resolvedTheme } = useThemeMode();
+const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
 
 const exampleText = ref(`[2026-01-25 14:23:45.123] [INFO] [OrderService] - 开始处理订单创建请求
 [2026-01-25 14:23:45.156] [DEBUG] [OrderService] - 接收到订单请求数据: {"orderId":"ORD2026012545678","customerId":"CUST001","customerName":"LoneKit","items":[{"productId":"PROD001","productName":"iPhone 15 Pro","quantity":2,"price":7999.00,"discount":0.95},{"productId":"PROD002","productName":"AirPods Pro 2","quantity":1,"price":1899.00,"discount":1.0}],"shippingAddress":{"province":"北京市","city":"朝阳区","street":"建国路88号","zipCode":"100020","contact":"13800138000"},"paymentMethod":"ALIPAY","totalAmount":17897.05,"discount":799.95,"createTime":"2026-01-25T14:23:45.000Z","status":"PENDING"}

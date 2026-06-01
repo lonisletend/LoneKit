@@ -55,13 +55,13 @@
           </n-input-group>
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
+        <div class="flex-1 w-full overflow-hidden text-lg border border-slate-300 dark:border-slate-700 rounded">
           <JsonFormat
             v-if="hasSourceContent"
             class="w-full h-full"
             ref="customJsonFormatRef"
             v-model="sourceJson"
-            theme="min-light"
+            :theme="formatTheme"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
             <!-- 输入内容后加载格式化视图 -->
@@ -86,6 +86,7 @@ import jsonpath from 'jsonpath';
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 import { useDataTransfer } from '../../composables/useDataTransfer';
+import { useThemeMode } from "../../composables/useThemeMode";
 import { JsonFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
@@ -107,6 +108,8 @@ const filterType = ref('jsonpath');
 const filterExpression = ref('');
 const isSorted = ref(false);
 const hasSourceContent = computed(() => !!sourceJson.value?.trim());
+const { resolvedTheme } = useThemeMode();
+const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
 
 // 过滤类型选项
 const filterTypeOptions = [

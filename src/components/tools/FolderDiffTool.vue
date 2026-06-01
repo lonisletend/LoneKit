@@ -925,7 +925,7 @@ async function openDiffModal(path) {
 </script>
 
 <template>
-  <div class="w-full h-full p-2">
+  <div class="folder-diff-root w-full h-full p-2">
     <input
       ref="leftInputRef"
       type="file"
@@ -979,7 +979,7 @@ async function openDiffModal(path) {
           <SplitPanel>
           <template #left>
             <div class="h-full px-2">
-              <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
+              <div class="h-full p-2 flex flex-col border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900">
                 <div class="tree-header pb-2">
                   <n-button v-if="!hasLeftFolder" type="warning" ghost size="small" circle title="选择左侧文件夹" @click="pickLeftFolder">
                     <template #icon>
@@ -1038,7 +1038,7 @@ async function openDiffModal(path) {
 
           <template #right>
             <div class="h-full px-2">
-              <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
+              <div class="h-full p-2 flex flex-col border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900">
                 <div class="tree-header pb-2">
                   <n-button v-if="!hasRightFolder" type="primary" ghost size="small" circle title="选择右侧文件夹" @click="pickRightFolder">
                     <template #icon>
@@ -1115,7 +1115,7 @@ async function openDiffModal(path) {
       >
         <div class="w-full flex-1 min-h-0 flex flex-col gap-2">
           <div class="flex-1 min-h-0 overflow-auto diff-preview-area">
-            <div v-if="previewLoading" class="text-sm text-gray-500">正在读取文件内容...</div>
+            <div v-if="previewLoading" class="text-sm text-slate-500 dark:text-slate-400">正在读取文件内容...</div>
             <n-alert v-else-if="previewType !== 'diff'" type="info" :show-icon="false">
               {{ previewMessage || '当前文件无法展示内容对比。' }}
             </n-alert>
@@ -1138,6 +1138,24 @@ async function openDiffModal(path) {
   height: 100%;
 }
 
+.folder-diff-root {
+  --folder-diff-border: #e5e7eb;
+  --folder-diff-border-strong: #d1d5db;
+  --folder-diff-border-hover: #9ca3af;
+  --folder-diff-text-muted: #6b7280;
+  --folder-diff-text-main: #374151;
+  --folder-diff-dot-total: #6b7280;
+}
+
+:global(html.dark) .folder-diff-root {
+  --folder-diff-border: #334155;
+  --folder-diff-border-strong: #475569;
+  --folder-diff-border-hover: #64748b;
+  --folder-diff-text-muted: #94a3b8;
+  --folder-diff-text-main: #cbd5e1;
+  --folder-diff-dot-total: #94a3b8;
+}
+
 .folder-diff-spin :deep(.n-spin-container),
 .folder-diff-spin :deep(.n-spin-body),
 .folder-diff-spin :deep(.n-spin-content) {
@@ -1158,7 +1176,7 @@ async function openDiffModal(path) {
   justify-content: space-between;
   gap: 8px;
   font-weight: 600;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--folder-diff-border);
 }
 
 .tree-title {
@@ -1186,7 +1204,7 @@ async function openDiffModal(path) {
 }
 
 .empty-tip {
-  color: #6b7280;
+  color: var(--folder-diff-text-muted);
   font-size: 13px;
   margin-top: 8px;
 }
@@ -1199,14 +1217,14 @@ async function openDiffModal(path) {
   padding: 0 10px;
   font-size: 12px;
   border-radius: 4px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--folder-diff-border);
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
 }
 
 .legend-item:hover {
-  border-color: #9ca3af;
+  border-color: var(--folder-diff-border-hover);
 }
 
 .legend-item.active {
@@ -1221,12 +1239,12 @@ async function openDiffModal(path) {
 }
 
 .legend-item.status-total .legend-dot {
-  background: #6b7280;
+  background: var(--folder-diff-dot-total);
 }
 
 .legend-item.status-total.active {
-  border-color: #6b7280;
-  box-shadow: inset 0 0 0 1px #6b7280;
+  border-color: var(--folder-diff-dot-total);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-dot-total);
 }
 
 .legend-item.status-left-only.active {
@@ -1277,8 +1295,8 @@ async function openDiffModal(path) {
   font-size: 10px;
   padding: 0 4px;
   border-radius: 4px;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  border: 1px solid var(--folder-diff-border-strong);
+  color: var(--folder-diff-text-main);
 }
 
 :deep(.type-dir .node-name) {

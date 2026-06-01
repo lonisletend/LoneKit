@@ -1,36 +1,49 @@
 <template>
-  <div class="w-full h-full flex">
-    <n-layout has-sider>
+  <div class="w-full h-full overflow-hidden">
+    <n-layout has-sider class="w-full h-full overflow-hidden">
       <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="200" :collapsed="collapsed"
         show-trigger @collapse="collapsed = true" @expand="collapsed = false">
-        <div class="flex flex-col h-full">
-          <div>
-            <div
-              class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
-              v-if="!collapsed">
-              <router-link to="/">LoneKit</router-link>
-            </div>
-            <div
-              class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none"
-              v-else>
-              <router-link to="/">Kit</router-link>
-            </div>
+        <div class="flex h-full min-h-0 flex-col overflow-hidden">
+          <div
+            class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none shrink-0"
+            v-if="!collapsed">
+            <router-link to="/">LoneKit</router-link>
+          </div>
+          <div
+            class="w-full h-16 mt-2 flex items-center justify-center font-bold font-logo text-2xl text-green-600 cursor-pointer select-none shrink-0"
+            v-else>
+            <router-link to="/">Kit</router-link>
+          </div>
+          <div class="min-h-0 flex-1 overflow-auto">
             <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22"
               @update:value="handleMenuUpdate"
               :options="menuOptions" />
           </div>
-          <!-- 版本号显示 -->
-          <div class="mt-auto mb-4 flex items-center justify-center">
-            <div class="text-xs text-gray-500 font-mono" v-if="!collapsed">
-              Version: {{ version }}
-            </div>
-            <div class="text-xs text-gray-500 font-mono" v-else>
-              V{{ version.split('.')[0] }}.{{ version.split('.')[1] }}
+          <div class="shrink-0 mb-4 flex items-center justify-center border-t border-slate-200 dark:border-slate-800 pt-3">
+            <div class="w-full px-2 flex flex-col items-center gap-2">
+              <div class="flex items-center gap-2">
+                <n-button size="small" quaternary circle class="theme-toggle-btn" @click="handleThemeToggleClick">
+                  <template #icon>
+                    <n-icon :component="currentThemeIcon" />
+                  </template>
+                </n-button>
+                <n-button size="small" quaternary circle class="theme-toggle-btn" @click="handleGithubClick">
+                  <template #icon>
+                    <n-icon :component="GithubIcon" />
+                  </template>
+                </n-button>
+              </div>
+              <div class="text-xs text-slate-500 dark:text-slate-400 font-mono" v-if="!collapsed">
+                Version: {{ version }}
+              </div>
+              <div class="text-xs text-slate-500 dark:text-slate-400 font-mono" v-else>
+                V{{ version.split('.')[0] }}.{{ version.split('.')[1] }}
+              </div>
             </div>
           </div>
         </div>
       </n-layout-sider>
-      <div class="w-full h-full px-4 py-2 overflow-auto">
+      <div class="w-full h-full min-h-0 px-4 py-2 overflow-auto">
         <n-notification-provider>
           <router-view v-slot="{ Component }">
             <keep-alive>
@@ -47,7 +60,7 @@
 import router from "../router";
 import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider } from "naive-ui";
+import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider, NButton } from "naive-ui";
 import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
 import Md5Icon from "./icons/Md5Icon.vue";
@@ -61,7 +74,8 @@ import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
 import UnicodeIcon from "./icons/UnicodeIcon.vue";
 import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon } from '@vicons/fluent';
-import { FlagOutline } from '@vicons/ionicons5';
+import { ContrastOutline, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline } from '@vicons/ionicons5';
+import { useThemeMode } from "../composables/useThemeMode";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -190,6 +204,35 @@ const activeKey = ref(null);
 const collapsed = ref(false);
 const version = packageJson.version;
 const route = useRoute();
+const { themeMode, setThemeMode } = useThemeMode();
+const themeModeOrder = ["light", "dark", "auto"];
+
+const currentThemeIcon = computed(() => {
+  switch (themeMode.value) {
+    case "light":
+      return SunnyOutline;
+    case "dark":
+      return MoonOutline;
+    default:
+      return ContrastOutline;
+  }
+});
+
+function handleThemeToggleClick() {
+  const currentIndex = themeModeOrder.indexOf(themeMode.value);
+  const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % themeModeOrder.length : 0;
+  setThemeMode(themeModeOrder[nextIndex]);
+}
+
+async function handleGithubClick() {
+  const githubUrl = "https://github.com/lonisletend/LoneKit";
+  try {
+    const { open } = await import("@tauri-apps/plugin-shell");
+    await open(githubUrl);
+  } catch {
+    window.open(githubUrl, "_blank", "noopener,noreferrer");
+  }
+}
 
 const routeNameToMenuKey = rawMenuItems.reduce((map, item) => {
   map[item.routeName] = item.key;
@@ -222,6 +265,11 @@ watch(
 /* Logo字体样式 - 优先使用Monaco和Consolas */
 .font-logo {
   font-family: Monaco, Consolas, 'Courier New', monospace !important;
+}
+
+.theme-toggle-btn {
+  width: 32px;
+  height: 32px;
 }
 
 :deep(.menu-label-row) {

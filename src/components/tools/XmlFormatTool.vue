@@ -12,6 +12,7 @@ import { ChevronDownOutline } from '@vicons/ionicons5';
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 import { useDataTransfer } from '../../composables/useDataTransfer';
+import { useThemeMode } from "../../composables/useThemeMode";
 import { XmlFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
@@ -24,6 +25,8 @@ const filterType = ref('xpath');
 const filterExpression = ref('');
 const isSorted = ref(false);
 const hasSourceContent = computed(() => !!source.value?.trim());
+const { resolvedTheme } = useThemeMode();
+const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
 
 // 过滤类型选项
 const filterTypeOptions = [
@@ -186,13 +189,13 @@ function handleMoreSelect(key) {
             />
           </n-input-group>
         </div>
-        <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
+        <div class="flex-1 w-full overflow-hidden text-lg border border-slate-300 dark:border-slate-700 rounded">
           <XmlFormat
             v-if="hasSourceContent"
             class="w-full h-full"
             ref="customXmlFormatRef"
             v-model="source"
-            theme="min-light"
+            :theme="formatTheme"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
             <!-- 输入内容后加载格式化视图 -->

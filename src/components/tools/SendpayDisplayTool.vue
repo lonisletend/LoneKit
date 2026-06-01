@@ -904,7 +904,7 @@ refreshUrlProfilesOnLoad();
 </script>
 
 <template>
-  <div class="w-full h-full p-2 flex flex-col gap-2">
+  <div class="sendpay-root w-full h-full p-2 flex flex-col gap-2">
     <div class="w-full flex flex-col gap-2">
       <div class="h-8 flex items-center justify-between">
         <div class="flex items-center space-x-4">
@@ -969,7 +969,7 @@ refreshUrlProfilesOnLoad();
     <div class="flex-1 min-h-0">
       <SplitPanel :default-size="0.75" :min="0.5" :max="0.9">
         <template #left>
-          <div class="h-full p-2 border border-green-100 rounded overflow-auto">
+          <div class="h-full p-2 border border-green-200 dark:border-green-900 rounded overflow-auto">
             <div v-if="sendpayPairs.length || sendpayMapPairs.length" class="space-y-3">
               <div v-if="sendpayPairs.length" class="pair-grid">
                 <table v-for="item in sendpayPairs" :key="item.position" class="pair-table">
@@ -1030,7 +1030,7 @@ refreshUrlProfilesOnLoad();
         </template>
 
         <template #right>
-          <div class="h-full p-2 border border-green-100 rounded overflow-auto">
+          <div class="h-full p-2 border border-green-200 dark:border-green-900 rounded overflow-auto">
             <div v-if="!parsedConfigEntries.length" class="h-full flex items-center justify-center">
               <n-empty description="当前配置暂无可展示解释" />
             </div>
@@ -1081,20 +1081,20 @@ refreshUrlProfilesOnLoad();
     <n-modal v-model:show="showConfigModal" preset="card" title="标位解释配置" style="width: 860px" :mask-closable="false">
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
-          <div class="text-sm text-gray-500">
+          <div class="text-sm text-slate-500 dark:text-slate-400">
             支持多份配置，格式可选 URL/Json。URL 配置在保存和页面进入时会自动拉取并更新。
           </div>
           <n-button size="small" @click="addProfile">新增配置</n-button>
         </div>
 
-        <div v-if="!editingProfiles.length" class="h-36 border border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400">
+        <div v-if="!editingProfiles.length" class="h-36 border border-dashed border-slate-300 dark:border-slate-600 rounded flex items-center justify-center text-slate-400 dark:text-slate-500">
           暂无配置，点击右上角“新增配置”创建。
         </div>
 
         <div v-else class="max-h-[520px] overflow-auto pr-1 space-y-3">
-          <div v-for="(profile, index) in editingProfiles" :key="profile.id" class="border border-green-100 rounded p-3 bg-green-50/20 space-y-2">
+          <div v-for="(profile, index) in editingProfiles" :key="profile.id" class="border border-green-200 dark:border-green-900 rounded p-3 bg-green-50/20 dark:bg-green-950/20 space-y-2">
             <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2 text-xs text-gray-500">
+              <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span>#{{ index + 1 }}</span>
                 <span>ID: {{ profile.id }}</span>
               </div>
@@ -1142,6 +1142,48 @@ refreshUrlProfilesOnLoad();
 </template>
 
 <style scoped>
+.sendpay-root {
+  --sendpay-text-main: #2d6a4f;
+  --sendpay-text-strong: #1b4332;
+  --sendpay-text-subtle: #52796f;
+  --sendpay-border: #b7e4c7;
+  --sendpay-border-strong: #7ccf98;
+  --sendpay-border-strong-hover: #63c784;
+  --sendpay-bg-panel: #f2fbf4;
+  --sendpay-bg-head: #d8f3dc;
+  --sendpay-bg-body: #f7fff8;
+  --sendpay-bg-input: #ffffff;
+  --sendpay-unmatched-border: #f4a5a5;
+  --sendpay-unmatched-head: #fee2e2;
+  --sendpay-unmatched-body: #fff5f5;
+  --sendpay-unmatched-text-main: #b91c1c;
+  --sendpay-unmatched-text-strong: #991b1b;
+  --sendpay-compare-bg: #fbfffc;
+  --sendpay-compare-unmatched-bg: #fffafa;
+  --sendpay-compare-unmatched-border: #fecaca;
+}
+
+:global(html.dark) .sendpay-root {
+  --sendpay-text-main: #a7f3d0;
+  --sendpay-text-strong: #d1fae5;
+  --sendpay-text-subtle: #86efac;
+  --sendpay-border: #166534;
+  --sendpay-border-strong: #16a34a;
+  --sendpay-border-strong-hover: #22c55e;
+  --sendpay-bg-panel: rgba(20, 83, 45, 0.26);
+  --sendpay-bg-head: rgba(22, 101, 52, 0.45);
+  --sendpay-bg-body: rgba(20, 83, 45, 0.28);
+  --sendpay-bg-input: rgba(15, 23, 42, 0.8);
+  --sendpay-unmatched-border: #b91c1c;
+  --sendpay-unmatched-head: rgba(153, 27, 27, 0.45);
+  --sendpay-unmatched-body: rgba(127, 29, 29, 0.3);
+  --sendpay-unmatched-text-main: #fecaca;
+  --sendpay-unmatched-text-strong: #fee2e2;
+  --sendpay-compare-bg: rgba(20, 83, 45, 0.22);
+  --sendpay-compare-unmatched-bg: rgba(127, 29, 29, 0.24);
+  --sendpay-compare-unmatched-border: #fca5a5;
+}
+
 .pair-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
@@ -1150,21 +1192,21 @@ refreshUrlProfilesOnLoad();
 
 .map-title {
   font-size: 12px;
-  color: #2d6a4f;
+  color: var(--sendpay-text-main);
   font-weight: 600;
 }
 
 .pair-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #b7e4c7;
+  border: 1px solid var(--sendpay-border);
   border-radius: 6px;
   overflow: hidden;
-  background: #f2fbf4;
+  background: var(--sendpay-bg-panel);
 }
 
 .pair-table td {
-  border: 1px solid #b7e4c7;
+  border: 1px solid var(--sendpay-border);
   padding: 4px 6px;
   text-align: center;
   font-size: 12px;
@@ -1175,57 +1217,57 @@ refreshUrlProfilesOnLoad();
 }
 
 .pair-position {
-  background: #d8f3dc;
-  color: #1b4332;
+  background: var(--sendpay-bg-head);
+  color: var(--sendpay-text-strong);
   font-weight: 600;
 }
 
 .pair-value {
-  background: #f7fff8;
-  color: #2d6a4f;
+  background: var(--sendpay-bg-body);
+  color: var(--sendpay-text-main);
   font-weight: 600;
   cursor: text;
 }
 
 .pair-value-editor {
   width: 100%;
-  border: 1px solid #7ccf98;
+  border: 1px solid var(--sendpay-border-strong);
   border-radius: 4px;
   padding: 2px 0;
   text-align: center;
   outline: none;
-  background: #ffffff;
-  color: #2d6a4f;
+  background: var(--sendpay-bg-input);
+  color: var(--sendpay-text-main);
 }
 
 .pair-value-editor:focus {
-  border-color: #63c784;
+  border-color: var(--sendpay-border-strong-hover);
   box-shadow: 0 0 0 2px rgba(99, 199, 132, 0.18);
 }
 
 .pair-value-editor::selection {
   background: rgba(99, 199, 132, 0.22);
-  color: #1b4332;
+  color: var(--sendpay-text-strong);
 }
 
 .pair-value-editor::-moz-selection {
   background: rgba(99, 199, 132, 0.22);
-  color: #1b4332;
+  color: var(--sendpay-text-strong);
 }
 
 .explain-item {
-  border: 1px solid #b7e4c7;
+  border: 1px solid var(--sendpay-border);
   border-radius: 6px;
   overflow: hidden;
 }
 
 .explain-item-unmatched {
-  border-color: #f4a5a5;
+  border-color: var(--sendpay-unmatched-border);
 }
 
 .explain-head {
-  background: #d8f3dc;
-  color: #1b4332;
+  background: var(--sendpay-bg-head);
+  color: var(--sendpay-text-strong);
   font-size: 13px;
   padding: 6px 8px;
   font-weight: 600;
@@ -1235,8 +1277,8 @@ refreshUrlProfilesOnLoad();
 }
 
 .explain-body {
-  background: #f7fff8;
-  color: #2d6a4f;
+  background: var(--sendpay-bg-body);
+  color: var(--sendpay-text-main);
   font-size: 13px;
   padding: 8px;
   line-height: 1.5;
@@ -1244,19 +1286,19 @@ refreshUrlProfilesOnLoad();
 }
 
 .explain-item-unmatched .explain-head {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--sendpay-unmatched-head);
+  color: var(--sendpay-unmatched-text-strong);
 }
 
 .explain-item-unmatched .explain-body {
-  background: #fff5f5;
-  color: #b91c1c;
+  background: var(--sendpay-unmatched-body);
+  color: var(--sendpay-unmatched-text-main);
 }
 
 .explain-toggle-btn {
   border: none;
   background: transparent;
-  color: #2d6a4f;
+  color: var(--sendpay-text-main);
   width: 22px;
   height: 22px;
   cursor: pointer;
@@ -1267,15 +1309,15 @@ refreshUrlProfilesOnLoad();
 }
 
 .explain-toggle-btn:hover {
-  color: #1b4332;
+  color: var(--sendpay-text-strong);
 }
 
 .explain-item-unmatched .explain-toggle-btn {
-  color: #b91c1c;
+  color: var(--sendpay-unmatched-text-main);
 }
 
 .explain-item-unmatched .explain-toggle-btn:hover {
-  color: #991b1b;
+  color: var(--sendpay-unmatched-text-strong);
 }
 
 .explain-toggle-icon {
@@ -1283,8 +1325,8 @@ refreshUrlProfilesOnLoad();
 }
 
 .explain-compare-list {
-  border-top: 1px dashed #b7e4c7;
-  background: #fbfffc;
+  border-top: 1px dashed var(--sendpay-border);
+  background: var(--sendpay-compare-bg);
   padding: 6px 8px;
   display: flex;
   flex-direction: column;
@@ -1292,8 +1334,8 @@ refreshUrlProfilesOnLoad();
 }
 
 .explain-item-unmatched .explain-compare-list {
-  border-top-color: #fecaca;
-  background: #fffafa;
+  border-top-color: var(--sendpay-compare-unmatched-border);
+  background: var(--sendpay-compare-unmatched-bg);
 }
 
 .explain-compare-item {
@@ -1305,12 +1347,12 @@ refreshUrlProfilesOnLoad();
 
 .explain-compare-key {
   min-width: 36px;
-  color: #2d6a4f;
+  color: var(--sendpay-text-main);
   font-weight: 600;
 }
 
 .explain-compare-text {
-  color: #52796f;
+  color: var(--sendpay-text-subtle);
   line-height: 1.4;
   white-space: pre-line;
 }
@@ -1321,23 +1363,23 @@ refreshUrlProfilesOnLoad();
 
 .sendpay-input :deep(textarea::selection) {
   background: rgba(99, 199, 132, 0.2);
-  color: #1b4332;
+  color: var(--sendpay-text-strong);
 }
 
 .sendpay-input :deep(textarea::-moz-selection) {
   background: rgba(99, 199, 132, 0.2);
-  color: #1b4332;
+  color: var(--sendpay-text-strong);
 }
 
 .config-setting-input :deep(input::selection),
 .config-setting-input :deep(textarea::selection) {
   background: rgba(99, 199, 132, 0.2);
-  color: #1b4332;
+  color: var(--sendpay-text-strong);
 }
 
 .config-setting-input :deep(input::-moz-selection),
 .config-setting-input :deep(textarea::-moz-selection) {
   background: rgba(99, 199, 132, 0.2);
-  color: #1b4332;
+  color: var(--sendpay-text-strong);
 }
 </style>

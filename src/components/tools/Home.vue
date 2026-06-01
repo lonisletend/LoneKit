@@ -10,11 +10,11 @@
               :type="log.type || 'success'"
             >
               <template #header>
-                <div class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <div class="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <span>{{ log.date }}</span>
                   <span class="text-green-600">{{ log.version }}</span>
                   <a v-if="log.releaseLink" :href="log.releaseLink" target="_blank" rel="noopener noreferrer" class="inline-flex items-center hover:opacity-70 transition-opacity">
-                    <component :is="GithubIcon" class="w-5 h-5 text-gray-600" />
+                    <component :is="GithubIcon" class="w-5 h-5 text-slate-600 dark:text-slate-300" />
                   </a>
                 </div>
               </template>
@@ -424,7 +424,11 @@ const changeLogs = ref([
 .changelog-list {
   margin-left: 24px;
   list-style-type: disc;
-  color: #666;
+  color: #64748b;
+}
+
+:global(html.dark) .changelog-list {
+  color: #94a3b8;
 }
 
 .changelog-list li {

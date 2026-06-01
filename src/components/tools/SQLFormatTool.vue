@@ -9,6 +9,7 @@ import {
 
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon'
+import { useThemeMode } from "../../composables/useThemeMode";
 import { SqlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
@@ -20,6 +21,8 @@ defineOptions({
 const source = ref();
 const customSqlFormatRef = ref(null)
 const hasSourceContent = computed(() => !!source.value?.trim());
+const { resolvedTheme } = useThemeMode();
+const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
 
 async function readClipboard() {
   const text = await readFromClipboard();
@@ -95,13 +98,13 @@ function collapseAll() {
               <template #icon> <component :is="ExpandIcon" /> </template>
             </n-button>
           </div>
-          <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
+          <div class="flex-1 w-full overflow-hidden text-lg border border-slate-300 dark:border-slate-700 rounded">
             <SqlFormat
               v-if="hasSourceContent"
               class="w-full h-full"
               ref="customSqlFormatRef"
               v-model="source"
-              theme="min-light"
+              :theme="formatTheme"
             />
             <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
               <!-- 输入内容后加载格式化视图 -->

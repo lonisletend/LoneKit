@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 /* 全局输入框代码字体样式 */
 .n-input .n-input__textarea,
 .n-input .n-input__input-el,
