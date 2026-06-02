@@ -1,7 +1,7 @@
 <script setup>
 
-import { computed, defineAsyncComponent, ref } from "vue";
-import {NButton, NInput, NTag, useNotification} from "naive-ui";
+import { computed, defineAsyncComponent, ref, watch } from "vue";
+import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
 import { 
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
@@ -23,6 +23,37 @@ const customSqlFormatRef = ref(null)
 const hasSourceContent = computed(() => !!source.value?.trim());
 const { resolvedTheme } = useThemeMode();
 const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
+const DIALECT_STORAGE_KEY = 'sql-format-dialect';
+const dialectOptions = [
+  { label: 'SQL(generic)', value: 'sql' },
+  { label: 'BigQuery', value: 'bigquery' },
+  { label: 'ClickHouse', value: 'clickhouse' },
+  { label: 'DB2', value: 'db2' },
+  { label: 'DB2i', value: 'db2i' },
+  { label: 'DuckDB', value: 'duckdb' },
+  { label: 'Hive', value: 'hive' },
+  { label: 'MariaDB', value: 'mariadb' },
+  { label: 'MySQL', value: 'mysql' },
+  { label: 'N1QL', value: 'n1ql' },
+  { label: 'PL/SQL', value: 'plsql' },
+  { label: 'PostgreSQL', value: 'postgresql' },
+  { label: 'Redshift', value: 'redshift' },
+  { label: 'Spark', value: 'spark' },
+  { label: 'SQLite', value: 'sqlite' },
+  { label: 'TiDB', value: 'tidb' },
+  { label: 'Trino', value: 'trino' },
+  { label: 'Transact-SQL', value: 'transactsql' },
+  { label: 'T-SQL', value: 'tsql' },
+  { label: 'SingleStoreDB', value: 'singlestoredb' },
+  { label: 'Snowflake', value: 'snowflake' }
+];
+const dialectValues = new Set(dialectOptions.map((option) => option.value));
+const savedDialect = localStorage.getItem(DIALECT_STORAGE_KEY);
+const dialect = ref(dialectValues.has(savedDialect) ? savedDialect : 'sql');
+
+watch(dialect, (value) => {
+  localStorage.setItem(DIALECT_STORAGE_KEY, value);
+});
 
 async function readClipboard() {
   const text = await readFromClipboard();
@@ -91,6 +122,11 @@ function collapseAll() {
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="success">结果</n-tag>
             <n-button @click="copyValue">复制</n-button>
+            <n-select
+              v-model:value="dialect"
+              :options="dialectOptions"
+              :style="{ width: '170px' }"
+            />
             <n-button @click="collapseAll">
               <template #icon> <component :is="CollapseIcon" /> </template>
             </n-button>
@@ -105,6 +141,7 @@ function collapseAll() {
               ref="customSqlFormatRef"
               v-model="source"
               :theme="formatTheme"
+              :dialect="dialect"
             />
             <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
               <!-- 输入内容后加载格式化视图 -->
