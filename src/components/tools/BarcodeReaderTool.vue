@@ -5,6 +5,7 @@ import { CloudUploadOutline } from "@vicons/ionicons5";
 import { readBarcodesFromImageFile } from 'zxing-wasm/reader';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
+import { useThemeMode } from '../../composables/useThemeMode';
 
 // 历史记录数组
 const historyList = ref([]);
@@ -12,6 +13,7 @@ const isLoading = ref(false);
 const isProcessing = ref(false);
 
 const { notify, copyToClipboard } = useCommon();
+const { resolvedTheme } = useThemeMode();
 
 // 处理图片文件并识别条形码（通用逻辑）
 async function processImageFile(imageFile) {
@@ -164,7 +166,7 @@ function syncScroll(e, target) {
 </script>
 
 <template>
-  <div class="h-full flex flex-col overflow-hidden">
+  <div class="barcode-reader-root h-full flex flex-col overflow-hidden" :class="{ 'is-dark': resolvedTheme === 'dark' }">
     <SplitPanel>
       <template #left>
         <div class="flex flex-col h-full p-2 space-y-2">
@@ -283,6 +285,28 @@ function syncScroll(e, target) {
 </template>
 
 <style scoped>
+.barcode-reader-root {
+  --reader-result-text: #334155;
+  --reader-result-bg: #f8fafc;
+  --reader-placeholder-border: #d9d9d9;
+  --reader-placeholder-bg: #fafafa;
+  --reader-placeholder-hover-border: #40a9ff;
+  --reader-placeholder-text: rgba(0, 0, 0, 0.45);
+  --reader-link: #18a058;
+  --reader-link-hover: #36ad6a;
+}
+
+.barcode-reader-root.is-dark {
+  --reader-result-text: #cbd5e1;
+  --reader-result-bg: #111827;
+  --reader-placeholder-border: #334155;
+  --reader-placeholder-bg: #0f172a;
+  --reader-placeholder-hover-border: #60a5fa;
+  --reader-placeholder-text: #94a3b8;
+  --reader-link: #4ade80;
+  --reader-link-hover: #86efac;
+}
+
 .history-item {
   scroll-margin-top: 1rem;
 }
@@ -296,6 +320,8 @@ function syncScroll(e, target) {
   min-height: 200px;
   max-height: 200px;
   overflow-y: auto;
+  color: var(--reader-result-text, #334155);
+  background: var(--reader-result-bg, #f8fafc);
 }
 
 /* 统一左右两侧提示区域样式 */
@@ -304,21 +330,21 @@ function syncScroll(e, target) {
   width: 100%;
   min-height: 150px;
   height: 150px;
-  border: 2px dashed #d9d9d9;
+  border: 2px dashed var(--reader-placeholder-border, #d9d9d9) !important;
   border-radius: 4px;
-  background-color: #fafafa;
+  background-color: var(--reader-placeholder-bg, #fafafa);
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, background-color 0.3s;
   box-sizing: border-box;
 }
 
 .upload-placeholder:hover {
-  border-color: #40a9ff;
+  border-color: var(--reader-placeholder-hover-border, #40a9ff) !important;
 }
 
 .result-placeholder {
@@ -328,7 +354,7 @@ function syncScroll(e, target) {
 /* 统一空状态文字颜色 */
 .upload-placeholder :deep(.n-text),
 .result-placeholder :deep(.n-empty__description) {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--reader-placeholder-text, rgba(0, 0, 0, 0.45));
 }
 
 /* 让 n-upload 组件占满整个容器宽度 */
@@ -342,13 +368,13 @@ function syncScroll(e, target) {
 
 /* URL 链接样式 */
 .result-link {
-  color: #18a058;
+  color: var(--reader-link, #18a058);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .result-link:hover {
-  color: #36ad6a;
+  color: var(--reader-link-hover, #36ad6a);
   text-decoration: underline;
 }
 </style>

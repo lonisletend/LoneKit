@@ -374,7 +374,8 @@ defineExpose({
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-:global(html.dark) .update-card {
+:global(html.dark .update-card),
+:global(html[data-theme='dark'] .update-card) {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 

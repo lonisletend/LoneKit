@@ -427,7 +427,8 @@ const changeLogs = ref([
   color: #64748b;
 }
 
-:global(html.dark) .changelog-list {
+:global(html.dark .changelog-list),
+:global(html[data-theme='dark'] .changelog-list) {
   color: #94a3b8;
 }
 

@@ -1163,7 +1163,8 @@ refreshUrlProfilesOnLoad();
   --sendpay-compare-unmatched-border: #fecaca;
 }
 
-:global(html.dark) .sendpay-root {
+:global(html.dark .sendpay-root),
+:global(html[data-theme='dark'] .sendpay-root) {
   --sendpay-text-main: #a7f3d0;
   --sendpay-text-strong: #d1fae5;
   --sendpay-text-subtle: #86efac;

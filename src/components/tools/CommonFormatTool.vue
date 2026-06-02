@@ -1,5 +1,6 @@
 <template>
-  <SplitPanel>
+  <div class="common-format-root h-full" :class="{ 'is-dark': resolvedTheme === 'dark' }">
+    <SplitPanel>
     <template #left>
       <!-- 左侧输入区域 -->
       <div class="h-full p-2 flex flex-col">
@@ -35,14 +36,14 @@
           </n-button> 
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-auto border border-slate-300 dark:border-slate-700 rounded p-3 custom-show-area">
+        <div class="flex-1 w-full overflow-auto rounded p-3 custom-show-area result-pane">
           <div v-for="(segment, index) in parsedSegments" :key="index" class="mb-3">
             <!-- 普通文本 -->
-            <div v-if="segment.type === 'plainText'" class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+            <div v-if="segment.type === 'plainText'" class="plain-text-segment whitespace-pre-wrap">
               {{ segment.content }}
             </div>
             <!-- JSON 格式化 -->
-            <div v-else-if="segment.type === 'json'" class="relative border border-blue-200 dark:border-blue-800 rounded format-block">
+            <div v-else-if="segment.type === 'json'" class="relative rounded format-block json-segment">
               <!-- 悬浮工具栏 -->
               <div class="absolute top-0 right-0 flex items-center space-x-1 format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200">
                 <n-tag size="small" type="info">JSON</n-tag>
@@ -75,7 +76,7 @@
               />
             </div>
             <!-- XML 格式化 -->
-            <div v-else-if="segment.type === 'xml'" class="relative border border-green-200 dark:border-green-800 rounded format-block">
+            <div v-else-if="segment.type === 'xml'" class="relative rounded format-block xml-segment">
               <!-- 悬浮工具栏 -->
               <div class="absolute top-0 right-0 flex items-center space-x-1 format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200">
                 <n-tag size="small" type="success">XML</n-tag>
@@ -111,7 +112,8 @@
         </div>
       </div>
     </template>
-  </SplitPanel>
+    </SplitPanel>
+  </div>
 </template>
 
 <script setup>
@@ -575,16 +577,62 @@ function expandAll() {
 </script>
 
 <style scoped>
+.common-format-root {
+  --common-format-pane-bg: #ffffff;
+  --common-format-pane-border: #cbd5e1;
+  --common-format-plain-text: #334155;
+  --common-format-json-border: #bfdbfe;
+  --common-format-json-bg: rgba(239, 246, 255, 0.45);
+  --common-format-xml-border: #bbf7d0;
+  --common-format-xml-bg: rgba(240, 253, 244, 0.45);
+  --common-format-toolbar-bg: rgba(255, 255, 255, 0.95);
+  --common-format-toolbar-border: #e2e8f0;
+  --common-format-toolbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.common-format-root.is-dark {
+  --common-format-pane-bg: #0f172a;
+  --common-format-pane-border: #334155;
+  --common-format-plain-text: #cbd5e1;
+  --common-format-json-border: #1e3a8a;
+  --common-format-json-bg: rgba(30, 58, 138, 0.22);
+  --common-format-xml-border: #166534;
+  --common-format-xml-bg: rgba(22, 101, 52, 0.2);
+  --common-format-toolbar-bg: rgba(15, 23, 42, 0.96);
+  --common-format-toolbar-border: #334155;
+  --common-format-toolbar-shadow: 0 4px 14px rgba(0, 0, 0, 0.42);
+}
+
+.result-pane {
+  border: 1px solid var(--common-format-pane-border);
+  background: var(--common-format-pane-bg);
+}
+
+.plain-text-segment {
+  color: var(--common-format-plain-text);
+}
+
+.json-segment {
+  border: 1px solid var(--common-format-json-border);
+  background: var(--common-format-json-bg);
+}
+
+.xml-segment {
+  border: 1px solid var(--common-format-xml-border);
+  background: var(--common-format-xml-bg);
+}
+
 /* 悬浮工具栏样式 */
 .format-block:hover .format-toolbar {
   opacity: 1;
 }
 
 .format-toolbar {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--common-format-toolbar-bg);
+  border: 1px solid var(--common-format-toolbar-border);
   border-radius: 6px;
   padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--common-format-toolbar-shadow);
   z-index: 10;
 }
 </style>

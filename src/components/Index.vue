@@ -72,9 +72,8 @@ import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
-import UnicodeIcon from "./icons/UnicodeIcon.vue";
 import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon } from '@vicons/fluent';
-import { ContrastOutline, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline } from '@vicons/ionicons5';
+import { ContrastOutline, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline, LanguageOutline as UnicodeMenuIcon } from '@vicons/ionicons5';
 import { useThemeMode } from "../composables/useThemeMode";
 
 function renderIcon(icon) {
@@ -99,7 +98,7 @@ const rawMenuItems = [
   { key: "uuid-tool", routeName: "UUIDTool", title: "UUID", icon: UUIDIcon },
   { key: "md5-tool", routeName: "Md5Tool", title: "Md5", icon: Md5Icon },
   { key: "base64-tool", routeName: "Base64Tool", title: "Base64", icon: Base64Icon },
-  { key: "unicode-tool", routeName: "UnicodeTool", title: "Unicode", icon: UnicodeIcon },
+  { key: "unicode-tool", routeName: "UnicodeTool", title: "Unicode", icon: UnicodeMenuIcon },
   { key: "string-hex-tool", routeName: "StringHexTool", title: "字符串16进制", icon: StringHexIcon },
   { key: "qr-code-tool", routeName: "QrCodeTool", title: "二维码生成", icon: QRCodeIcon },
   { key: "qr-code-reader-tool", routeName: "QRCodeReaderTool", title: "二维码识别", icon: QRCodeReaderIcon },
