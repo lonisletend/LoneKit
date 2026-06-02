@@ -33,7 +33,12 @@
           </n-button>
           <n-button @click="expandAll">
             <template #icon> <component :is="ExpandIcon" /> </template>
-          </n-button> 
+          </n-button>
+          <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+            <n-button>
+              <template #icon><n-icon :component="ChevronDownOutline" /></template>
+            </n-button>
+          </n-dropdown>
         </div>
         <!-- 可滚动的输出区域 -->
         <div class="flex-1 w-full overflow-auto rounded p-3 custom-show-area result-pane">
@@ -118,20 +123,23 @@
 
 <script setup>
 import { computed, defineAsyncComponent, ref, watch } from "vue";
-import { NInput, NTag, NButton } from "naive-ui";
+import { NInput, NTag, NButton, NDropdown, NIcon } from "naive-ui";
 import { 
   Copy24Regular as CopyIcon,
   TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
+import { ChevronDownOutline } from '@vicons/ionicons5';
 
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
+import { useDataTransfer } from '../../composables/useDataTransfer';
 import { useThemeMode } from "../../composables/useThemeMode";
 import { JsonFormat, XmlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { send } = useDataTransfer();
 
 const props = defineProps({
   id: {
@@ -520,12 +528,12 @@ function copySource() {
   copyToClipboard(sourceText.value);
 }
 
-async function copyAll() {
+async function getFormattedText() {
   const textParts = [];
-  
+
   for (let i = 0; i < parsedSegments.value.length; i++) {
     const segment = parsedSegments.value[i];
-    
+
     if (segment.type === 'plainText') {
       textParts.push(segment.content);
     } else if (segment.type === 'json') {
@@ -542,9 +550,12 @@ async function copyAll() {
       textParts.push(formattedXml);
     }
   }
-  
-  // 用换行连接所有部分
-  const allText = textParts.join('\n');
+
+  return textParts.join('\n');
+}
+
+async function copyAll() {
+  const allText = await getFormattedText();
   await copyToClipboard(allText);
 }
 
@@ -572,6 +583,25 @@ function expandAll() {
       xmlFormatRefs.value[i]?.expandAll();
     }
   }
+}
+
+async function sendToDiff() {
+  const text = await getFormattedText();
+  if (!text) {
+    notify('warning', '没有可发送的内容')
+    return
+  }
+
+  send('DiffTool', text)
+  notify('success', '已发送到文本对比，请点击菜单进入查看')
+}
+
+const moreOptions = [
+  { label: '发送到文本对比', key: 'diff' }
+]
+
+function handleMoreSelect(key) {
+  if (key === 'diff') sendToDiff()
 }
 
 </script>
