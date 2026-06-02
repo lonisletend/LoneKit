@@ -1,9 +1,10 @@
 <script setup>
 
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import {NButton, NButtonGroup, NInput, NSelect} from "naive-ui";
 import SplitPanel from '../common/SplitPanel.vue';
 import { CodeDiff } from 'v-code-diff'
+import { useThemeMode } from "../../composables/useThemeMode";
 
 defineOptions({
   name: 'DiffTool'
@@ -19,6 +20,8 @@ const source = ref();
 const target = ref();
 const panel = ref('source');
 const outputFormat = ref('side-by-side');
+const { resolvedTheme } = useThemeMode();
+const diffTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'));
 
 const outputFormatOptions = [
   { label: '并排（side-by-side）', value: 'side-by-side' },
@@ -96,6 +99,7 @@ function clear() {
           :old-string="source"
           :new-string="target"
           :output-format="outputFormat"
+          :theme="diffTheme"
       />
     </div>
   </div>

@@ -10,12 +10,15 @@ import {
 import { CodeDiff } from 'v-code-diff';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
+import { useThemeMode } from '../../composables/useThemeMode';
 
 defineOptions({
   name: 'FolderDiffTool'
 });
 
 const { notify } = useCommon();
+const { resolvedTheme } = useThemeMode();
+const diffTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'));
 
 const leftInputRef = ref(null);
 const rightInputRef = ref(null);
@@ -925,7 +928,7 @@ async function openDiffModal(path) {
 </script>
 
 <template>
-  <div class="folder-diff-root w-full h-full p-2">
+  <div class="folder-diff-root w-full h-full p-2" :class="{ 'is-dark': resolvedTheme === 'dark' }">
     <input
       ref="leftInputRef"
       type="file"
@@ -946,7 +949,7 @@ async function openDiffModal(path) {
     >
 
     <div class="h-full flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-2 text-sm">
+      <div class="legend-bar w-full h-8 flex items-center space-x-2 text-sm">
         <span
           class="legend-item status-total"
           :class="{ active: statusFilter === 'all' }"
@@ -979,7 +982,7 @@ async function openDiffModal(path) {
           <SplitPanel>
           <template #left>
             <div class="h-full px-2">
-              <div class="h-full p-2 flex flex-col border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900">
+              <div class="folder-panel h-full p-2 flex flex-col rounded">
                 <div class="tree-header pb-2">
                   <n-button v-if="!hasLeftFolder" type="warning" ghost size="small" circle title="选择左侧文件夹" @click="pickLeftFolder">
                     <template #icon>
@@ -1038,7 +1041,7 @@ async function openDiffModal(path) {
 
           <template #right>
             <div class="h-full px-2">
-              <div class="h-full p-2 flex flex-col border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900">
+              <div class="folder-panel h-full p-2 flex flex-col rounded">
                 <div class="tree-header pb-2">
                   <n-button v-if="!hasRightFolder" type="primary" ghost size="small" circle title="选择右侧文件夹" @click="pickRightFolder">
                     <template #icon>
@@ -1124,6 +1127,7 @@ async function openDiffModal(path) {
               :old-string="leftText"
               :new-string="rightText"
               output-format="side-by-side"
+              :theme="diffTheme"
             />
           </div>
         </div>
@@ -1139,21 +1143,52 @@ async function openDiffModal(path) {
 }
 
 .folder-diff-root {
+  --folder-diff-surface: #ffffff;
+  --folder-diff-panel-bg: #ffffff;
+  --folder-diff-header-bg: #f8fafc;
   --folder-diff-border: #e5e7eb;
   --folder-diff-border-strong: #d1d5db;
   --folder-diff-border-hover: #9ca3af;
   --folder-diff-text-muted: #6b7280;
   --folder-diff-text-main: #374151;
   --folder-diff-dot-total: #6b7280;
+  --folder-diff-legend-bg: #f8fafc;
+  --folder-diff-legend-hover-bg: #f1f5f9;
+  --folder-diff-legend-active-bg: #eef2f7;
+  --folder-diff-left-only: #f59e0b;
+  --folder-diff-right-only: #3b82f6;
+  --folder-diff-modified: #ef4444;
+  --folder-diff-same: #10b981;
+  --folder-diff-sync-hover: rgba(16, 185, 129, 0.12);
+  --folder-diff-left-only-name: #b45309;
+  --folder-diff-right-only-name: #1d4ed8;
+  --folder-diff-modified-name: #b91c1c;
+  --folder-diff-same-name: #065f46;
+  color: var(--folder-diff-text-main);
 }
 
-:global(html.dark) .folder-diff-root {
+.folder-diff-root.is-dark {
+  --folder-diff-surface: #0f172a;
+  --folder-diff-panel-bg: #0f172a;
+  --folder-diff-header-bg: #111827;
   --folder-diff-border: #334155;
   --folder-diff-border-strong: #475569;
   --folder-diff-border-hover: #64748b;
   --folder-diff-text-muted: #94a3b8;
   --folder-diff-text-main: #cbd5e1;
   --folder-diff-dot-total: #94a3b8;
+  --folder-diff-legend-bg: #111827;
+  --folder-diff-legend-hover-bg: #1f2937;
+  --folder-diff-legend-active-bg: #1e293b;
+  --folder-diff-left-only: #fbbf24;
+  --folder-diff-right-only: #60a5fa;
+  --folder-diff-modified: #f87171;
+  --folder-diff-same: #34d399;
+  --folder-diff-sync-hover: rgba(16, 185, 129, 0.22);
+  --folder-diff-left-only-name: #fbbf24;
+  --folder-diff-right-only-name: #60a5fa;
+  --folder-diff-modified-name: #fca5a5;
+  --folder-diff-same-name: #6ee7b7;
 }
 
 .folder-diff-spin :deep(.n-spin-container),
@@ -1168,6 +1203,15 @@ async function openDiffModal(path) {
   flex-direction: column;
 }
 
+.legend-bar {
+  color: var(--folder-diff-text-main);
+}
+
+.folder-panel {
+  border: 1px solid var(--folder-diff-border);
+  background-color: var(--folder-diff-panel-bg);
+}
+
 .tree-header {
   flex: 0 0 auto;
   height: 30px;
@@ -1176,6 +1220,8 @@ async function openDiffModal(path) {
   justify-content: space-between;
   gap: 8px;
   font-weight: 600;
+  color: var(--folder-diff-text-main);
+  background-color: var(--folder-diff-header-bg);
   border-bottom: 1px solid var(--folder-diff-border);
 }
 
@@ -1185,6 +1231,7 @@ async function openDiffModal(path) {
   text-align: left;
   font-size: 12px;
   font-weight: 500;
+  color: var(--folder-diff-text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1194,6 +1241,10 @@ async function openDiffModal(path) {
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+.header-actions :deep(.n-button) {
+  color: var(--folder-diff-text-main);
 }
 
 .tree-body {
@@ -1218,17 +1269,21 @@ async function openDiffModal(path) {
   font-size: 12px;
   border-radius: 4px;
   border: 1px solid var(--folder-diff-border);
+  color: var(--folder-diff-text-main);
+  background-color: var(--folder-diff-legend-bg);
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
 }
 
 .legend-item:hover {
+  background-color: var(--folder-diff-legend-hover-bg);
   border-color: var(--folder-diff-border-hover);
 }
 
 .legend-item.active {
   font-weight: 600;
+  background-color: var(--folder-diff-legend-active-bg);
 }
 
 .legend-dot {
@@ -1248,23 +1303,23 @@ async function openDiffModal(path) {
 }
 
 .legend-item.status-left-only.active {
-  border-color: #f59e0b;
-  box-shadow: inset 0 0 0 1px #f59e0b;
+  border-color: var(--folder-diff-left-only);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-left-only);
 }
 
 .legend-item.status-right-only.active {
-  border-color: #3b82f6;
-  box-shadow: inset 0 0 0 1px #3b82f6;
+  border-color: var(--folder-diff-right-only);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-right-only);
 }
 
 .legend-item.status-modified.active {
-  border-color: #ef4444;
-  box-shadow: inset 0 0 0 1px #ef4444;
+  border-color: var(--folder-diff-modified);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-modified);
 }
 
 .legend-item.status-same.active {
-  border-color: #10b981;
-  box-shadow: inset 0 0 0 1px #10b981;
+  border-color: var(--folder-diff-same);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-same);
 }
 
 :deep(.tree-node-label) {
@@ -1275,7 +1330,7 @@ async function openDiffModal(path) {
 }
 
 :deep(.tree-node-label.is-sync-hover) {
-  background: rgba(16, 185, 129, 0.12);
+  background: var(--folder-diff-sync-hover);
   border-radius: 4px;
 }
 
@@ -1288,6 +1343,7 @@ async function openDiffModal(path) {
 
 :deep(.tree-node-label .node-name) {
   white-space: nowrap;
+  color: var(--folder-diff-text-main);
 }
 
 :deep(.tree-node-label .node-status) {
@@ -1305,43 +1361,49 @@ async function openDiffModal(path) {
 
 :deep(.status-left-only .status-dot),
 .legend-item.status-left-only .legend-dot {
-  background: #f59e0b;
+  background: var(--folder-diff-left-only);
 }
 
 :deep(.status-right-only .status-dot),
 .legend-item.status-right-only .legend-dot {
-  background: #3b82f6;
+  background: var(--folder-diff-right-only);
 }
 
 :deep(.status-modified .status-dot),
 .legend-item.status-modified .legend-dot {
-  background: #ef4444;
+  background: var(--folder-diff-modified);
 }
 
 :deep(.status-same .status-dot),
 .legend-item.status-same .legend-dot {
-  background: #10b981;
+  background: var(--folder-diff-same);
 }
 
 :deep(.status-left-only .node-name) {
-  color: #b45309;
+  color: var(--folder-diff-left-only-name);
 }
 
 :deep(.status-right-only .node-name) {
-  color: #1d4ed8;
+  color: var(--folder-diff-right-only-name);
 }
 
 :deep(.status-modified .node-name) {
-  color: #b91c1c;
+  color: var(--folder-diff-modified-name);
 }
 
 :deep(.status-same .node-name) {
-  color: #065f46;
+  color: var(--folder-diff-same-name);
 }
 
 .diff-modal {
   width: min(1200px, 95vw);
   height: min(760px, 90vh);
+}
+
+.diff-modal :deep(.n-card) {
+  background-color: var(--folder-diff-surface);
+  color: var(--folder-diff-text-main);
+  border: 1px solid var(--folder-diff-border);
 }
 
 .diff-modal :deep(.n-card__content) {
