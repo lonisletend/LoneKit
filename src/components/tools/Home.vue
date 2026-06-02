@@ -76,6 +76,26 @@ import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
 
 const changeLogs = ref([
   {
+    date: '2026.06.02',
+    version: 'v0.9.7',
+    added: [
+      '新增深色模式支持，light/dark/auto 切换。',
+      'SQL 格式化新增 dialect 选择器，支持 BigQuery、ClickHouse、MySQL、PostgreSQL、SQLite、Snowflake 等多种方言，并记住上次选择。',
+      '通用格式化工具新增「发送到文本对比」，可将格式化后的完整内容一键发送到文本对比工具。',
+      '时间处理工具新增时间间隔计算、时间推移计算功能。',
+    ],
+    optimized: [
+      '时间戳转换支持更多常见输入格式，包括斜杠/点分日期、紧凑数字日期时间、ISO 日期时间、秒/毫秒时间戳等，并支持多示例循环展示。',
+      'UUID 工具进入页面后按默认配置自动生成 UUID，减少首次使用操作。',
+      '二维码识别、条形码识别、文件夹对比等工具优化浅色/深色模式下的展示细节。',
+      '升级 lone-format 到 0.16.0，跟进格式化组件能力。',
+    ],
+    fixed: [
+      '修复二维码、条形码识别结果展示区域顶部预留空白过大的问题。',
+      '修复时间戳转换中清空秒/毫秒时间戳输入时的边界问题。',
+    ],
+  },
+  {
     date: '2026.06.01',
     version: 'v0.9.6',
     added: [

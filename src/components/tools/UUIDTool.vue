@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { NButton, NInput, NInputNumber, NSelect, NTag } from "naive-ui";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
@@ -161,6 +161,10 @@ function parseUuid(value) {
     variantNibble: variantNibble.toUpperCase(),
   };
 }
+
+onMounted(() => {
+  generateUuids();
+});
 </script>
 
 <template>
