@@ -216,7 +216,7 @@ onMounted(() => {
               clearable
             />
           </div>
-          <div class="flex-1 w-full overflow-auto border border-gray-300 rounded p-3 text-sm">
+          <div class="flex-1 w-full overflow-auto text-sm lk-result-surface lk-result-surface-padded">
             <div v-if="!parseResult" class="text-gray-500">请输入 UUID</div>
             <div v-else-if="!parseResult.valid" class="space-y-2">
               <div class="text-red-500">{{ parseResult.message }}</div>

@@ -8,6 +8,7 @@
               <n-tag size="large" type="warning">
                 时间戳转换
               </n-tag>
+              <n-button @click="readTimestampClipboard">剪贴板</n-button>
               <n-button @click="showTimestampExample">示例</n-button>
               <n-button @click="clearTimestampTool">清空</n-button>
             </div>
@@ -105,7 +106,7 @@
                       <n-input
                         :value="intervalFormattedParts[item.key]"
                         readonly
-                        placeholder="0"
+                        placeholder=""
                       />
                       <n-input-group-label class="shift-unit-label">{{ item.label }}</n-input-group-label>
                     </n-input-group>
@@ -199,7 +200,7 @@ import SplitPanel from '../common/SplitPanel.vue';
 
 dayjs.extend(customParseFormat);
 
-const { copyToClipboard } = useCommon();
+const { copyToClipboard, readFromClipboard, notify } = useCommon();
 
 const inputTime = ref();
 const timestamp = ref();
@@ -330,28 +331,23 @@ const intervalFormattedResult = computed(() => {
 });
 
 const intervalFormattedParts = computed(() => {
+  const emptyParts = {
+    year: '',
+    month: '',
+    day: '',
+    hour: '',
+    minute: '',
+    second: '',
+  };
+
   if (!intervalStart.value || !intervalEnd.value) {
-    return {
-      year: '0',
-      month: '0',
-      day: '0',
-      hour: '0',
-      minute: '0',
-      second: '0',
-    };
+    return emptyParts;
   }
 
   const start = dayjs(intervalStart.value);
   const end = dayjs(intervalEnd.value);
   if (!start.isValid() || !end.isValid()) {
-    return {
-      year: '0',
-      month: '0',
-      day: '0',
-      hour: '0',
-      minute: '0',
-      second: '0',
-    };
+    return emptyParts;
   }
 
   const parts = getDurationParts(start, end);
@@ -380,7 +376,7 @@ const shiftResult = computed(() => {
 });
 
 const shiftInfoText = computed(() => {
-  const directionLabel = shiftDirection.value === 'backward' ? '往前' : '往后';
+  const directionLabel = shiftDirection.value === 'backward' ? '向前' : '向后';
   const parts = [];
 
   shiftItems.forEach((item) => {
@@ -478,6 +474,16 @@ function timeNow() {
   let now = dayjs();
   inputTime.value = now.format('YYYY-MM-DD HH:mm:ss');
   transfer(now);
+}
+
+async function readTimestampClipboard() {
+  const text = await readFromClipboard();
+  if (text) {
+    inputTime.value = text;
+    handleInputTimeChange(inputTime.value);
+  } else {
+    notify('warning', '剪贴板中没有可用文本');
+  }
 }
 
 function showTimestampExample() {
@@ -738,6 +744,24 @@ function toNonNegativeInteger(val) {
 .shift-field-item .n-input .n-input-wrapper,
 .shift-field-item .n-input-group-label {
   border-radius: 0 !important;
+}
+
+.shift-field-item .n-input .n-input__input-el,
+.shift-field-item .n-input-number .n-input__input-el {
+  text-align: right;
+}
+
+.shift-field-item .n-input .n-input__input,
+.shift-field-item .n-input-number .n-input__input {
+  display: flex;
+  align-items: center;
+}
+
+.shift-field-item .n-input .n-input__placeholder,
+.shift-field-item .n-input-number .n-input__placeholder,
+.shift-field-item .n-input .n-input__placeholder span,
+.shift-field-item .n-input-number .n-input__placeholder span {
+  text-align: right;
 }
 
 .shift-field-item:last-child .n-input-group-label {

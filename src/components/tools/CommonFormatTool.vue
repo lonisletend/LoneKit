@@ -41,7 +41,7 @@
           </n-dropdown>
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-auto rounded p-3 custom-show-area result-pane">
+        <div class="flex-1 w-full overflow-auto custom-show-area result-pane lk-result-surface lk-result-surface-padded">
           <div v-for="(segment, index) in parsedSegments" :key="index" class="mb-3">
             <!-- 普通文本 -->
             <div v-if="segment.type === 'plainText'" class="plain-text-segment whitespace-pre-wrap">
@@ -608,34 +608,22 @@ function handleMoreSelect(key) {
 
 <style scoped>
 .common-format-root {
-  --common-format-pane-bg: #ffffff;
-  --common-format-pane-border: #cbd5e1;
   --common-format-plain-text: #334155;
-  --common-format-json-border: #bfdbfe;
-  --common-format-json-bg: rgba(239, 246, 255, 0.45);
-  --common-format-xml-border: #bbf7d0;
-  --common-format-xml-bg: rgba(240, 253, 244, 0.45);
+  --common-format-block-bg: #f8fafc;
   --common-format-toolbar-bg: rgba(255, 255, 255, 0.95);
-  --common-format-toolbar-border: #e2e8f0;
   --common-format-toolbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .common-format-root.is-dark {
-  --common-format-pane-bg: #0f172a;
-  --common-format-pane-border: #334155;
-  --common-format-plain-text: #cbd5e1;
-  --common-format-json-border: #1e3a8a;
-  --common-format-json-bg: rgba(30, 58, 138, 0.22);
-  --common-format-xml-border: #166534;
-  --common-format-xml-bg: rgba(22, 101, 52, 0.2);
-  --common-format-toolbar-bg: rgba(15, 23, 42, 0.96);
-  --common-format-toolbar-border: #334155;
+  --common-format-plain-text: #d4d4d8;
+  --common-format-block-bg: rgba(39, 39, 42, 0.58);
+  --common-format-toolbar-bg: rgba(24, 24, 27, 0.96);
   --common-format-toolbar-shadow: 0 4px 14px rgba(0, 0, 0, 0.42);
 }
 
 .result-pane {
-  border: 1px solid var(--common-format-pane-border);
-  background: var(--common-format-pane-bg);
+  border-color: var(--lk-surface-border);
+  background: var(--lk-surface-bg);
 }
 
 .plain-text-segment {
@@ -643,13 +631,15 @@ function handleMoreSelect(key) {
 }
 
 .json-segment {
-  border: 1px solid var(--common-format-json-border);
-  background: var(--common-format-json-bg);
+  border: 1px solid var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
+  background: var(--common-format-block-bg);
 }
 
 .xml-segment {
-  border: 1px solid var(--common-format-xml-border);
-  background: var(--common-format-xml-bg);
+  border: 1px solid var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
+  background: var(--common-format-block-bg);
 }
 
 /* 悬浮工具栏样式 */
@@ -659,8 +649,8 @@ function handleMoreSelect(key) {
 
 .format-toolbar {
   background: var(--common-format-toolbar-bg);
-  border: 1px solid var(--common-format-toolbar-border);
-  border-radius: 6px;
+  border: 1px solid var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
   padding: 4px;
   box-shadow: var(--common-format-toolbar-shadow);
   z-index: 10;

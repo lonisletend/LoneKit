@@ -156,7 +156,10 @@ function copySource() {
 
 <style scoped>
 .stat-row {
-  @apply w-full flex items-center justify-between border border-slate-200 dark:border-slate-700 rounded px-3 py-2;
+  @apply w-full flex items-center justify-between px-3 py-2;
+  border: 1px solid var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
+  background: var(--lk-surface-bg);
 }
 
 .stat-value {

@@ -189,7 +189,7 @@ function handleMoreSelect(key) {
             />
           </n-input-group>
         </div>
-        <div class="flex-1 w-full overflow-hidden text-lg border border-slate-300 dark:border-slate-700 rounded">
+        <div class="flex-1 w-full overflow-hidden text-lg lk-result-surface">
           <XmlFormat
             v-if="hasSourceContent"
             class="w-full h-full"

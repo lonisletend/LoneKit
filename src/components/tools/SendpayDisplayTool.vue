@@ -969,7 +969,7 @@ refreshUrlProfilesOnLoad();
     <div class="flex-1 min-h-0">
       <SplitPanel :default-size="0.75" :min="0.5" :max="0.9">
         <template #left>
-          <div class="h-full p-2 border border-green-200 dark:border-green-900 rounded overflow-auto">
+          <div class="h-full overflow-auto lk-result-surface p-2">
             <div v-if="sendpayPairs.length || sendpayMapPairs.length" class="space-y-3">
               <div v-if="sendpayPairs.length" class="pair-grid">
                 <table v-for="item in sendpayPairs" :key="item.position" class="pair-table">
@@ -1030,7 +1030,7 @@ refreshUrlProfilesOnLoad();
         </template>
 
         <template #right>
-          <div class="h-full p-2 border border-green-200 dark:border-green-900 rounded overflow-auto">
+          <div class="h-full overflow-auto lk-result-surface p-2">
             <div v-if="!parsedConfigEntries.length" class="h-full flex items-center justify-center">
               <n-empty description="当前配置暂无可展示解释" />
             </div>
@@ -1087,12 +1087,12 @@ refreshUrlProfilesOnLoad();
           <n-button size="small" @click="addProfile">新增配置</n-button>
         </div>
 
-        <div v-if="!editingProfiles.length" class="h-36 border border-dashed border-slate-300 dark:border-slate-600 rounded flex items-center justify-center text-slate-400 dark:text-slate-500">
+        <div v-if="!editingProfiles.length" class="h-36 border border-dashed empty-result-surface flex items-center justify-center text-slate-400 dark:text-slate-500">
           暂无配置，点击右上角“新增配置”创建。
         </div>
 
         <div v-else class="max-h-[520px] overflow-auto pr-1 space-y-3">
-          <div v-for="(profile, index) in editingProfiles" :key="profile.id" class="border border-green-200 dark:border-green-900 rounded p-3 bg-green-50/20 dark:bg-green-950/20 space-y-2">
+          <div v-for="(profile, index) in editingProfiles" :key="profile.id" class="lk-result-surface p-3 bg-green-50/20 dark:bg-green-950/20 space-y-2">
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span>#{{ index + 1 }}</span>

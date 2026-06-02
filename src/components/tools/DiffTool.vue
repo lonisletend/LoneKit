@@ -1,10 +1,11 @@
 <script setup>
 
 import { computed, onMounted, ref } from "vue";
-import {NButton, NButtonGroup, NInput, NSelect} from "naive-ui";
+import { NButton, NButtonGroup, NIcon, NInput } from "naive-ui";
 import SplitPanel from '../common/SplitPanel.vue';
 import { CodeDiff } from 'v-code-diff'
 import { useThemeMode } from "../../composables/useThemeMode";
+import { SplitHorizontal12Regular, SplitVertical12Regular } from '@vicons/fluent';
 
 defineOptions({
   name: 'DiffTool'
@@ -23,11 +24,6 @@ const outputFormat = ref('side-by-side');
 const { resolvedTheme } = useThemeMode();
 const diffTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'));
 
-const outputFormatOptions = [
-  { label: '并排（side-by-side）', value: 'side-by-side' },
-  { label: '逐行（line-by-line）', value: 'line-by-line' }
-];
-
 onMounted(() => {
   if (props.initialData?.left) source.value = props.initialData.left
   if (props.initialData?.right) target.value = props.initialData.right
@@ -44,8 +40,8 @@ function clear() {
 </script>
 
 <template>
-  <div class="w-full h-full flex flex-col p-2"  v-show="panel === 'source'">
-    <div class="w-full h-8 flex items-center space-x-4">
+  <div class="w-full h-full min-h-0 flex flex-col p-2"  v-show="panel === 'source'">
+    <div class="w-full h-8 shrink-0 flex items-center space-x-4">
       <n-button-group>
         <n-button secondary type="primary">
           原始文本
@@ -55,10 +51,10 @@ function clear() {
         </n-button>
       </n-button-group>
     </div>
-    <div class="w-full h-full text-xl">
+    <div class="w-full flex-1 min-h-0 text-xl">
       <SplitPanel>
         <template #left>
-          <div class="h-full p-2 flex flex-col space-y-2">
+          <div class="h-full py-2 flex flex-col space-y-2">
             <div class="w-full h-full text-xl">
               <n-input v-model:value="source" type="textarea" class="w-full h-full"
                        placeholder="原始文本"/>
@@ -66,7 +62,7 @@ function clear() {
           </div>
         </template>
         <template #right>
-          <div class="h-full p-2 flex flex-col space-y-2">
+          <div class="h-full py-2 flex flex-col space-y-2">
             <div class="w-full h-full text-xl">
               <n-input v-model:value="target" type="textarea" class="w-full h-full"
                        placeholder="对比文本"/>
@@ -77,8 +73,8 @@ function clear() {
     </div>
   </div>
 
-  <div class="w-full h-full flex flex-col p-2" v-show="panel === 'result'">
-    <div class="w-full h-8 flex items-center space-x-4">
+  <div class="w-full h-full min-h-0 flex flex-col p-2" v-show="panel === 'result'">
+    <div class="w-full h-8 shrink-0 flex items-center space-x-4">
       <n-button-group>
         <n-button ghost @click="() => panel = 'source'">
           原始文本
@@ -87,14 +83,32 @@ function clear() {
           对比结果
         </n-button>
       </n-button-group>
-      <n-select 
-        v-model:value="outputFormat" 
-        :options="outputFormatOptions" 
-        :style="{width: '200px'}"
-        class="w-32"
-      />
+      <n-button-group>
+        <n-button
+          :secondary="outputFormat === 'side-by-side'"
+          :ghost="outputFormat !== 'side-by-side'"
+          :type="outputFormat === 'side-by-side' ? 'primary' : 'default'"
+          title="并排"
+          @click="() => outputFormat = 'side-by-side'"
+        >
+          <template #icon>
+            <n-icon :component="SplitVertical12Regular" />
+          </template>
+        </n-button>
+        <n-button
+          :secondary="outputFormat === 'line-by-line'"
+          :ghost="outputFormat !== 'line-by-line'"
+          :type="outputFormat === 'line-by-line' ? 'primary' : 'default'"
+          title="逐行"
+          @click="() => outputFormat = 'line-by-line'"
+        >
+          <template #icon>
+            <n-icon :component="SplitHorizontal12Regular" />
+          </template>
+        </n-button>
+      </n-button-group>
     </div>
-    <div class="w-full h-full text-xl flex space-x-4 custom-diff-area">
+    <div class="w-full flex-1 min-h-0 text-xl flex space-x-4 custom-diff-area">
       <CodeDiff
           :old-string="source"
           :new-string="target"
@@ -106,15 +120,6 @@ function clear() {
 </template>
 
 <style scoped>
-.code-diff-view {
-  position: relative;
-  margin-top: 8px;
-  margin-bottom: 0;
-  border: 1px solid var(--color-border-default, #ddd);
-  border-radius: 6px;
-  overflow-y: auto;
-}
-
 /* Diff 对比结果展示区域字体优化 - 覆盖 v-code-diff 组件自带样式 */
 .custom-diff-area :deep(.blob-code-inner),
 .custom-diff-area :deep(.file-header) {
@@ -130,5 +135,11 @@ function clear() {
 /* 确保 CodeDiff 组件占满全宽 */
 .custom-diff-area :deep(.code-diff-view) {
   width: 100% !important;
+  height: calc(100% - 8px) !important;
+  margin-top: 8px !important;
+  margin-bottom: 0 !important;
+  border: 1px solid var(--lk-surface-border) !important;
+  border-radius: var(--lk-surface-radius) !important;
+  background: var(--lk-surface-bg) !important;
 }
 </style>

@@ -233,7 +233,7 @@ function exportToExcel() {
             class="w-full h-full text-lg transition overflow-auto space-y-3"
             @scroll="handleScroll('right', $event)"
           >
-            <div v-for="entry in entries" :key="entry.id" class="w-full border border-gray-200 rounded p-2 relative" :style="cardStyle">
+            <div v-for="entry in entries" :key="entry.id" class="w-full lk-result-surface p-2 relative" :style="cardStyle">
               <div v-if="hasContent(entry)" class="h-full flex flex-col">
                 <div class="entry-copy-btn">
                   <n-button size="small" @click="copyCanvasImage(`qrcode-${entry.id}`, '二维码图片已复制到剪贴板!')">复制</n-button>
@@ -245,7 +245,7 @@ function exportToExcel() {
                   {{ entry.content }}
                 </div>
               </div>
-              <div v-else class="h-full border border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 text-sm">
+              <div v-else class="h-full border border-dashed flex items-center justify-center text-gray-400 text-sm empty-result-surface">
                 待输入
               </div>
             </div>

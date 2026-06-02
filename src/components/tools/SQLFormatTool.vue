@@ -134,7 +134,7 @@ function collapseAll() {
               <template #icon> <component :is="ExpandIcon" /> </template>
             </n-button>
           </div>
-          <div class="flex-1 w-full overflow-hidden text-lg border border-slate-300 dark:border-slate-700 rounded">
+          <div class="flex-1 w-full overflow-hidden text-lg lk-result-surface">
             <SqlFormat
               v-if="hasSourceContent"
               class="w-full h-full"

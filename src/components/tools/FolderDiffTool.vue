@@ -1143,12 +1143,12 @@ async function openDiffModal(path) {
 }
 
 .folder-diff-root {
-  --folder-diff-surface: #ffffff;
-  --folder-diff-panel-bg: #ffffff;
+  --folder-diff-surface: var(--lk-surface-bg);
+  --folder-diff-panel-bg: var(--lk-surface-bg);
   --folder-diff-header-bg: transparent;
-  --folder-diff-border: #e5e7eb;
-  --folder-diff-border-strong: #d1d5db;
-  --folder-diff-border-hover: #9ca3af;
+  --folder-diff-border: var(--lk-surface-border);
+  --folder-diff-border-strong: var(--lk-surface-border);
+  --folder-diff-border-hover: var(--lk-surface-border-hover);
   --folder-diff-text-muted: #6b7280;
   --folder-diff-text-main: #374151;
   --folder-diff-dot-total: #6b7280;
@@ -1168,18 +1168,18 @@ async function openDiffModal(path) {
 }
 
 .folder-diff-root.is-dark {
-  --folder-diff-surface: #0f172a;
-  --folder-diff-panel-bg: #0f172a;
-  --folder-diff-header-bg: #111827;
-  --folder-diff-border: #334155;
-  --folder-diff-border-strong: #475569;
-  --folder-diff-border-hover: #64748b;
-  --folder-diff-text-muted: #94a3b8;
-  --folder-diff-text-main: #cbd5e1;
-  --folder-diff-dot-total: #94a3b8;
-  --folder-diff-legend-bg: #111827;
-  --folder-diff-legend-hover-bg: #1f2937;
-  --folder-diff-legend-active-bg: #1e293b;
+  --folder-diff-surface: var(--lk-surface-bg);
+  --folder-diff-panel-bg: var(--lk-surface-bg);
+  --folder-diff-header-bg: var(--lk-surface-muted-bg);
+  --folder-diff-border: var(--lk-surface-border);
+  --folder-diff-border-strong: var(--lk-surface-border);
+  --folder-diff-border-hover: var(--lk-surface-border-hover);
+  --folder-diff-text-muted: #a1a1aa;
+  --folder-diff-text-main: #d4d4d8;
+  --folder-diff-dot-total: #a1a1aa;
+  --folder-diff-legend-bg: #1f1f23;
+  --folder-diff-legend-hover-bg: #27272a;
+  --folder-diff-legend-active-bg: #27272a;
   --folder-diff-left-only: #fbbf24;
   --folder-diff-right-only: #60a5fa;
   --folder-diff-modified: #f87171;
@@ -1209,6 +1209,7 @@ async function openDiffModal(path) {
 
 .folder-panel {
   border: 1px solid var(--folder-diff-border);
+  border-radius: var(--lk-surface-radius);
   background-color: var(--folder-diff-panel-bg);
 }
 
@@ -1426,5 +1427,8 @@ async function openDiffModal(path) {
   width: 100% !important;
   max-width: 100%;
   overflow: auto;
+  border: 1px solid var(--lk-surface-border) !important;
+  border-radius: var(--lk-surface-radius) !important;
+  background: var(--lk-surface-bg) !important;
 }
 </style>

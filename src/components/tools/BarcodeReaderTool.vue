@@ -288,21 +288,21 @@ function syncScroll(e, target) {
 .barcode-reader-root {
   --reader-result-text: #334155;
   --reader-result-bg: transparent;
-  --reader-placeholder-border: #d9d9d9;
-  --reader-placeholder-bg: #fafafa;
-  --reader-placeholder-hover-border: #40a9ff;
+  --reader-placeholder-border: var(--lk-surface-border);
+  --reader-placeholder-bg: var(--lk-surface-bg);
+  --reader-placeholder-hover-border: var(--lk-surface-border-hover);
   --reader-placeholder-text: rgba(0, 0, 0, 0.45);
   --reader-link: #18a058;
   --reader-link-hover: #36ad6a;
 }
 
 .barcode-reader-root.is-dark {
-  --reader-result-text: #cbd5e1;
-  --reader-result-bg: #111827;
-  --reader-placeholder-border: #334155;
-  --reader-placeholder-bg: #0f172a;
-  --reader-placeholder-hover-border: #60a5fa;
-  --reader-placeholder-text: #94a3b8;
+  --reader-result-text: #d4d4d8;
+  --reader-result-bg: transparent;
+  --reader-placeholder-border: var(--lk-surface-border);
+  --reader-placeholder-bg: var(--lk-surface-bg);
+  --reader-placeholder-hover-border: var(--lk-surface-border-hover);
+  --reader-placeholder-text: #a1a1aa;
   --reader-link: #4ade80;
   --reader-link-hover: #86efac;
 }
@@ -311,17 +311,26 @@ function syncScroll(e, target) {
   scroll-margin-top: 1rem;
 }
 
+.history-item :deep(.n-card) {
+  border: 1px solid var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
+  background: var(--lk-surface-bg);
+}
+
+.history-item :deep(.n-card__content) {
+  padding: var(--lk-surface-padding);
+}
+
 .result-text {
   font-family: Monaco, Consolas, 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.6;
-  padding: 32px 8px 40px 8px;
-  border-radius: 4px;
+  padding: 24px 0 40px 0;
   min-height: 200px;
   max-height: 200px;
   overflow-y: auto;
   color: var(--reader-result-text, #334155);
-  background: var(--reader-result-bg, #f8fafc);
+  background: var(--reader-result-bg, transparent);
 }
 
 /* 统一左右两侧提示区域样式 */
@@ -330,10 +339,10 @@ function syncScroll(e, target) {
   width: 100%;
   min-height: 150px;
   height: 150px;
-  border: 2px dashed var(--reader-placeholder-border, #d9d9d9) !important;
-  border-radius: 4px;
+  border: 1px dashed var(--reader-placeholder-border, #d9d9d9) !important;
+  border-radius: var(--lk-surface-radius);
   background-color: var(--reader-placeholder-bg, #fafafa);
-  padding: 20px;
+  padding: var(--lk-surface-padding);
   display: flex;
   flex-direction: column;
   align-items: center;
