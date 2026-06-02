@@ -1145,7 +1145,7 @@ async function openDiffModal(path) {
 .folder-diff-root {
   --folder-diff-surface: #ffffff;
   --folder-diff-panel-bg: #ffffff;
-  --folder-diff-header-bg: #f8fafc;
+  --folder-diff-header-bg: transparent;
   --folder-diff-border: #e5e7eb;
   --folder-diff-border-strong: #d1d5db;
   --folder-diff-border-hover: #9ca3af;

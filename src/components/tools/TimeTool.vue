@@ -8,11 +8,13 @@
               <n-tag size="large" type="warning">
                 时间戳转换
               </n-tag>
+              <n-button @click="showTimestampExample">示例</n-button>
+              <n-button @click="clearTimestampTool">清空</n-button>
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
                 <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">输入时间</n-input-group-label>
-                <n-input :style="{ flex: 1 }" placeholder="输入格式任意时间" :status="status.inputTime" clearable
+                <n-input :style="{ flex: 1 }" placeholder="支持时间戳、YYYY-MM-DD、YYYY/MM/DD、ISO 等常见格式" :status="status.inputTime" clearable
                         v-model:value="inputTime" @input="handleInputTimeChange" />
                 <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="timeNow">当前时间</n-button>
               </n-input-group>
@@ -43,13 +45,15 @@
             </div>
           </div>
 
-          <n-divider dashed class="my-8" />
+          <n-divider dashed class="my-12" />
 
           <div class="tool-block">
             <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
               <n-tag size="large" type="success">
                 时间间隔计算
               </n-tag>
+              <n-button @click="showIntervalExample">示例</n-button>
+              <n-button @click="clearIntervalTool">清空</n-button>
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
@@ -112,13 +116,15 @@
             </div>
           </div>
 
-          <n-divider dashed class="my-8" />
+          <n-divider dashed class="my-12" />
 
           <div class="tool-block">
             <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
               <n-tag size="large" type="info">
                 时间推移计算
               </n-tag>
+              <n-button @click="showShiftExample">示例</n-button>
+              <n-button @click="clearShiftTool">清空</n-button>
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
@@ -187,20 +193,55 @@
 import { ref, onMounted, reactive, computed } from "vue";
 import { NInputGroup, NInputGroupLabel, NInput, NInputNumber, NButton, NDatePicker, NTag, NSelect, NDivider } from "naive-ui";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useCommon } from '../../composables/useCommon';
 import SplitPanel from '../common/SplitPanel.vue';
+
+dayjs.extend(customParseFormat);
 
 const { copyToClipboard } = useCommon();
 
 const inputTime = ref();
 const timestamp = ref();
 const milliTimestamp = ref();
+const timestampExampleIndex = ref(0);
 
 const status = reactive({
   inputTime: '',
   timestamp: '',
   milliTimestamp: '',
 });
+
+const inputTimeFormats = [
+  'YYYY-MM-DD',
+  'YYYY/MM/DD',
+  'YYYY.MM.DD',
+  'YYYYMMDD',
+  'YYYY-MM-DD HH:mm',
+  'YYYY-MM-DD HH:mm:ss',
+  'YYYY-MM-DD HH:mm:ss.SSS',
+  'YYYY/MM/DD HH:mm',
+  'YYYY/MM/DD HH:mm:ss',
+  'YYYY/MM/DD HH:mm:ss.SSS',
+  'YYYY.MM.DD HH:mm',
+  'YYYY.MM.DD HH:mm:ss',
+  'YYYY.MM.DD HH:mm:ss.SSS',
+  'YYYYMMDDHHmm',
+  'YYYYMMDDHHmmss',
+  'YYYYMMDDHHmmssSSS',
+  'YYYY-MM-DDTHH:mm',
+  'YYYY-MM-DDTHH:mm:ss',
+  'YYYY-MM-DDTHH:mm:ss.SSS',
+];
+const timestampExamples = [
+  '2026-01-25 14:23:45',
+  '2026/01/25 14:23:45',
+  '2026.01.25 14:23:45.123',
+  '20260125142345',
+  '2026-01-25T14:23:45.123',
+  '1769341425',
+  '1769341425123',
+];
 
 const intervalStart = ref(null);
 const intervalEnd = ref(null);
@@ -358,31 +399,19 @@ onMounted(() => {
 function handleInputTimeChange(val) {
   console.log('Time change val ==> ', val);
   console.log('Time change value ==> ', inputTime.value);
-  if (inputTime.value === '') {
+  const parsedTime = parseInputTime(inputTime.value);
+  if (!parsedTime.raw) {
     status.inputTime = '';
     initResult();
     return;
   }
-  if (isTimestamp(inputTime.value)) {
+
+  if (parsedTime.value?.isValid()) {
     status.inputTime = '';
-    transfer(dayjs.unix(Number.parseInt(inputTime.value)));
+    transfer(parsedTime.value);
     return;
   }
-  if (isMilliTimestamp(inputTime.value)) {
-    status.inputTime = '';
-    transfer(dayjs(Number.parseInt(inputTime.value)));
-    return;
-  }
-  if (isDate(inputTime.value)) {
-    status.inputTime = '';
-    transfer(dayjs(inputTime.value + ' 00:00:00', 'YYYY-MM-DD HH:mm:ss'));
-    return;
-  }
-  if (isDatetime(inputTime.value)) {
-    status.inputTime = '';
-    transfer(dayjs(inputTime.value, 'YYYY-MM-DD HH:mm:ss'));
-    return;
-  }
+
   status.inputTime = 'error';
   initResult();
   console.log('Time change status ==> ', status);
@@ -390,7 +419,14 @@ function handleInputTimeChange(val) {
 
 function handleTimestampChange(val) {
   console.log('Timestamp change val ==> ', val);
-  if (val && !isTimestamp(val.toString())) {
+  if (val === null || val === undefined || val === '') {
+    status.timestamp = '';
+    inputTime.value = '';
+    milliTimestamp.value = null;
+    return;
+  }
+
+  if (!isTimestamp(val.toString())) {
     status.timestamp = 'error';
     inputTime.value = '';
     milliTimestamp.value = null;
@@ -403,7 +439,14 @@ function handleTimestampChange(val) {
 
 function handleMilliTimestampChange(val) {
   console.log('MilliTimestamp change val ==> ', val);
-  if (val && !isMilliTimestamp(val.toString())) {
+  if (val === null || val === undefined || val === '') {
+    status.milliTimestamp = '';
+    inputTime.value = '';
+    timestamp.value = null;
+    return;
+  }
+
+  if (!isMilliTimestamp(val.toString())) {
     status.milliTimestamp = 'error';
     inputTime.value = '';
     timestamp.value = null;
@@ -437,6 +480,51 @@ function timeNow() {
   transfer(now);
 }
 
+function showTimestampExample() {
+  inputTime.value = timestampExamples[timestampExampleIndex.value];
+  timestampExampleIndex.value = (timestampExampleIndex.value + 1) % timestampExamples.length;
+  handleInputTimeChange(inputTime.value);
+}
+
+function clearTimestampTool() {
+  inputTime.value = '';
+  status.inputTime = '';
+  status.timestamp = '';
+  status.milliTimestamp = '';
+  initResult();
+}
+
+function showIntervalExample() {
+  intervalStart.value = dayjs('2026-01-25 14:23:45', 'YYYY-MM-DD HH:mm:ss').valueOf();
+  intervalEnd.value = dayjs('2026-02-28 18:05:12', 'YYYY-MM-DD HH:mm:ss').valueOf();
+  intervalUnit.value = 'day';
+}
+
+function clearIntervalTool() {
+  intervalStart.value = null;
+  intervalEnd.value = null;
+  intervalUnit.value = 'second';
+}
+
+function showShiftExample() {
+  shiftStart.value = dayjs('2026-01-25 14:23:45', 'YYYY-MM-DD HH:mm:ss').valueOf();
+  shiftDirection.value = 'forward';
+  shiftValues.year = null;
+  shiftValues.month = 1;
+  shiftValues.day = 3;
+  shiftValues.hour = 2;
+  shiftValues.minute = 30;
+  shiftValues.second = null;
+}
+
+function clearShiftTool() {
+  shiftStart.value = null;
+  shiftDirection.value = 'forward';
+  shiftItems.forEach((item) => {
+    shiftValues[item.key] = null;
+  });
+}
+
 function isNumeric(value) {
   return /^-?\d+$/.test(value);
 }
@@ -455,14 +543,28 @@ function isMilliTimestamp(str) {
   return false;
 }
 
-function isDate(str) {
-  let dateReg = /^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-  return dateReg.test(str);
-}
+function parseInputTime(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) {
+    return { raw, value: null };
+  }
 
-function isDatetime(str) {
-  let datetimeReg = /^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(2[0-3]|[0-1]\d):[0-5]\d:[0-5]\d$/;
-  return datetimeReg.test(str);
+  if (isTimestamp(raw)) {
+    return { raw, value: dayjs.unix(Number.parseInt(raw)) };
+  }
+
+  if (isMilliTimestamp(raw)) {
+    return { raw, value: dayjs(Number.parseInt(raw)) };
+  }
+
+  const normalized = raw.replace(/\s+/, ' ');
+  const strictParsed = dayjs(normalized, inputTimeFormats, true);
+  if (strictParsed.isValid()) {
+    return { raw, value: strictParsed };
+  }
+
+  const isoParsed = dayjs(raw);
+  return { raw, value: isoParsed.isValid() ? isoParsed : null };
 }
 
 function copyTimestamp() {

@@ -273,7 +273,7 @@ function syncScroll(e, target) {
 <style scoped>
 .qr-reader-root {
   --reader-result-text: #334155;
-  --reader-result-bg: #f8fafc;
+  --reader-result-bg: transparent;
   --reader-placeholder-border: #d9d9d9;
   --reader-placeholder-bg: #fafafa;
   --reader-placeholder-hover-border: #40a9ff;
@@ -301,7 +301,7 @@ function syncScroll(e, target) {
   font-family: Monaco, Consolas, 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.6;
-  padding: 40px 8px 8px 8px;
+  padding: 8px 8px 40px 8px;
   border-radius: 4px;
   min-height: 200px;
   max-height: 200px;
