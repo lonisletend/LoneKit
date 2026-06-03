@@ -10,7 +10,7 @@ import { useAutoAppendEntries } from "../../composables/useAutoAppendEntries";
 import { useEntryJump } from "../../composables/useEntryJump";
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const cardHeight = 220;
 const inputRows = 6;
@@ -209,19 +209,19 @@ async function readClipboardByType(type) {
 function showExampleByType(type) {
   if (isBatchInput.value) {
     if (type === 1) {
-      batchSourceText.value = "test\nLoneKit";
+      batchSourceText.value = tm('examples.codec.plainBatch');
       applyBatchSource(batchSourceText.value);
     } else {
-      batchTargetText.value = "\\u0074\\u0065\\u0073\\u0074\n\\u004C\\u006F\\u006E\\u0065\\u004B\\u0069\\u0074";
+      batchTargetText.value = tm('examples.codec.unicodeBatch');
       applyBatchTarget(batchTargetText.value);
     }
     return;
   }
 
   if (type === 1) {
-    resetEntries([createEntry("test", ""), createEntry()]);
+    resetEntries([createEntry(tm('examples.codec.plain'), ''), createEntry()]);
   } else {
-    resetEntries([createEntry("", "\\u0074\\u0065\\u0073\\u0074"), createEntry()]);
+    resetEntries([createEntry('', tm('examples.codec.unicode')), createEntry()]);
   }
 }
 

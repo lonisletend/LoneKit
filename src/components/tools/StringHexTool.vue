@@ -11,7 +11,7 @@ import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 import { useEntryJump } from '../../composables/useEntryJump';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const cardHeight = 220;
 const inputRows = 6;
@@ -199,10 +199,10 @@ async function readClipboardByType(type) {
 function showExampleByType(type) {
   if (isBatchInput.value) {
     if (type === 1) {
-      batchSourceText.value = 'test\nLoneKit';
+      batchSourceText.value = tm('examples.codec.plainBatch');
       applyBatchSource(batchSourceText.value);
     } else {
-      batchTargetText.value = '74657374\n4c6f6e654b6974';
+      batchTargetText.value = tm('examples.codec.hexBatch');
       applyBatchTarget(batchTargetText.value);
     }
     return;
@@ -210,12 +210,12 @@ function showExampleByType(type) {
 
   if (type === 1) {
     resetEntries([
-      createEntry('test', ''),
+      createEntry(tm('examples.codec.plain'), ''),
       createEntry(),
     ]);
   } else {
     resetEntries([
-      createEntry('', '74657374'),
+      createEntry('', tm('examples.codec.hex')),
       createEntry(),
     ]);
   }

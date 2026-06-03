@@ -14,7 +14,7 @@ import { useThemeMode } from "../../composables/useThemeMode";
 import { SqlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 defineOptions({
   name: 'SQLFormatTool'
@@ -65,11 +65,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  source.value = 'select supplier_name,city from\n' +
-      '(select * from suppliers join addresses on suppliers.address_id=addresses.id)\n' +
-      'as suppliers\n' +
-      'where supplier_id > 500\n' +
-      'order by supplier_name asc,city desc;';
+  source.value = tm('examples.sqlFormat');
 }
 
 function clear() {

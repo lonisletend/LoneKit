@@ -141,7 +141,7 @@ import { JsonFormat, XmlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
-const { t, locale } = useI18n();
+const { t, tm } = useI18n();
 
 const props = defineProps({
   id: {
@@ -160,28 +160,6 @@ const xmlSortStates = ref({});
 const { resolvedTheme } = useThemeMode();
 const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
 
-const exampleText = ref(`[2026-01-25 14:23:45.123] [INFO] [OrderService] - 开始处理订单创建请求
-[2026-01-25 14:23:45.156] [DEBUG] [OrderService] - 接收到订单请求数据: {"orderId":"ORD2026012545678","customerId":"CUST001","customerName":"LoneKit","items":[{"productId":"PROD001","productName":"iPhone 15 Pro","quantity":2,"price":7999.00,"discount":0.95},{"productId":"PROD002","productName":"AirPods Pro 2","quantity":1,"price":1899.00,"discount":1.0}],"shippingAddress":{"province":"北京市","city":"朝阳区","street":"建国路88号","zipCode":"100020","contact":"13800138000"},"paymentMethod":"ALIPAY","totalAmount":17897.05,"discount":799.95,"createTime":"2026-01-25T14:23:45.000Z","status":"PENDING"}
-[2026-01-25 14:23:45.234] [INFO] [OrderService] - 订单数据验证通过，开始库存检查
-[2026-01-25 14:23:45.267] [DEBUG] [InventoryService] - 调用库存服务 API: POST /api/v1/inventory/check
-[2026-01-25 14:23:45.345] [INFO] [InventoryService] - 库存检查结果: {"success":true,"availableStock":{"PROD001":150,"PROD002":89},"reservationId":"RSV20260125001","expireTime":"2026-01-25T14:33:45.000Z"}
-[2026-01-25 14:23:45.389] [DEBUG] [OrderService] - 生成支付请求，调用支付网关
-[2026-01-25 14:23:45.445] [INFO] [PaymentGateway] - 创建支付订单，返回支付链接
-[2026-01-25 14:23:45.501] [DEBUG] [MessageQueue] - 发送订单创建消息到 Kafka topic: order-events
-[2026-01-25 14:23:45.534] [INFO] [MessageQueue] - 消息发送成功，partition: 3, offset: 123456789
-[2026-01-25 14:23:45.578] [DEBUG] [AuditService] - 记录审计日志，写入数据库
-[2026-01-25 14:23:45.612] [INFO] [AuditService] - 审计日志保存成功，日志ID: AUDIT20260125456789
-[2026-01-25 14:23:45.645] [DEBUG] [NotificationService] - 发送 XML 格式通知到外部系统
-[2026-01-25 14:23:45.678] [INFO] [NotificationService] - 通知消息内容: <?xml version="1.0" encoding="UTF-8"?><notification><type>ORDER_CREATED</type><orderId>ORD2026012545678</orderId><customer><id>CUST001</id><name>LoneKit</name><phone>13800138000</phone><level>VIP</level></customer><order><totalAmount>17897.05</totalAmount><itemCount>3</itemCount><status>PENDING</status><timestamp>2026-01-25T14:23:45.000Z</timestamp></order><actions><action type="email" to="customer@example.com" priority="high"/><action type="sms" to="13800138000" priority="medium"/></actions></notification>
-[2026-01-25 14:23:45.723] [INFO] [NotificationService] - XML 通知发送完成，响应状态: 200
-[2026-01-25 14:23:45.756] [INFO] [OrderService] - 订单创建流程完成，订单号: ORD2026012545678
-[2026-01-25 14:23:45.789] [DEBUG] [OrderService] - 最终响应数据: {"success":true,"orderId":"ORD2026012545678","paymentUrl":"https://pay.example.com/checkout?token=abc123xyz","qrCode":"data:image/png;base64,iVBORw0KGgo...","estimatedDelivery":"2026-01-28","trackingEnabled":true,"message":"订单创建成功，请在15分钟内完成支付"}
-[2026-01-25 14:23:45.812] [INFO] [OrderService] - 请求处理完成，总耗时: 667ms`);
-const englishExampleText = `[2026-01-25 14:23:45.123] [INFO] [OrderService] - Start processing order creation request
-[2026-01-25 14:23:45.156] [DEBUG] [OrderService] - Received order payload: {"orderId":"ORD2026012545678","customerId":"CUST001","customerName":"LoneKit","items":[{"productId":"PROD001","productName":"iPhone 15 Pro","quantity":2,"price":7999.00},{"productId":"PROD002","productName":"AirPods Pro 2","quantity":1,"price":1899.00}],"shippingAddress":{"province":"Beijing","city":"Chaoyang","street":"Jianguo Road 88","zipCode":"100020"},"paymentMethod":"ALIPAY","totalAmount":17897.05,"status":"PENDING"}
-[2026-01-25 14:23:45.345] [INFO] [InventoryService] - Inventory check result: {"success":true,"availableStock":{"PROD001":150,"PROD002":89},"reservationId":"RSV20260125001","expireTime":"2026-01-25T14:33:45.000Z"}
-[2026-01-25 14:23:45.678] [INFO] [NotificationService] - Notification payload: <?xml version="1.0" encoding="UTF-8"?><notification><type>ORDER_CREATED</type><orderId>ORD2026012545678</orderId><customer><id>CUST001</id><name>LoneKit</name><level>VIP</level></customer><order><totalAmount>17897.05</totalAmount><itemCount>3</itemCount><status>PENDING</status><timestamp>2026-01-25T14:23:45.000Z</timestamp></order></notification>
-[2026-01-25 14:23:45.812] [INFO] [OrderService] - Request completed, elapsed: 667ms`;
 
 // 设置 JSON 格式化组件的 ref
 function setJsonFormatRef(el, index) {
@@ -522,7 +500,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  sourceText.value = locale.value === 'en-US' ? englishExampleText : exampleText.value;
+  sourceText.value = tm('examples.commonFormat');
   handleSourceTextChange();
 }
 

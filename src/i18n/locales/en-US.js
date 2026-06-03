@@ -1,4 +1,5 @@
 import changelog from "./changelog/en-US";
+import examples from "./examples/en-US";
 
 export default {
   common: {
@@ -388,4 +389,5 @@ export default {
     removed: "Removed",
     changeLogs: changelog,
   },
+  examples,
 };

@@ -202,7 +202,7 @@ import SplitPanel from '../common/SplitPanel.vue';
 dayjs.extend(customParseFormat);
 
 const { copyToClipboard, readFromClipboard, notify } = useCommon();
-const { t, locale } = useI18n();
+const { t, tm, locale } = useI18n();
 
 const inputTime = ref();
 const timestamp = ref();
@@ -236,15 +236,7 @@ const inputTimeFormats = [
   'YYYY-MM-DDTHH:mm:ss',
   'YYYY-MM-DDTHH:mm:ss.SSS',
 ];
-const timestampExamples = [
-  '2026-01-25 14:23:45',
-  '2026/01/25 14:23:45',
-  '2026.01.25 14:23:45.123',
-  '20260125142345',
-  '2026-01-25T14:23:45.123',
-  '1769341425',
-  '1769341425123',
-];
+const timestampExamples = computed(() => tm('examples.time.timestamps'));
 
 const intervalStart = ref(null);
 const intervalEnd = ref(null);
@@ -489,8 +481,9 @@ async function readTimestampClipboard() {
 }
 
 function showTimestampExample() {
-  inputTime.value = timestampExamples[timestampExampleIndex.value];
-  timestampExampleIndex.value = (timestampExampleIndex.value + 1) % timestampExamples.length;
+  const examples = timestampExamples.value;
+  inputTime.value = examples[timestampExampleIndex.value];
+  timestampExampleIndex.value = (timestampExampleIndex.value + 1) % examples.length;
   handleInputTimeChange(inputTime.value);
 }
 
@@ -503,9 +496,10 @@ function clearTimestampTool() {
 }
 
 function showIntervalExample() {
-  intervalStart.value = dayjs('2026-01-25 14:23:45', 'YYYY-MM-DD HH:mm:ss').valueOf();
-  intervalEnd.value = dayjs('2026-02-28 18:05:12', 'YYYY-MM-DD HH:mm:ss').valueOf();
-  intervalUnit.value = 'day';
+  const example = tm('examples.time.interval');
+  intervalStart.value = dayjs(example.start, 'YYYY-MM-DD HH:mm:ss').valueOf();
+  intervalEnd.value = dayjs(example.end, 'YYYY-MM-DD HH:mm:ss').valueOf();
+  intervalUnit.value = example.unit;
 }
 
 function clearIntervalTool() {
@@ -515,14 +509,10 @@ function clearIntervalTool() {
 }
 
 function showShiftExample() {
-  shiftStart.value = dayjs('2026-01-25 14:23:45', 'YYYY-MM-DD HH:mm:ss').valueOf();
-  shiftDirection.value = 'forward';
-  shiftValues.year = null;
-  shiftValues.month = 1;
-  shiftValues.day = 3;
-  shiftValues.hour = 2;
-  shiftValues.minute = 30;
-  shiftValues.second = null;
+  const example = tm('examples.time.shift');
+  shiftStart.value = dayjs(example.start, 'YYYY-MM-DD HH:mm:ss').valueOf();
+  shiftDirection.value = example.direction;
+  Object.assign(shiftValues, example.values);
 }
 
 function clearShiftTool() {

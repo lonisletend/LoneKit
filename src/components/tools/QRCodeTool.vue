@@ -10,7 +10,7 @@ import { useSyncedScroll } from '../../composables/useSyncedScroll';
 import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 
 const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const size = ref(200);
 const sizeOptions = computed(() => [
@@ -18,7 +18,6 @@ const sizeOptions = computed(() => [
   { label: t('tool.generator.medium'), value: 200 },
   { label: t('tool.generator.large'), value: 300 },
 ])
-const qrExamples = ['https://kit.lonestack.com', 'LoneKit'];
 const color = ref('#18A058');
 const isBatchInput = ref(false);
 const batchInputText = ref('');
@@ -131,9 +130,10 @@ async function readClipboard() {
 }
 
 function showExample() {
-  const example = qrExamples[0] ?? '';
+  const examples = tm('examples.generator.qr');
+  const example = examples[0] ?? '';
   if (isBatchInput.value) {
-    batchInputText.value = qrExamples.join('\n');
+    batchInputText.value = examples.join('\n');
     applyBatchInput(batchInputText.value);
     return;
   }

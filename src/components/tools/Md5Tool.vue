@@ -11,7 +11,7 @@ import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 import { useEntryJump } from '../../composables/useEntryJump';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const cardHeight = 220;
 const inputRows = 6;
@@ -112,13 +112,13 @@ async function readClipboard() {
 
 function showExample() {
   if (isBatchInput.value) {
-    batchSourceText.value = 'test\nLoneKit';
+    batchSourceText.value = tm('examples.codec.plainBatch');
     applyBatchSource(batchSourceText.value);
     return;
   }
 
   resetEntries([
-    createEntry('test'),
+    createEntry(tm('examples.codec.plain')),
     createEntry(),
   ]);
 }

@@ -1,4 +1,5 @@
 import changelog from "./changelog/zh-CN";
+import examples from "./examples/zh-CN";
 
 export default {
   common: {
@@ -388,4 +389,5 @@ export default {
     removed: "删除",
     changeLogs: changelog,
   },
+  examples,
 };

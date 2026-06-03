@@ -92,7 +92,7 @@ import { JsonFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const props = defineProps({
   id: {
@@ -104,7 +104,6 @@ const props = defineProps({
 
 const customJsonFormatRef = ref(null)
 const sourceJson = ref();
-const exampleJsonStr = ref(`{"status":200,"text":"","error":null,"data":[{"news_id":123456789012345678901234567890,"title":"iPhone X Review: Innovative future with real black technology","source":"Netease phone","rating":0.5},{"news_id":123456789012345678901234567891,"title":"Traffic paradise: How to design streets for people and unmanned vehicles in the future?","source":"Netease smart","link":"http://netease.smart/traffic-paradise/1235","rating":0.60},{"news_id":123456789012345678901234567892,"title":"Teslamask's American Business Relations: The government does not pay billions to build factories","source":"AI Finance","rating":0.8000,"members":["Daniel","Mike","John"]}]}`);
 const jsonObject = ref();
 const filterType = ref('jsonpath');
 const filterExpression = ref('');
@@ -154,7 +153,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  sourceJson.value = exampleJsonStr.value;
+  sourceJson.value = tm('examples.jsonFormat');
   handleSourceJsonChange(sourceJson.value);
 }
 

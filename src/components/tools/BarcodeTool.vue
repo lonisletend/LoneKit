@@ -10,7 +10,7 @@ import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 import JsBarcode from 'jsbarcode';
 
 const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const height = ref(150);
 const sizeOptions = computed(() => [
@@ -53,17 +53,7 @@ const formatHints = computed(() => ({
   pharmacode: t('tool.generator.barcodeHints.pharmacode'),
   codabar: t('tool.generator.barcodeHints.codabar'),
 }));
-const formatExamples = {
-  CODE128: ['https://kit.lonestack.com', 'LoneKit'],
-  CODE39: ['LONEKIT', 'HELLO-2024'],
-  EAN13: ['5901234123457', '4006381333931'],
-  EAN8: ['96385074', '55123457'],
-  UPC: ['012345678905', '036000291452'],
-  ITF14: ['98249880215004', '15400141288763'],
-  MSI: ['80523', '1234567'],
-  pharmacode: ['1234', '5678'],
-  codabar: ['A12345B', 'C$25.00D'],
-};
+const formatExamples = computed(() => tm('examples.generator.barcode'));
 const isBatchInput = ref(false);
 const batchInputText = ref('');
 
@@ -185,7 +175,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  const examples = formatExamples[barcodeFormat.value] || formatExamples.CODE128;
+  const examples = formatExamples.value[barcodeFormat.value] || formatExamples.value.CODE128;
   if (isBatchInput.value) {
     batchInputText.value = examples.join('\n');
     applyBatchInput(batchInputText.value);

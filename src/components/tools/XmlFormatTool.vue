@@ -18,7 +18,7 @@ import { XmlFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const source = ref();
 const target = ref();
@@ -53,7 +53,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  source.value = `<?xml version="1.0" encoding="UTF-8"?><library><book id="1" category="programming"><title lang="en">Learning TypeScript</title><author>Josh Goldberg</author><year>2022</year><price currency="USD">39.99</price><example><![CDATA[const add = (a, b) => a + b; console.log(add(2, 3)); // 5]]></example><publisher><name>O'Reilly Media</name><location>Sebastopol, CA</location></publisher><tags><tag>TypeScript</tag><tag>JavaScript</tag><tag>Web Development</tag></tags></book><book id="2" category="web"><title lang="en">Vue.js 3 Cookbook</title><author>Heitor Ramon Ribeiro</author><year>2023</year><price currency="USD">44.99</price><publisher><name>Packt Publishing</name><location>Birmingham, UK</location></publisher><tags><tag>Vue.js</tag><tag>Frontend</tag><tag>Framework</tag></tags></book></library>`;
+  source.value = tm('examples.xmlFormat');
   handleChange(source.value);
 }
 

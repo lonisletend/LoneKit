@@ -7,7 +7,7 @@ import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
 
 const { notify, readFromClipboard } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const STORAGE_KEY = "lonekit-sendpay-config-profiles";
 const LEGACY_STORAGE_KEY = "lonekit-sendpay-explain-config";
@@ -36,6 +36,14 @@ const formatOptions = [
 
 function normalizeSendpay(raw) {
   return String(raw ?? "").replace(/\D+/g, "");
+}
+
+function parseClipboardSendpay(raw) {
+  const text = String(raw ?? "").trim();
+  if (!text || !/^\d+$/.test(text)) {
+    return "";
+  }
+  return text;
 }
 
 function handleSendpayInput(value) {
@@ -763,19 +771,20 @@ async function saveConfig() {
   }
 }
 
-async function readClipboard() {
+async function readSendpayClipboard() {
   const text = await readFromClipboard();
-  if (text) {
-    sendpayInput.value = normalizeSendpay(text);
+  const sendpayText = parseClipboardSendpay(text);
+  if (sendpayText) {
+    sendpayInput.value = sendpayText;
     return;
   }
   notify("warning", t("tool.sendpayDisplay.clipboardNoText"));
 }
 
-function showExample() {
-  sendpayInput.value = Array.from({ length: 256 }, (_, index) => String(index % 10)).join("");
+function fillSendpayExample() {
+  sendpayInput.value = tm('examples.sendpayDisplay.sendpay');
   if (sendpayMapEnabled.value) {
-    sendpayMapInput.value = '{"520":"1","1002":"6","1024":9}';
+    sendpayMapInput.value = JSON.stringify(tm('examples.sendpayDisplay.sendpayMap'));
   }
 }
 
@@ -919,8 +928,8 @@ refreshUrlProfilesOnLoad();
       <div class="h-8 flex items-center justify-between">
         <div class="flex items-center space-x-4">
           <n-tag size="large" type="warning">{{ t('tool.sendpayDisplay.input') }}</n-tag>
-          <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
-          <n-button @click="showExample">{{ t('common.example') }}</n-button>
+          <n-button @click="readSendpayClipboard">{{ t('common.clipboard') }}</n-button>
+          <n-button @click="fillSendpayExample">{{ t('common.example') }}</n-button>
           <n-button @click="clearAll">{{ t('common.clear') }}</n-button>
           <n-switch v-model:value="sendpayMapEnabled" size="large">
               <template #checked>sendpayMap</template>

@@ -6,7 +6,7 @@ import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
 
 const { readFromClipboard, copyToClipboard } = useCommon();
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const source = ref("");
 
@@ -80,7 +80,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  source.value = `Here’s to the crazy ones. \nThe misfits. \nThe rebels. \nThe troublemakers. \nThe round pegs in the square holes. \nThe ones who see things differently. \nThey’re not fond of rules. \nAnd they have no respect for the status quo. \nYou can quote them, disagree with them, glorify or vilify them. \nAbout the only thing you can’t do is ignore them. \nBecause they change things. \nThey push the human race forward. \nAnd while some may see them as the crazy ones, we see genius. \nBecause the people who are crazy enough to think they can change the world, are the ones who do.`;
+  source.value = tm("examples.textCount");
 }
 
 function clearAll() {
