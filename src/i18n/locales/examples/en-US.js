@@ -20,4 +20,7 @@ You can ignore a tiny improvement for a day.
 But a tiny improvement repeated every day becomes a different way to work.
 Good tools do not ask for attention.
 They give attention back.`,
+  textProcess: `alpha
+beta
+gamma`,
 };

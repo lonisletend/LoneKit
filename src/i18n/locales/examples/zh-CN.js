@@ -19,6 +19,9 @@ export default {
 [2026-01-25 14:23:45.789] [DEBUG] [OrderService] - 最终响应数据: {"success":true,"orderId":"ORD2026012545678","paymentUrl":"https://pay.example.com/checkout?token=abc123xyz","qrCode":"data:image/png;base64,iVBORw0KGgo...","estimatedDelivery":"2026-01-28","trackingEnabled":true,"message":"订单创建成功，请在15分钟内完成支付"}
 [2026-01-25 14:23:45.812] [INFO] [OrderService] - 请求处理完成，总耗时: 667ms`,
   textCount: `改变世界的人\n\n献给疯狂的人。\n那些格格不入的人。\n那些反叛者。\n那些惹麻烦的人。\n他们像方孔里的圆钉。\n他们用不同的方式看世界。\n他们不喜欢循规蹈矩。\n他们也不尊重现状。\n你可以引用他们，反对他们，赞美他们，或者诋毁他们。\n但你唯一不能做的，就是忽视他们。\n因为他们改变事物。\n他们推动人类向前。\n有些人把他们看作疯子，而我们看到的是天才。\n因为那些疯狂到认为自己可以改变世界的人，正是改变世界的人。`,
+  textProcess: `alpha
+beta
+gamma`,
   sqlFormat: `select supplier_name,city from
 (select * from suppliers join addresses on suppliers.address_id=addresses.id)
 as suppliers

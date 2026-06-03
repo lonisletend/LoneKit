@@ -84,7 +84,7 @@ import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
-import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon } from '@vicons/fluent';
+import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon, DocumentTextToolbox24Regular as TextProcessIcon } from '@vicons/fluent';
 import { ContrastOutline, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline, LanguageOutline as UnicodeMenuIcon } from '@vicons/ionicons5';
 import { useThemeMode } from "../composables/useThemeMode";
 import { useLocaleMode } from "../composables/useLocaleMode";
@@ -110,6 +110,7 @@ const rawMenuItems = [
   { key: "diff-tool", routeName: "DiffToolWrapper", titleKey: "menu.diff", icon: DiffIcon },
   { key: "folder-diff-tool", routeName: "FolderDiffToolWrapper", titleKey: "menu.folderDiff", icon: FolderDiffIcon },
   { key: "text-count-tool", routeName: "TextCountTool", titleKey: "menu.textCount", icon: TextCountIcon },
+  { key: "text-process-tool", routeName: "TextProcessToolWrapper", titleKey: "menu.textProcess", icon: TextProcessIcon },
   { key: "uuid-tool", routeName: "UUIDTool", titleKey: "menu.uuid", icon: UUIDIcon },
   { key: "md5-tool", routeName: "Md5Tool", titleKey: "menu.md5", icon: Md5Icon },
   { key: "base64-tool", routeName: "Base64Tool", titleKey: "menu.base64", icon: Base64Icon },
