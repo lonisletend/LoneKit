@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NInput, NSwitch, NTag } from "naive-ui";
 import md5 from 'blueimp-md5';
 import SplitPanel from '../common/SplitPanel.vue'
@@ -10,6 +11,7 @@ import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 import { useEntryJump } from '../../composables/useEntryJump';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { t } = useI18n();
 
 const cardHeight = 220;
 const inputRows = 6;
@@ -104,7 +106,7 @@ async function readClipboard() {
     }
     ensureEntries();
   } else {
-    notify('warning', '剪贴板中没有可用文本');
+    notify('warning', t('tool.codec.noClipboardText'));
   }
 }
 
@@ -133,10 +135,10 @@ function clear() {
 
 function copyValue(value) {
   if (!value) {
-    notify('warning', '没有可复制内容');
+    notify('warning', t('tool.codec.noCopyableContent'));
     return;
   }
-  copyToClipboard(value, '复制成功!');
+  copyToClipboard(value);
 }
 
 </script>
@@ -147,13 +149,13 @@ function copyValue(value) {
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="warning">加密</n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">删除全部</n-button>
+            <n-tag size="large" type="warning">{{ t('tool.codec.encrypt') }}</n-tag>
+            <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExample">{{ t('common.example') }}</n-button>
+            <n-button @click="clear">{{ t('tool.codec.deleteAll') }}</n-button>
             <n-switch v-model:value="isBatchInput" size="large">
-              <template #checked>批量输入</template>
-              <template #unchecked>批量输入</template>
+              <template #checked>{{ t('tool.codec.batchInput') }}</template>
+              <template #unchecked>{{ t('tool.codec.batchInput') }}</template>
             </n-switch>
           </div>
           <div
@@ -173,14 +175,14 @@ function copyValue(value) {
                   size="small"
                   @click="copyValue(entry.source)"
                 >
-                  复制
+                  {{ t('common.copy') }}
                 </n-button>
                 <n-button
                   size="small"
                   @click="removeRow(index)"
                   :disabled="entries.length === 1"
                 >
-                  删除
+                  {{ t('tool.codec.delete') }}
                 </n-button>
               </div>
               <n-input
@@ -189,7 +191,7 @@ function copyValue(value) {
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
-                placeholder="输入字符串"
+                :placeholder="t('tool.codec.md5InputPlaceholder')"
                 @input="val => handleSourceInput(index, val)"
                 @keydown="event => handleJumpKeydown(event, 'left', index)"
               />
@@ -200,7 +202,7 @@ function copyValue(value) {
               v-model:value="batchSourceText"
               type="textarea"
               class="w-full h-full batch-input"
-              placeholder="每行一条内容，按换行分割批量加密"
+              :placeholder="t('tool.codec.batchMd5InputPlaceholder')"
               @input="onBatchSourceInput"
             />
           </div>
@@ -209,8 +211,8 @@ function copyValue(value) {
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">结果</n-tag>
-            <n-button @click="copyValue(allResults)">复制全部</n-button>
+            <n-tag size="large" type="success">{{ t('tool.codec.result') }}</n-tag>
+            <n-button @click="copyValue(allResults)">{{ t('tool.codec.copyAll') }}</n-button>
           </div>
           <div
             v-if="!isBatchInput"
@@ -229,14 +231,14 @@ function copyValue(value) {
                   size="small"
                   @click="copyValue(entry.target)"
                 >
-                  复制
+                  {{ t('common.copy') }}
                 </n-button>
                 <n-button
                   size="small"
                   @click="removeRow(index)"
                   :disabled="entries.length === 1"
                 >
-                  删除
+                  {{ t('tool.codec.delete') }}
                 </n-button>
               </div>
               <n-input
@@ -244,7 +246,7 @@ function copyValue(value) {
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
-                placeholder="加密结果"
+                :placeholder="t('tool.codec.md5ResultPlaceholder')"
                 :readonly="true"
               />
             </div>
@@ -254,7 +256,7 @@ function copyValue(value) {
               :value="batchTargetText"
               type="textarea"
               class="w-full h-full batch-input"
-              placeholder="批量加密结果"
+              :placeholder="t('tool.codec.batchMd5ResultPlaceholder')"
               :readonly="true"
             />
           </div>

@@ -1,5 +1,6 @@
 <script setup>
 import { computed, h, nextTick, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { NAlert, NButton, NCard, NIcon, NModal, NSpin, NTree } from 'naive-ui';
 import {
   ArrowClockwise24Regular as RefreshIcon,
@@ -18,6 +19,7 @@ defineOptions({
 
 const { notify } = useCommon();
 const { resolvedTheme } = useThemeMode();
+const { t } = useI18n();
 const diffTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'));
 
 const leftInputRef = ref(null);
@@ -27,8 +29,8 @@ const rightTreeBodyRef = ref(null);
 const leftDirHandle = ref(null);
 const rightDirHandle = ref(null);
 
-const leftFolderName = ref('未选择文件夹');
-const rightFolderName = ref('未选择文件夹');
+const leftFolderName = ref('');
+const rightFolderName = ref('');
 
 const leftFilesMap = ref(new Map());
 const rightFilesMap = ref(new Map());
@@ -58,12 +60,12 @@ const hoveredSamePath = ref('');
 const statusFilter = ref('all');
 const hasComparedResult = ref(false);
 
-const statusLabelMap = {
-  'left-only': '仅左侧',
-  'right-only': '仅右侧',
-  modified: '变更',
-  same: '相同'
-};
+const statusLabelMap = computed(() => ({
+  'left-only': t('tool.folderDiff.status.leftOnly'),
+  'right-only': t('tool.folderDiff.status.rightOnly'),
+  modified: t('tool.folderDiff.status.modified'),
+  same: t('tool.folderDiff.status.same')
+}));
 
 const statusShortMap = {
   'left-only': 'L',
@@ -104,6 +106,18 @@ const rightExpandedKeys = computed(() => {
 });
 
 let isSyncingScroll = false;
+
+function getUnknownError(error) {
+  return error?.message || t('tool.folderDiff.unknownError');
+}
+
+function getSideName(side) {
+  return side === 'left' ? t('tool.folderDiff.side.left') : t('tool.folderDiff.side.right');
+}
+
+function getSideLoadingKey(side, action) {
+  return `tool.folderDiff.loading.${action}${side === 'left' ? 'Left' : 'Right'}`;
+}
 
 function collectDirKeys(nodes, keySet) {
   nodes.forEach((node) => {
@@ -189,11 +203,11 @@ async function pickFolder(side) {
 async function pickFolderWithFSAccess(side) {
   try {
     loading.value = true;
-    loadingText.value = side === 'left' ? '正在加载左侧文件夹...' : '正在加载右侧文件夹...';
+    loadingText.value = t(getSideLoadingKey(side, 'loading'));
 
     const handle = await window.showDirectoryPicker();
 
-    loadingText.value = side === 'left' ? '正在扫描左侧文件夹...' : '正在扫描右侧文件夹...';
+    loadingText.value = t(getSideLoadingKey(side, 'scanning'));
     const fileMap = new Map();
     await collectFilesFromDirectoryHandle(handle, '', fileMap);
 
@@ -210,7 +224,7 @@ async function pickFolderWithFSAccess(side) {
     await handleFolderSelectionChange();
   } catch (error) {
     if (error?.name !== 'AbortError') {
-      notify('error', `文件夹选择失败: ${error?.message || '未知错误'}`);
+      notify('error', t('tool.folderDiff.pickFailed', { message: getUnknownError(error) }));
     }
   } finally {
     loading.value = false;
@@ -252,12 +266,12 @@ async function handleFileInputChange(event, side) {
   }
 
   loading.value = true;
-  loadingText.value = side === 'left' ? '正在加载左侧文件夹...' : '正在加载右侧文件夹...';
+  loadingText.value = t(getSideLoadingKey(side, 'loading'));
   await nextTick();
 
   try {
     const map = new Map();
-    let folderName = '已选择文件夹';
+    let folderName = t('tool.folderDiff.selectedFolder');
 
     files.forEach((file) => {
       const rawPath = file.webkitRelativePath || file.name;
@@ -403,7 +417,7 @@ async function startCompare() {
   }
 
   loading.value = true;
-  loadingText.value = '正在比较文件夹内容，请稍候...';
+  loadingText.value = t('tool.folderDiff.loading.comparing');
 
   try {
     const compareMap = await buildFileDiffMap(leftFilesMap.value, rightFilesMap.value);
@@ -418,9 +432,9 @@ async function startCompare() {
     leftSelectedKeys.value = [];
     rightSelectedKeys.value = [];
 
-    notify('success', `文件夹比较完成，共 ${compareMap.size} 个文件项目`);
+    notify('success', t('tool.folderDiff.compareSuccess', { count: compareMap.size }));
   } catch (error) {
-    notify('error', `文件夹比较失败: ${error?.message || '未知错误'}`);
+    notify('error', t('tool.folderDiff.compareFailed', { message: getUnknownError(error) }));
   } finally {
     loading.value = false;
     loadingText.value = '';
@@ -632,13 +646,13 @@ function buildTreeData(side, sideFileMap, compareMap, directoryMap, filterStatus
 function clearSideFolder(side) {
   if (side === 'left') {
     leftDirHandle.value = null;
-    leftFolderName.value = '未选择文件夹';
+    leftFolderName.value = '';
     leftFilesMap.value = new Map();
     leftTreeData.value = [];
     leftSelectedKeys.value = [];
   } else {
     rightDirHandle.value = null;
-    rightFolderName.value = '未选择文件夹';
+    rightFolderName.value = '';
     rightFilesMap.value = new Map();
     rightTreeData.value = [];
     rightSelectedKeys.value = [];
@@ -708,7 +722,7 @@ async function expandSideAll(side) {
     return;
   }
 
-  const startedAt = await beginUiLoading(side === 'left' ? '正在展开左侧文件树...' : '正在展开右侧文件树...');
+  const startedAt = await beginUiLoading(t(getSideLoadingKey(side, 'expanding')));
   try {
     const sideKeys = getSideTreeDirKeys(side);
     expandedDirKeys.value = Array.from(new Set([...expandedDirKeys.value, ...sideKeys]));
@@ -722,7 +736,7 @@ async function collapseSideAll(side) {
     return;
   }
 
-  const startedAt = await beginUiLoading(side === 'left' ? '正在折叠左侧文件树...' : '正在折叠右侧文件树...');
+  const startedAt = await beginUiLoading(t(getSideLoadingKey(side, 'collapsing')));
   try {
     const sideKeys = getSideTreeDirKeys(side);
     expandedDirKeys.value = expandedDirKeys.value.filter((key) => !sideKeys.has(key));
@@ -738,20 +752,20 @@ async function refreshSide(side) {
 
   const hasFolder = side === 'left' ? hasLeftFolder.value : hasRightFolder.value;
   if (!hasFolder) {
-    notify('warning', `请先选择${side === 'left' ? '左侧' : '右侧'}文件夹`);
+    notify('warning', t('tool.folderDiff.selectSideFirst', { side: getSideName(side) }));
     return;
   }
 
   const handle = side === 'left' ? leftDirHandle.value : rightDirHandle.value;
   if (!handle) {
-    notify('warning', '当前文件夹为上传模式，无法自动刷新，请重新选择该侧文件夹');
+    notify('warning', t('tool.folderDiff.uploadModeRefreshUnsupported'));
     await pickFolder(side);
     return;
   }
 
   try {
     loading.value = true;
-    loadingText.value = side === 'left' ? '正在刷新左侧文件夹...' : '正在刷新右侧文件夹...';
+    loadingText.value = t(getSideLoadingKey(side, 'refreshing'));
 
     const fileMap = new Map();
     await collectFilesFromDirectoryHandle(handle, '', fileMap);
@@ -766,7 +780,7 @@ async function refreshSide(side) {
 
     await handleFolderSelectionChange();
   } catch (error) {
-    notify('error', `刷新失败: ${error?.message || '未知错误'}`);
+    notify('error', t('tool.folderDiff.refreshFailed', { message: getUnknownError(error) }));
   } finally {
     loading.value = false;
     loadingText.value = '';
@@ -896,7 +910,7 @@ async function openDiffModal(path) {
   }
 
   modalVisible.value = true;
-  modalTitle.value = `${path} [${statusLabelMap[compare.status]}]`;
+  modalTitle.value = `${path} [${statusLabelMap.value[compare.status]}]`;
   previewLoading.value = true;
   previewType.value = 'message';
   previewMessage.value = '';
@@ -911,7 +925,7 @@ async function openDiffModal(path) {
 
     if ((leftRead.exists && !leftRead.isText) || (rightRead.exists && !rightRead.isText)) {
       previewType.value = 'binary';
-      previewMessage.value = '该文件是二进制或不可安全解码的文本，暂不展示内容级 diff。';
+      previewMessage.value = t('tool.folderDiff.binaryPreviewUnsupported');
       return;
     }
 
@@ -920,7 +934,7 @@ async function openDiffModal(path) {
     previewType.value = 'diff';
   } catch (error) {
     previewType.value = 'message';
-    previewMessage.value = `读取文件失败: ${error?.message || '未知错误'}`;
+    previewMessage.value = t('tool.folderDiff.readFileFailed', { message: getUnknownError(error) });
   } finally {
     previewLoading.value = false;
   }
@@ -954,37 +968,37 @@ async function openDiffModal(path) {
           class="legend-item status-total"
           :class="{ active: statusFilter === 'all' }"
           @click="handleLegendFilterClick('all')"
-        ><i class="legend-dot"></i>总数 {{ stats.total }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.total') }} {{ stats.total }}</span>
         <span
           class="legend-item status-left-only"
           :class="{ active: statusFilter === 'left-only' }"
           @click="handleLegendFilterClick('left-only')"
-        ><i class="legend-dot"></i>仅左侧 {{ stats['left-only'] }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.leftOnly') }} {{ stats['left-only'] }}</span>
         <span
           class="legend-item status-right-only"
           :class="{ active: statusFilter === 'right-only' }"
           @click="handleLegendFilterClick('right-only')"
-        ><i class="legend-dot"></i>仅右侧 {{ stats['right-only'] }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.rightOnly') }} {{ stats['right-only'] }}</span>
         <span
           class="legend-item status-modified"
           :class="{ active: statusFilter === 'modified' }"
           @click="handleLegendFilterClick('modified')"
-        ><i class="legend-dot"></i>变更 {{ stats.modified }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.modified') }} {{ stats.modified }}</span>
         <span
           class="legend-item status-same"
           :class="{ active: statusFilter === 'same' }"
           @click="handleLegendFilterClick('same')"
-        ><i class="legend-dot"></i>相同 {{ stats.same }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.same') }} {{ stats.same }}</span>
       </div>
 
-      <n-spin :show="loading" :description="loadingText || '处理中...'" class="folder-diff-spin flex-1 min-h-0">
+      <n-spin :show="loading" :description="loadingText || t('tool.folderDiff.loading.processing')" class="folder-diff-spin flex-1 min-h-0">
         <div class="h-full min-h-0">
           <SplitPanel>
           <template #left>
             <div class="h-full px-2">
               <div class="folder-panel h-full p-2 flex flex-col rounded">
                 <div class="tree-header pb-2">
-                  <n-button v-if="!hasLeftFolder" type="warning" ghost size="small" circle title="选择左侧文件夹" @click="pickLeftFolder">
+                  <n-button v-if="!hasLeftFolder" type="warning" ghost size="small" circle :title="t('tool.folderDiff.selectLeftFolder')" @click="pickLeftFolder">
                     <template #icon>
                       <n-icon>
                         <FolderIcon />
@@ -994,21 +1008,21 @@ async function openDiffModal(path) {
                   <template v-else>
                     <span class="tree-title" :title="leftFolderName">{{ leftFolderName }}</span>
                     <div class="header-actions">
-                      <n-button quaternary size="small" title="展开全部" @click="expandSideAll('left')">
+                      <n-button quaternary size="small" :title="t('common.expandAll')" @click="expandSideAll('left')">
                         <template #icon>
                           <n-icon>
                             <ExpandIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="折叠全部" @click="collapseSideAll('left')">
+                      <n-button quaternary size="small" :title="t('common.collapseAll')" @click="collapseSideAll('left')">
                         <template #icon>
                           <n-icon>
                             <CollapseIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="刷新" @click="refreshSide('left')">
+                      <n-button quaternary size="small" :title="t('tool.folderDiff.refresh')" @click="refreshSide('left')">
                         <template #icon>
                           <n-icon>
                             <RefreshIcon />
@@ -1033,7 +1047,7 @@ async function openDiffModal(path) {
                     @update:expanded-keys="handleExpandedUpdate"
                     @update:selected-keys="handleLeftSelected"
                   />
-                  <div v-else class="empty-tip">请选择文件夹</div>
+                  <div v-else class="empty-tip">{{ t('tool.folderDiff.selectFolder') }}</div>
                 </div>
               </div>
             </div>
@@ -1043,7 +1057,7 @@ async function openDiffModal(path) {
             <div class="h-full px-2">
               <div class="folder-panel h-full p-2 flex flex-col rounded">
                 <div class="tree-header pb-2">
-                  <n-button v-if="!hasRightFolder" type="primary" ghost size="small" circle title="选择右侧文件夹" @click="pickRightFolder">
+                  <n-button v-if="!hasRightFolder" type="primary" ghost size="small" circle :title="t('tool.folderDiff.selectRightFolder')" @click="pickRightFolder">
                     <template #icon>
                       <n-icon>
                         <FolderIcon />
@@ -1053,21 +1067,21 @@ async function openDiffModal(path) {
                   <template v-else>
                     <span class="tree-title" :title="rightFolderName">{{ rightFolderName }}</span>
                     <div class="header-actions">
-                      <n-button quaternary size="small" title="展开全部" @click="expandSideAll('right')">
+                      <n-button quaternary size="small" :title="t('common.expandAll')" @click="expandSideAll('right')">
                         <template #icon>
                           <n-icon>
                             <ExpandIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="折叠全部" @click="collapseSideAll('right')">
+                      <n-button quaternary size="small" :title="t('common.collapseAll')" @click="collapseSideAll('right')">
                         <template #icon>
                           <n-icon>
                             <CollapseIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="刷新" @click="refreshSide('right')">
+                      <n-button quaternary size="small" :title="t('tool.folderDiff.refresh')" @click="refreshSide('right')">
                         <template #icon>
                           <n-icon>
                             <RefreshIcon />
@@ -1092,7 +1106,7 @@ async function openDiffModal(path) {
                     @update:expanded-keys="handleExpandedUpdate"
                     @update:selected-keys="handleRightSelected"
                   />
-                  <div v-else class="empty-tip">请选择文件夹</div>
+                  <div v-else class="empty-tip">{{ t('tool.folderDiff.selectFolder') }}</div>
                 </div>
               </div>
             </div>
@@ -1118,9 +1132,9 @@ async function openDiffModal(path) {
       >
         <div class="w-full flex-1 min-h-0 flex flex-col gap-2">
           <div class="flex-1 min-h-0 overflow-auto diff-preview-area">
-            <div v-if="previewLoading" class="text-sm text-slate-500 dark:text-slate-400">正在读取文件内容...</div>
+            <div v-if="previewLoading" class="text-sm text-slate-500 dark:text-slate-400">{{ t('tool.folderDiff.loading.readingFile') }}</div>
             <n-alert v-else-if="previewType !== 'diff'" type="info" :show-icon="false">
-              {{ previewMessage || '当前文件无法展示内容对比。' }}
+              {{ previewMessage || t('tool.folderDiff.previewUnavailable') }}
             </n-alert>
             <CodeDiff
               v-else

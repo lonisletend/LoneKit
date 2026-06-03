@@ -1,10 +1,12 @@
 <script setup>
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NInput, NTag } from "naive-ui";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
 
 const { readFromClipboard, copyToClipboard } = useCommon();
+const { t } = useI18n();
 
 const source = ref("");
 
@@ -28,7 +30,7 @@ function formatBytes(bytes) {
 
 function formatReadingTime(wordCount) {
   if (!Number.isFinite(wordCount) || wordCount <= 0) {
-    return "0 秒";
+    return t("tool.textCount.zeroSeconds");
   }
 
   // Mixed Chinese/English reading speed baseline.
@@ -38,14 +40,14 @@ function formatReadingTime(wordCount) {
   const seconds = totalSeconds % 60;
 
   if (minutes === 0) {
-    return `${seconds} 秒`;
+    return t("tool.textCount.seconds", { seconds });
   }
 
   if (seconds === 0) {
-    return `${minutes} 分钟`;
+    return t("tool.textCount.minutes", { minutes });
   }
 
-  return `${minutes} 分 ${seconds} 秒`;
+  return t("tool.textCount.minutesSeconds", { minutes, seconds });
 }
 
 const stats = computed(() => {
@@ -86,7 +88,7 @@ function clearAll() {
 }
 
 function copySource() {
-  copyToClipboard(source.value, "复制成功!");
+  copyToClipboard(source.value);
 }
 </script>
 
@@ -96,18 +98,18 @@ function copySource() {
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="warning">输入</n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clearAll">清空</n-button>
-            <n-button @click="copySource">复制</n-button>
+            <n-tag size="large" type="warning">{{ t('common.input') }}</n-tag>
+            <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExample">{{ t('common.example') }}</n-button>
+            <n-button @click="clearAll">{{ t('common.clear') }}</n-button>
+            <n-button @click="copySource">{{ t('common.copy') }}</n-button>
           </div>
           <div class="w-full h-full text-xl">
             <n-input
               v-model:value="source"
               type="textarea"
               class="w-full h-full"
-              placeholder="输入任意文本"
+              :placeholder="t('tool.textCount.inputPlaceholder')"
             />
           </div>
         </div>
@@ -116,35 +118,35 @@ function copySource() {
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">统计</n-tag>
+            <n-tag size="large" type="success">{{ t('tool.textCount.stats') }}</n-tag>
           </div>
           <div class="flex-1 overflow-auto space-y-2 pr-1">
             <div class="stat-row">
-              <span class="text-slate-600 dark:text-slate-300">字符数</span>
+              <span class="text-slate-600 dark:text-slate-300">{{ t('tool.textCount.chars') }}</span>
               <span class="stat-value">{{ stats.chars }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-slate-600 dark:text-slate-300">字符数(不含空白)</span>
+              <span class="text-slate-600 dark:text-slate-300">{{ t('tool.textCount.charsNoWhitespace') }}</span>
               <span class="stat-value">{{ stats.charsNoWhitespace }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-slate-600 dark:text-slate-300">单词数</span>
+              <span class="text-slate-600 dark:text-slate-300">{{ t('tool.textCount.words') }}</span>
               <span class="stat-value">{{ stats.words }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-slate-600 dark:text-slate-300">行数</span>
+              <span class="text-slate-600 dark:text-slate-300">{{ t('tool.textCount.lines') }}</span>
               <span class="stat-value">{{ stats.lines }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-slate-600 dark:text-slate-300">段落数</span>
+              <span class="text-slate-600 dark:text-slate-300">{{ t('tool.textCount.paragraphs') }}</span>
               <span class="stat-value">{{ stats.paragraphs }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-slate-600 dark:text-slate-300">字节数(UTF-8)</span>
+              <span class="text-slate-600 dark:text-slate-300">{{ t('tool.textCount.bytesUtf8') }}</span>
               <span class="stat-value">{{ stats.bytes === 0 ? stats.bytes : `${stats.bytes} (${stats.bytesHuman})` }}</span>
             </div>
             <div class="stat-row">
-              <span class="text-slate-600 dark:text-slate-300">预估阅读时长</span>
+              <span class="text-slate-600 dark:text-slate-300">{{ t('tool.textCount.readingTime') }}</span>
               <span class="stat-value">{{ stats.readingTime }}</span>
             </div>
           </div>

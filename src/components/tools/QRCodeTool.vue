@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NInput, NSwitch, NTag, NRadioGroup, NRadioButton, NColorPicker } from "naive-ui";
 import QrcodeVue from 'qrcode.vue'
 import SplitPanel from '../common/SplitPanel.vue'
@@ -9,12 +10,13 @@ import { useSyncedScroll } from '../../composables/useSyncedScroll';
 import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 
 const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
+const { t } = useI18n();
 
 const size = ref(200);
-const sizeOptions = ref([
-  {label: '小', value: 100},
-  {label: '中', value: 200},
-  {label: '大', value: 300},
+const sizeOptions = computed(() => [
+  { label: t('tool.generator.small'), value: 100 },
+  { label: t('tool.generator.medium'), value: 200 },
+  { label: t('tool.generator.large'), value: 300 },
 ])
 const qrExamples = ['https://kit.lonestack.com', 'LoneKit'];
 const color = ref('#18A058');
@@ -124,7 +126,7 @@ async function readClipboard() {
     }
     ensureEntries();
   } else {
-    notify('warning', '剪贴板中没有可用文本');
+    notify('warning', t('tool.generator.clipboardNoText'));
   }
 }
 
@@ -155,10 +157,10 @@ function clear() {
 function exportToExcel() {
   const activeEntries = entries.value.filter(hasContent);
   exportCanvasToExcel(activeEntries, 'qrcode-', {
-    sheetName: '二维码',
-    textHeader: '二维码文本',
-    imageHeader: '二维码图片',
-    filePrefix: '二维码',
+    sheetName: t('tool.generator.qrSheetName'),
+    textHeader: t('tool.generator.qrTextHeader'),
+    imageHeader: t('tool.generator.qrImageHeader'),
+    filePrefix: t('tool.generator.qrFilePrefix'),
   });
 }
 
@@ -170,13 +172,13 @@ function exportToExcel() {
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="warning">输入</n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">删除全部</n-button>
+            <n-tag size="large" type="warning">{{ t('common.input') }}</n-tag>
+            <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExample">{{ t('common.example') }}</n-button>
+            <n-button @click="clear">{{ t('tool.generator.deleteAll') }}</n-button>
             <n-switch v-model:value="isBatchInput" size="large">
-              <template #checked>批量输入</template>
-              <template #unchecked>批量输入</template>
+              <template #checked>{{ t('tool.generator.batchInput') }}</template>
+              <template #unchecked>{{ t('tool.generator.batchInput') }}</template>
             </n-switch>
           </div>
           <div
@@ -192,7 +194,7 @@ function exportToExcel() {
                   @click="removeEntry(index)"
                   :disabled="entries.length === 1"
                 >
-                  删除
+                  {{ t('tool.generator.delete') }}
                 </n-button>
               </div>
               <n-input
@@ -200,7 +202,7 @@ function exportToExcel() {
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
-                placeholder="输入字符串（支持换行，整体生成一个二维码）"
+                :placeholder="t('tool.generator.qrInputPlaceholder')"
                 @input="val => handleEntryInput(index, val)"
               />
             </div>
@@ -210,7 +212,7 @@ function exportToExcel() {
               v-model:value="batchInputText"
               type="textarea"
               class="w-full h-full batch-input"
-              placeholder="每行一条内容，按换行分割生成多个二维码"
+              :placeholder="t('tool.generator.qrBatchPlaceholder')"
               @input="onBatchInputChange"
             />
           </div>
@@ -219,14 +221,14 @@ function exportToExcel() {
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">结果</n-tag>
+            <n-tag size="large" type="success">{{ t('tool.generator.result') }}</n-tag>
             <n-radio-group v-model:value="size" name="sizeRadioGroup">
               <n-radio-button v-for="(item, index) in sizeOptions" :key="index" :value="item.value" :label="item.label"/>
             </n-radio-group>
             <n-color-picker v-model:value="color" :style="{width: '80px'}"
               :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
             />
-            <n-button @click="exportToExcel">导出 Excel</n-button>
+            <n-button @click="exportToExcel">{{ t('tool.generator.exportExcel') }}</n-button>
           </div>
           <div
             ref="rightScrollRef"
@@ -236,7 +238,7 @@ function exportToExcel() {
             <div v-for="entry in entries" :key="entry.id" class="w-full lk-result-surface p-2 relative" :style="cardStyle">
               <div v-if="hasContent(entry)" class="h-full flex flex-col">
                 <div class="entry-copy-btn">
-                  <n-button size="small" @click="copyCanvasImage(`qrcode-${entry.id}`, '二维码图片已复制到剪贴板!')">复制</n-button>
+                  <n-button size="small" @click="copyCanvasImage(`qrcode-${entry.id}`, t('tool.generator.qrImageCopied'))">{{ t('common.copy') }}</n-button>
                 </div>
                 <div class="flex-1 flex justify-center items-center overflow-hidden" :id="`qrcode-${entry.id}`">
                   <qrcode-vue :value="entry.content" :size="size" level="H" :foreground="color" />
@@ -246,7 +248,7 @@ function exportToExcel() {
                 </div>
               </div>
               <div v-else class="h-full border border-dashed flex items-center justify-center text-gray-400 text-sm empty-result-surface">
-                待输入
+                {{ t('tool.generator.pendingInput') }}
               </div>
             </div>
           </div>

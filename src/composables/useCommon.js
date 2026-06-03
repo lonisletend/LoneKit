@@ -1,4 +1,5 @@
 import { useNotification } from "naive-ui";
+import { useI18n } from "vue-i18n";
 import { writeText, readText } from "@tauri-apps/plugin-clipboard-manager";
 
 /**
@@ -7,6 +8,7 @@ import { writeText, readText } from "@tauri-apps/plugin-clipboard-manager";
  */
 export function useCommon() {
   const notification = useNotification();
+  const { t, locale } = useI18n();
 
   /**
    * 显示通知消息
@@ -25,12 +27,12 @@ export function useCommon() {
   /**
    * 复制文本到剪贴板
    * @param {string} text - 要复制的文本内容
-   * @param {string} successMessage - 成功提示消息，默认为 '复制成功'
-   * @param {string} errorMessage - 失败提示消息，默认为 '复制失败'
+   * @param {string} successMessage - 成功提示消息，默认使用当前语言
+   * @param {string} errorMessage - 失败提示消息，默认使用当前语言
    */
-  async function copyToClipboard(text, successMessage = '复制成功', errorMessage = '复制失败') {
+  async function copyToClipboard(text, successMessage = t('common.copied'), errorMessage = t('common.copyFailed')) {
     if (!text) {
-      notify('warning', '没有可复制的内容');
+      notify('warning', t('common.noCopyableContent'));
       return false;
     }
 
@@ -74,11 +76,11 @@ export function useCommon() {
         return await readText();
       }
 
-      notify('error', '无法访问剪贴板');
+      notify('error', t('common.clipboardUnavailable'));
       return null;
     } catch (error) {
       console.error('读取剪贴板失败:', error);
-      notify('error', '读取剪贴板失败');
+      notify('error', t('common.readClipboardFailed'));
       return null;
     }
   }
@@ -89,15 +91,15 @@ export function useCommon() {
    * @param {string} successMessage - 成功提示消息
    * @param {string} errorMessage - 失败提示消息
    */
-  async function copyCanvasImage(containerId, successMessage = '图片已复制到剪贴板!', errorMessage = '复制失败') {
+  async function copyCanvasImage(containerId, successMessage = t('common.imageCopied'), errorMessage = t('common.copyFailed')) {
     const container = document.getElementById(containerId);
     if (!container) {
-      notify('warning', '没有可复制的内容');
+      notify('warning', t('common.noCopyableContent'));
       return false;
     }
     const canvas = container.querySelector('canvas');
     if (!canvas) {
-      notify('warning', '没有可复制的内容');
+      notify('warning', t('common.noCopyableContent'));
       return false;
     }
     try {
@@ -105,7 +107,7 @@ export function useCommon() {
         canvas.toBlob((b) => resolve(b), 'image/png');
       });
       if (!blob) {
-        notify('error', '生成图片失败');
+        notify('error', t('common.imageBuildFailed'));
         return false;
       }
       await navigator.clipboard.write([
@@ -125,15 +127,20 @@ export function useCommon() {
    * @param {Array<{id: string, content: string}>} items - 条目列表，每项包含 id 和 content
    * @param {string} containerIdPrefix - 容器 ID 前缀，与 entry.id 拼接查找 canvas
    * @param {object} options - 可选配置
-   * @param {string} options.sheetName - 工作表名称，默认 '导出数据'
-   * @param {string} options.textHeader - 文本列表头，默认 '文本'
-   * @param {string} options.imageHeader - 图片列表头，默认 '图片'
-   * @param {string} options.filePrefix - 文件名前缀，默认 '导出'
+   * @param {string} options.sheetName - 工作表名称，默认使用当前语言
+   * @param {string} options.textHeader - 文本列表头，默认使用当前语言
+   * @param {string} options.imageHeader - 图片列表头，默认使用当前语言
+   * @param {string} options.filePrefix - 文件名前缀，默认使用当前语言
    */
   async function exportCanvasToExcel(items, containerIdPrefix, options = {}) {
-    const { sheetName = '导出数据', textHeader = '文本', imageHeader = '图片', filePrefix = '导出' } = options;
+    const {
+      sheetName = t('common.exportData'),
+      textHeader = t('common.text'),
+      imageHeader = t('common.image'),
+      filePrefix = t('common.export')
+    } = options;
     if (!items || items.length === 0) {
-      notify('warning', '没有可导出的内容');
+      notify('warning', t('common.noExportableContent'));
       return;
     }
 
@@ -178,14 +185,14 @@ export function useCommon() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const ts = new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/[\/:\s]/g, '');
+      const ts = new Date().toLocaleString(locale.value, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/[\/:\s,]/g, '');
       a.download = `${filePrefix}_${ts}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
-      notify('success', '导出成功!');
+      notify('success', t('common.exportSuccess'));
     } catch (e) {
       console.error('导出 Excel 失败:', e);
-      notify('error', '导出失败');
+      notify('error', t('common.exportFailed'));
     }
   }
 

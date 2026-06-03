@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NInput, NSwitch, NTag, NRadioGroup, NRadioButton, NColorPicker, NSelect } from "naive-ui";
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
@@ -9,12 +10,13 @@ import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 import JsBarcode from 'jsbarcode';
 
 const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
+const { t } = useI18n();
 
 const height = ref(150);
-const sizeOptions = ref([
-  {label: '小', value: 100},
-  {label: '中', value: 150},
-  {label: '大', value: 200},
+const sizeOptions = computed(() => [
+  { label: t('tool.generator.small'), value: 100 },
+  { label: t('tool.generator.medium'), value: 150 },
+  { label: t('tool.generator.large'), value: 200 },
 ])
 const heightWidthMap = {
   100: 1,
@@ -40,17 +42,17 @@ const formatOptions = [
   { label: 'Pharmacode', value: 'pharmacode' },
   { label: 'Codabar', value: 'codabar' },
 ];
-const formatHints = {
-  CODE128: '支持所有 ASCII 字符',
-  CODE39: '仅支持大写字母 A-Z、数字 0-9 及 - . $ / + % 空格',
-  EAN13: '需要 12 或 13 位纯数字',
-  EAN8: '需要 7 或 8 位纯数字',
-  UPC: '需要 11 或 12 位纯数字',
-  ITF14: '需要 13 或 14 位纯数字', 
-  MSI: '仅支持纯数字',
-  pharmacode: '仅支持 3~131070 之间的整数',
-  codabar: '数字 0-9、特殊字符 - $ : / . + 及起止符 A/B/C/D',
-};
+const formatHints = computed(() => ({
+  CODE128: t('tool.generator.barcodeHints.CODE128'),
+  CODE39: t('tool.generator.barcodeHints.CODE39'),
+  EAN13: t('tool.generator.barcodeHints.EAN13'),
+  EAN8: t('tool.generator.barcodeHints.EAN8'),
+  UPC: t('tool.generator.barcodeHints.UPC'),
+  ITF14: t('tool.generator.barcodeHints.ITF14'),
+  MSI: t('tool.generator.barcodeHints.MSI'),
+  pharmacode: t('tool.generator.barcodeHints.pharmacode'),
+  codabar: t('tool.generator.barcodeHints.codabar'),
+}));
 const formatExamples = {
   CODE128: ['https://kit.lonestack.com', 'LoneKit'],
   CODE39: ['LONEKIT', 'HELLO-2024'],
@@ -178,7 +180,7 @@ async function readClipboard() {
     }
     ensureEntries();
   } else {
-    notify('warning', '剪贴板中没有可用文本');
+    notify('warning', t('tool.generator.clipboardNoText'));
   }
 }
 
@@ -210,10 +212,10 @@ function clear() {
 function exportToExcel() {
   const activeEntries = entries.value.filter(e => hasContent(e) && isValidBarcode(e.content));
   exportCanvasToExcel(activeEntries, 'barcode-', {
-    sheetName: '条形码',
-    textHeader: '条码文本',
-    imageHeader: '条形码图片',
-    filePrefix: '条形码',
+    sheetName: t('tool.generator.barcodeSheetName'),
+    textHeader: t('tool.generator.barcodeTextHeader'),
+    imageHeader: t('tool.generator.barcodeImageHeader'),
+    filePrefix: t('tool.generator.barcodeFilePrefix'),
   });
 }
 
@@ -225,13 +227,13 @@ function exportToExcel() {
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="warning">输入</n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">删除全部</n-button>
+            <n-tag size="large" type="warning">{{ t('common.input') }}</n-tag>
+            <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExample">{{ t('common.example') }}</n-button>
+            <n-button @click="clear">{{ t('tool.generator.deleteAll') }}</n-button>
             <n-switch v-model:value="isBatchInput" size="large">
-              <template #checked>批量输入</template>
-              <template #unchecked>批量输入</template>
+              <template #checked>{{ t('tool.generator.batchInput') }}</template>
+              <template #unchecked>{{ t('tool.generator.batchInput') }}</template>
             </n-switch>
           </div>
           <div
@@ -247,7 +249,7 @@ function exportToExcel() {
                   @click="removeEntry(index)"
                   :disabled="entries.length === 1"
                 >
-                  删除
+                  {{ t('tool.generator.delete') }}
                 </n-button>
               </div>
               <n-input
@@ -255,7 +257,7 @@ function exportToExcel() {
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
-                placeholder="输入字符串（支持换行，整体生成一个条形码）"
+                :placeholder="t('tool.generator.barcodeInputPlaceholder')"
                 @input="val => handleEntryInput(index, val)"
               />
             </div>
@@ -265,7 +267,7 @@ function exportToExcel() {
               v-model:value="batchInputText"
               type="textarea"
               class="w-full h-full batch-input"
-              placeholder="每行一条内容，按换行分割生成多个条形码"
+              :placeholder="t('tool.generator.barcodeBatchPlaceholder')"
               @input="onBatchInputChange"
             />
           </div>
@@ -274,7 +276,7 @@ function exportToExcel() {
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">结果</n-tag>
+            <n-tag size="large" type="success">{{ t('tool.generator.result') }}</n-tag>
             <n-radio-group v-model:value="height" name="sizeRadioGroup">
               <n-radio-button v-for="(item, index) in sizeOptions" :key="index" :value="item.value" :label="item.label"/>
             </n-radio-group>
@@ -282,7 +284,7 @@ function exportToExcel() {
               :swatches="['#18A058','#2080F0','#F0A020','rgba(208, 48, 80, 1)','#000000']"
             />
             <n-select v-model:value="barcodeFormat" :options="formatOptions" :style="{width: '130px'}" />
-            <n-button @click="exportToExcel">导出 Excel</n-button>
+            <n-button @click="exportToExcel">{{ t('tool.generator.exportExcel') }}</n-button>
           </div>
           <div
             ref="rightScrollRef"
@@ -293,14 +295,14 @@ function exportToExcel() {
               <div v-if="hasContent(entry)" class="h-full flex flex-col">
                 <template v-if="isValidBarcode(entry.content)">
                   <div class="entry-copy-btn">
-                    <n-button size="small" @click="copyCanvasImage(`barcode-${entry.id}`, '条形码图片已复制到剪贴板!')">复制</n-button>
+                    <n-button size="small" @click="copyCanvasImage(`barcode-${entry.id}`, t('tool.generator.barcodeImageCopied'))">{{ t('common.copy') }}</n-button>
                   </div>
                   <div class="flex-1 flex justify-center items-center overflow-hidden" :id="`barcode-${entry.id}`">
                     <vue-barcode :key="`${entry.id}-${barcodeFormat}`" :value="entry.content" :options="{ format: barcodeFormat, displayValue: false, lineColor: color, height: barcodeSize.height, width: barcodeSize.width }"></vue-barcode>
                   </div>
                 </template>
                 <div v-else class="flex-1 flex flex-col justify-center items-center text-red-400 text-sm">
-                  <div>当前内容不支持 {{ barcodeFormat }} 格式</div>
+                  <div>{{ t('tool.generator.barcodeUnsupported', { format: barcodeFormat }) }}</div>
                   <div class="mt-1 text-gray-400 text-xs">{{ formatHints[barcodeFormat] }}</div>
                 </div>
                 <div class="text-sm whitespace-pre-wrap break-all text-center max-h-20 overflow-auto w-full px-2">
@@ -308,7 +310,7 @@ function exportToExcel() {
                 </div>
               </div>
               <div v-else class="h-full border border-dashed flex items-center justify-center text-gray-400 text-sm empty-result-surface">
-                待输入
+                {{ t('tool.generator.pendingInput') }}
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NButtonGroup, NIcon, NInput } from "naive-ui";
 import SplitPanel from '../common/SplitPanel.vue';
 import { CodeDiff } from 'v-code-diff'
@@ -22,6 +23,7 @@ const target = ref();
 const panel = ref('source');
 const outputFormat = ref('side-by-side');
 const { resolvedTheme } = useThemeMode();
+const { t } = useI18n();
 const diffTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'));
 
 onMounted(() => {
@@ -44,10 +46,10 @@ function clear() {
     <div class="w-full h-8 shrink-0 flex items-center space-x-4">
       <n-button-group>
         <n-button secondary type="primary">
-          原始文本
+          {{ t('tool.diff.sourceText') }}
         </n-button>
         <n-button ghost @click="() => panel = 'result'">
-          对比结果
+          {{ t('tool.diff.result') }}
         </n-button>
       </n-button-group>
     </div>
@@ -57,7 +59,7 @@ function clear() {
           <div class="h-full py-2 flex flex-col space-y-2">
             <div class="w-full h-full text-xl">
               <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                       placeholder="原始文本"/>
+                       :placeholder="t('tool.diff.sourceText')"/>
             </div>
           </div>
         </template>
@@ -65,7 +67,7 @@ function clear() {
           <div class="h-full py-2 flex flex-col space-y-2">
             <div class="w-full h-full text-xl">
               <n-input v-model:value="target" type="textarea" class="w-full h-full"
-                       placeholder="对比文本"/>
+                       :placeholder="t('tool.diff.targetText')"/>
             </div>
           </div>
         </template>
@@ -77,10 +79,10 @@ function clear() {
     <div class="w-full h-8 shrink-0 flex items-center space-x-4">
       <n-button-group>
         <n-button ghost @click="() => panel = 'source'">
-          原始文本
+          {{ t('tool.diff.sourceText') }}
         </n-button>
         <n-button secondary type="primary">
-          对比结果
+          {{ t('tool.diff.result') }}
         </n-button>
       </n-button-group>
       <n-button-group>
@@ -88,7 +90,8 @@ function clear() {
           :secondary="outputFormat === 'side-by-side'"
           :ghost="outputFormat !== 'side-by-side'"
           :type="outputFormat === 'side-by-side' ? 'primary' : 'default'"
-          title="并排"
+          :title="t('tool.diff.sideBySide')"
+          :aria-label="t('tool.diff.sideBySide')"
           @click="() => outputFormat = 'side-by-side'"
         >
           <template #icon>
@@ -99,7 +102,8 @@ function clear() {
           :secondary="outputFormat === 'line-by-line'"
           :ghost="outputFormat !== 'line-by-line'"
           :type="outputFormat === 'line-by-line' ? 'primary' : 'default'"
-          title="逐行"
+          :title="t('tool.diff.lineByLine')"
+          :aria-label="t('tool.diff.lineByLine')"
           @click="() => outputFormat = 'line-by-line'"
         >
           <template #icon>

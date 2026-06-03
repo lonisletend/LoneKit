@@ -27,6 +27,17 @@
                     <n-icon :component="currentThemeIcon" />
                   </template>
                 </n-button>
+                <n-button
+                  size="small"
+                  quaternary
+                  circle
+                  class="theme-toggle-btn locale-toggle-btn"
+                  :title="t('common.language')"
+                  :aria-label="t('common.language')"
+                  @click="toggleLocaleMode"
+                >
+                  {{ localeButtonText }}
+                </n-button>
                 <n-button size="small" quaternary circle class="theme-toggle-btn" @click="handleGithubClick">
                   <template #icon>
                     <n-icon :component="GithubIcon" />
@@ -34,7 +45,7 @@
                 </n-button>
               </div>
               <div class="text-xs text-slate-500 dark:text-slate-400 font-mono" v-if="!collapsed">
-                Version: {{ version }}
+                {{ t('common.version') }}: {{ version }}
               </div>
               <div class="text-xs text-slate-500 dark:text-slate-400 font-mono" v-else>
                 V{{ version.split('.')[0] }}.{{ version.split('.')[1] }}
@@ -60,6 +71,7 @@
 import router from "../router";
 import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider, NButton } from "naive-ui";
 import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
@@ -75,10 +87,13 @@ import CodeIcon from "./icons/CodeIcon.vue";
 import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon } from '@vicons/fluent';
 import { ContrastOutline, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline, LanguageOutline as UnicodeMenuIcon } from '@vicons/ionicons5';
 import { useThemeMode } from "../composables/useThemeMode";
+import { useLocaleMode } from "../composables/useLocaleMode";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, { default: () => h(icon) });
 }
+
+const { t } = useI18n();
 
 // const message = useMessage();
 function getFavoriteStorageKey() {
@@ -87,24 +102,24 @@ function getFavoriteStorageKey() {
   return `lonekit.menuFavorites.${currentUser}`;
 }
 const rawMenuItems = [
-  { key: "common-format-wrapper", routeName: "CommonFormatWrapper", title: "通用格式化", icon: FlashIcon },
-  { key: "json-format-wrapper", routeName: "JsonFormatWrapper", title: "Json 格式化", icon: JsonIcon },
-  { key: "xml-format-wrapper", routeName: "XmlFormatWrapper", title: "XML 格式化", icon: CodeIcon },
-  { key: "sql-format-wrapper", routeName: "SQLFormatWrapper", title: "SQL 格式化", icon: SQLIcon },
-  { key: "time-tool", routeName: "TimeTool", title: "时间处理", icon: TimeIcon },
-  { key: "diff-tool", routeName: "DiffToolWrapper", title: "文本对比", icon: DiffIcon },
-  { key: "folder-diff-tool", routeName: "FolderDiffToolWrapper", title: "文件夹对比", icon: FolderDiffIcon },
-  { key: "text-count-tool", routeName: "TextCountTool", title: "文本计数", icon: TextCountIcon },
-  { key: "uuid-tool", routeName: "UUIDTool", title: "UUID", icon: UUIDIcon },
-  { key: "md5-tool", routeName: "Md5Tool", title: "Md5", icon: Md5Icon },
-  { key: "base64-tool", routeName: "Base64Tool", title: "Base64", icon: Base64Icon },
-  { key: "unicode-tool", routeName: "UnicodeTool", title: "Unicode", icon: UnicodeMenuIcon },
-  { key: "string-hex-tool", routeName: "StringHexTool", title: "字符串16进制", icon: StringHexIcon },
-  { key: "qr-code-tool", routeName: "QrCodeTool", title: "二维码生成", icon: QRCodeIcon },
-  { key: "qr-code-reader-tool", routeName: "QRCodeReaderTool", title: "二维码识别", icon: QRCodeReaderIcon },
-  { key: "barcode-tool", routeName: "BarcodeTool", title: "条形码生成", icon: BarcodeIcon },
-  { key: "barcode-reader-tool", routeName: "BarcodeReaderTool", title: "条形码识别", icon: BarcodeReaderIcon },
-  { key: "sendpay-display-tool", routeName: "SendpayDisplayWrapper", title: "Sendpay", icon: FlagOutline },
+  { key: "common-format-wrapper", routeName: "CommonFormatWrapper", titleKey: "menu.commonFormat", icon: FlashIcon },
+  { key: "json-format-wrapper", routeName: "JsonFormatWrapper", titleKey: "menu.jsonFormat", icon: JsonIcon },
+  { key: "xml-format-wrapper", routeName: "XmlFormatWrapper", titleKey: "menu.xmlFormat", icon: CodeIcon },
+  { key: "sql-format-wrapper", routeName: "SQLFormatWrapper", titleKey: "menu.sqlFormat", icon: SQLIcon },
+  { key: "time-tool", routeName: "TimeTool", titleKey: "menu.time", icon: TimeIcon },
+  { key: "diff-tool", routeName: "DiffToolWrapper", titleKey: "menu.diff", icon: DiffIcon },
+  { key: "folder-diff-tool", routeName: "FolderDiffToolWrapper", titleKey: "menu.folderDiff", icon: FolderDiffIcon },
+  { key: "text-count-tool", routeName: "TextCountTool", titleKey: "menu.textCount", icon: TextCountIcon },
+  { key: "uuid-tool", routeName: "UUIDTool", titleKey: "menu.uuid", icon: UUIDIcon },
+  { key: "md5-tool", routeName: "Md5Tool", titleKey: "menu.md5", icon: Md5Icon },
+  { key: "base64-tool", routeName: "Base64Tool", titleKey: "menu.base64", icon: Base64Icon },
+  { key: "unicode-tool", routeName: "UnicodeTool", titleKey: "menu.unicode", icon: UnicodeMenuIcon },
+  { key: "string-hex-tool", routeName: "StringHexTool", titleKey: "menu.stringHex", icon: StringHexIcon },
+  { key: "qr-code-tool", routeName: "QrCodeTool", titleKey: "menu.qrCode", icon: QRCodeIcon },
+  { key: "qr-code-reader-tool", routeName: "QRCodeReaderTool", titleKey: "menu.qrCodeReader", icon: QRCodeReaderIcon },
+  { key: "barcode-tool", routeName: "BarcodeTool", titleKey: "menu.barcode", icon: BarcodeIcon },
+  { key: "barcode-reader-tool", routeName: "BarcodeReaderTool", titleKey: "menu.barcodeReader", icon: BarcodeReaderIcon },
+  { key: "sendpay-display-tool", routeName: "SendpayDisplayWrapper", titleKey: "menu.sendpay", icon: FlagOutline },
 ];
 
 function readFavoriteMenuKeys() {
@@ -123,7 +138,7 @@ function readFavoriteMenuKeys() {
     }
     return uniqueKeys;
   } catch (error) {
-    console.warn("[menu] 读取收藏菜单失败", error);
+    console.warn(t("menu.readFavoritesFailed"), error);
     return [];
   }
 }
@@ -174,15 +189,15 @@ const menuOptions = computed(() =>
             {
               class: "menu-label-link",
             },
-            item.title
+            t(item.titleKey)
           ),
           h(
             "button",
             {
               type: "button",
               class: ["menu-favorite-star", { "is-favorite": isFavorite, "is-outline": !isFavorite }],
-              title: isFavorite ? "取消收藏" : "收藏",
-              "aria-label": isFavorite ? "取消收藏" : "收藏",
+              title: isFavorite ? t("menu.unfavorite") : t("menu.favorite"),
+              "aria-label": isFavorite ? t("menu.unfavorite") : t("menu.favorite"),
               onMousedown: (event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -204,7 +219,9 @@ const collapsed = ref(false);
 const version = packageJson.version;
 const route = useRoute();
 const { themeMode, setThemeMode } = useThemeMode();
+const { localeMode, toggleLocaleMode } = useLocaleMode();
 const themeModeOrder = ["light", "dark", "auto"];
+const localeButtonText = computed(() => (localeMode.value === "zh-CN" ? "EN" : "中"));
 
 const currentThemeIcon = computed(() => {
   switch (themeMode.value) {

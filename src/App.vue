@@ -1,5 +1,10 @@
 <template>
-  <n-config-provider :theme="naiveTheme" :theme-overrides="naiveThemeOverrides">
+  <n-config-provider
+    :theme="naiveTheme"
+    :theme-overrides="naiveThemeOverrides"
+    :locale="naiveLocale"
+    :date-locale="naiveDateLocale"
+  >
     <div class="w-full h-screen overflow-hidden bg-slate-50 text-slate-900 transition-colors dark:bg-neutral-950 dark:text-slate-100">
       <router-view />
       <UpdateDialog ref="updateDialogRef" />
@@ -11,11 +16,14 @@ import { computed, ref } from 'vue';
 import { NConfigProvider, darkTheme } from 'naive-ui';
 import UpdateDialog from './components/common/UpdateDialog.vue';
 import { useThemeMode } from './composables/useThemeMode';
+import { useLocaleMode } from './composables/useLocaleMode';
 
 const updateDialogRef = ref(null);
 const { resolvedTheme, initThemeMode } = useThemeMode();
+const { naiveLocale, naiveDateLocale, initLocaleMode } = useLocaleMode();
 
 initThemeMode();
+initLocaleMode();
 
 const naiveTheme = computed(() => (resolvedTheme.value === 'dark' ? darkTheme : null));
 const lightInputTheme = {

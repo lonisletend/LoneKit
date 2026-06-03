@@ -6,18 +6,18 @@
         <!-- 固定的操作按钮 -->
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
           <n-tag size="large" type="warning">
-            输入
+            {{ t('common.input') }}
           </n-tag>
-          <n-button @click="readClipboard">剪贴板</n-button>
-          <n-button @click="showExample">示例</n-button>
-          <n-button @click="clear">清空</n-button>
-          <n-button @click="compressive">压缩</n-button>
-          <n-button @click="copySource">复制</n-button>
+          <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+          <n-button @click="showExample">{{ t('common.example') }}</n-button>
+          <n-button @click="clear">{{ t('common.clear') }}</n-button>
+          <n-button @click="compressive">{{ t('common.compress') }}</n-button>
+          <n-button @click="copySource">{{ t('common.copy') }}</n-button>
         </div>
         <!-- 可滚动的输入区域 -->
         <div class="flex-1 w-full overflow-hidden">
           <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
-                   placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
+                   :placeholder="t('tool.json.inputPlaceholder')" @input="handleSourceJsonChange"/>
         </div>
       </div>
     </template>
@@ -26,8 +26,8 @@
       <div class="h-full p-2 flex flex-col">
         <!-- 固定的操作按钮 -->
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-          <n-tag size="large" type="success">输出</n-tag>
-          <n-button @click="copyJson">复制</n-button>
+          <n-tag size="large" type="success">{{ t('common.output') }}</n-tag>
+          <n-button @click="copyJson">{{ t('common.copy') }}</n-button>
           <n-button @click="collapseAll">
             <template #icon> <component :is="CollapseIcon" /> </template>
           </n-button>
@@ -50,7 +50,7 @@
               @keydown.enter="jsonFilter" 
               @clear="onFilterExpressionClear"
               clearable
-              :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：$.data.filter(item => item.rating > 0.5)'"
+              :placeholder="filterPlaceholder"
             />
           </n-input-group>
         </div>
@@ -75,6 +75,7 @@
 <script setup>
 
 import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import {NInput, NInputGroup, NSelect, NTag, NButton, NDropdown, NIcon} from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
@@ -91,6 +92,7 @@ import { JsonFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
+const { t } = useI18n();
 
 const props = defineProps({
   id: {
@@ -110,6 +112,11 @@ const isSorted = ref(false);
 const hasSourceContent = computed(() => !!sourceJson.value?.trim());
 const { resolvedTheme } = useThemeMode();
 const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
+const filterPlaceholder = computed(() => (
+  filterType.value === 'jsonpath'
+    ? t('tool.json.jsonPathPlaceholder')
+    : t('tool.json.jsFilterPlaceholder')
+));
 
 // 过滤类型选项
 const filterTypeOptions = [
@@ -165,7 +172,7 @@ function clear() {
 
 async function copyJson() {
   await customJsonFormatRef.value?.copyJson()
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function executeFilter() {
@@ -218,16 +225,16 @@ async function sendToDiff() {
   
   const json = await readFromClipboard();
   if (json == null) {
-    notify('warning', '没有可发送的内容')
+    notify('warning', t('tool.noSendableContent'))
     return
   }
   send('DiffTool', json)
-  notify('success', '已发送到文本对比，请点击菜单进入查看')
+  notify('success', t('tool.sentToDiff'))
 }
 
-const moreOptions = [
-  { label: '发送到文本对比', key: 'diff' }
-]
+const moreOptions = computed(() => [
+  { label: t('tool.sendToDiff'), key: 'diff' }
+])
 
 function handleMoreSelect(key) {
   if (key === 'diff') sendToDiff()

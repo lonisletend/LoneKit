@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NInput, NInputNumber, NSelect, NTag } from "naive-ui";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
 
 const { notify, copyToClipboard } = useCommon();
+const { t } = useI18n();
 
 const version = ref("v4");
 const count = ref(20);
@@ -37,17 +39,17 @@ function generateUuidV4() {
 function generateUuids() {
   const size = Number(count.value) || 0;
   if (size <= 0) {
-    notify("warning", "生成个数必须大于 0");
+    notify("warning", t("tool.uuid.countMustPositive"));
     return;
   }
 
   if (size > 1000) {
-    notify("warning", "单次最多生成 1000 个");
+    notify("warning", t("tool.uuid.countMax"));
     return;
   }
 
   if (version.value !== "v4") {
-    notify("warning", "当前仅支持 v4");
+    notify("warning", t("tool.uuid.onlyV4"));
     return;
   }
 
@@ -77,52 +79,44 @@ function clearGenerated() {
 
 function copyAll() {
   if (!uuidList.value.length) {
-    notify("warning", "没有可复制的 UUID");
+    notify("warning", t("tool.uuid.noCopyableUuid"));
     return;
   }
-  copyToClipboard(uuidText.value, "复制成功!");
+  copyToClipboard(uuidText.value);
 }
 
 function takeOne() {
   if (!uuidList.value.length) {
-    notify("warning", "没有可取的 UUID");
+    notify("warning", t("tool.uuid.noUuidToTake"));
     return;
   }
 
   const [picked] = uuidList.value.splice(0, 1);
-  copyToClipboard(formatUuidValue(picked), "已复制 1 个 UUID");
+  copyToClipboard(formatUuidValue(picked), t("tool.uuid.copiedOne"));
 }
 
 function parseVariant(nibble) {
   const value = parseInt(nibble, 16);
   if (Number.isNaN(value)) {
-    return "未知";
+    return t("tool.uuid.unknown");
   }
 
   if ((value & 0x8) === 0x0) {
-    return "NCS 兼容 (0xxx)";
+    return t("tool.uuid.ncsVariant");
   }
   if ((value & 0xc) === 0x8) {
     return "RFC 4122 / RFC 9562 (10xx)";
   }
   if ((value & 0xe) === 0xc) {
-    return "Microsoft 兼容 (110x)";
+    return t("tool.uuid.microsoftVariant");
   }
-  return "保留 (111x)";
+  return t("tool.uuid.reservedVariant");
 }
 
 function versionDescription(versionNumber) {
-  const map = {
-    1: "v1: 基于时间与节点",
-    2: "v2: DCE 安全 UUID",
-    3: "v3: 基于 MD5 的命名空间 UUID",
-    4: "v4: 随机 UUID",
-    5: "v5: 基于 SHA-1 的命名空间 UUID",
-    6: "v6: 可排序的时间 UUID",
-    7: "v7: Unix 时间戳 + 随机",
-    8: "v8: 自定义格式 UUID",
-  };
-  return map[versionNumber] || `v${versionNumber}: 未知或非标准版本`;
+  const key = `tool.uuid.versions.${versionNumber}`;
+  const translated = t(key);
+  return translated === key ? t("tool.uuid.nonStandardVersion", { version: versionNumber }) : translated;
 }
 
 function parseUuid(value) {
@@ -142,7 +136,7 @@ function parseUuid(value) {
       valid: false,
       raw,
       normalized: input,
-      message: "不是合法的 UUID 格式",
+      message: t("tool.uuid.invalidFormat"),
     };
   }
 
@@ -173,7 +167,7 @@ onMounted(() => {
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-3">
-            <n-tag size="large" type="warning">生成</n-tag>
+            <n-tag size="large" type="warning">{{ t('tool.uuid.generate') }}</n-tag>
             <n-select
               v-model:value="version"
               :options="versionOptions"
@@ -185,21 +179,21 @@ onMounted(() => {
               :min="1"
               :max="1000"
               :style="{ width: '80px' }"
-              placeholder="生成个数"
+              :placeholder="t('tool.uuid.generateCountPlaceholder')"
             />
             <n-button :type="useHyphen ? 'success' : 'default'" @click="toggleHyphen">-</n-button>
             <n-button @click="toggleCase">{{ caseLabel }}</n-button>
-            <n-button @click="generateUuids">生成</n-button>
-            <n-button @click="clearGenerated">清空</n-button>
-            <n-button @click="copyAll">复制</n-button>
-            <n-button @click="takeOne">取一个</n-button>
+            <n-button @click="generateUuids">{{ t('tool.uuid.generateButton') }}</n-button>
+            <n-button @click="clearGenerated">{{ t('common.clear') }}</n-button>
+            <n-button @click="copyAll">{{ t('common.copy') }}</n-button>
+            <n-button @click="takeOne">{{ t('tool.uuid.takeOne') }}</n-button>
           </div>
           <div class="flex-1 w-full overflow-hidden">
             <n-input
               :value="uuidText"
               type="textarea"
               class="w-full h-full text-lg"
-              placeholder="生成结果"
+              :placeholder="t('tool.uuid.generateResultPlaceholder')"
               readonly
             />
           </div>
@@ -209,26 +203,26 @@ onMounted(() => {
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-3">
-            <n-tag size="large" type="success">解析</n-tag>
+            <n-tag size="large" type="success">{{ t('tool.uuid.parse') }}</n-tag>
             <n-input
               v-model:value="parseInput"
-              placeholder="输入任意版本 UUID，如：550e8400-e29b-41d4-a716-446655440000"
+              :placeholder="t('tool.uuid.parsePlaceholder')"
               clearable
             />
           </div>
           <div class="flex-1 w-full overflow-auto text-sm lk-result-surface lk-result-surface-padded">
-            <div v-if="!parseResult" class="text-gray-500">请输入 UUID</div>
+            <div v-if="!parseResult" class="text-gray-500">{{ t('tool.uuid.emptyParse') }}</div>
             <div v-else-if="!parseResult.valid" class="space-y-2">
               <div class="text-red-500">{{ parseResult.message }}</div>
-              <div><strong>输入值:</strong> {{ parseResult.raw }}</div>
+              <div><strong>{{ t('tool.uuid.fields.input') }}:</strong> {{ parseResult.raw }}</div>
             </div>
             <div v-else class="space-y-2">
-              <div><strong>合法性:</strong> 是</div>
-              <div><strong>标准化:</strong> {{ parseResult.normalized }}</div>
-              <div><strong>版本:</strong> {{ parseResult.versionInfo }}</div>
-              <div><strong>版本号:</strong> {{ parseResult.versionNumber }}</div>
-              <div><strong>变体:</strong> {{ parseResult.variant }}</div>
-              <div><strong>变体位:</strong> {{ parseResult.variantNibble }}</div>
+              <div><strong>{{ t('tool.uuid.fields.valid') }}:</strong> {{ t('tool.uuid.fields.yes') }}</div>
+              <div><strong>{{ t('tool.uuid.fields.normalized') }}:</strong> {{ parseResult.normalized }}</div>
+              <div><strong>{{ t('tool.uuid.fields.version') }}:</strong> {{ parseResult.versionInfo }}</div>
+              <div><strong>{{ t('tool.uuid.fields.versionNumber') }}:</strong> {{ parseResult.versionNumber }}</div>
+              <div><strong>{{ t('tool.uuid.fields.variant') }}:</strong> {{ parseResult.variant }}</div>
+              <div><strong>{{ t('tool.uuid.fields.variantBits') }}:</strong> {{ parseResult.variantNibble }}</div>
             </div>
           </div>
         </div>

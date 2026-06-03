@@ -24,24 +24,24 @@
         <div class="update-content">
           <div v-if="status === 'checking'" class="flex items-center gap-3">
             <n-spin size="small" />
-            <span>正在检查更新...</span>
+            <span>{{ t('update.checking') }}</span>
           </div>
 
           <div v-else-if="status === 'found'" class="space-y-3">
             <div>
-              <p class="text-base font-medium">发现新版本: {{ updateInfo.version }}</p>
+              <p class="text-base font-medium">{{ t('update.foundVersion', { version: updateInfo.version }) }}</p>
               <p class="text-sm text-slate-500 dark:text-slate-400" v-if="updateInfo.date">
-                发布日期: {{ formatDate(updateInfo.date) }}
+                {{ t('update.releaseDate', { date: formatDate(updateInfo.date) }) }}
               </p>
             </div>
             
             <div v-if="updateInfo.body" class="bg-slate-100/80 dark:bg-slate-800/70 p-2 rounded text-sm max-h-32 overflow-y-auto">
-              <p class="font-medium mb-1 text-xs text-slate-700 dark:text-slate-200">更新说明：</p>
+              <p class="font-medium mb-1 text-xs text-slate-700 dark:text-slate-200">{{ t('update.releaseNotes') }}</p>
               <div class="whitespace-pre-wrap text-xs">{{ updateInfo.body }}</div>
             </div>
 
             <div class="flex gap-2 justify-end">
-              <n-button size="small" @click="skipUpdate" :disabled="downloading">稍后</n-button>
+              <n-button size="small" @click="skipUpdate" :disabled="downloading">{{ t('update.later') }}</n-button>
               <n-button size="small" type="primary" @click="handleUpdate" :loading="downloading">
                 {{ updateButtonText }}
               </n-button>
@@ -49,7 +49,7 @@
           </div>
 
           <div v-else-if="status === 'downloading'" class="space-y-2">
-            <p class="text-sm">正在下载更新...</p>
+            <p class="text-sm">{{ t('update.downloading') }}</p>
             <n-progress
               type="line"
               :percentage="downloadProgress"
@@ -63,13 +63,13 @@
 
           <div v-else-if="status === 'installing'" class="flex items-center gap-3">
             <n-spin size="small" />
-            <span class="text-sm">正在安装更新...</span>
+            <span class="text-sm">{{ t('update.installing') }}</span>
           </div>
 
           <div v-else-if="status === 'error'" class="space-y-3">
             <p class="text-red-500 text-sm">{{ errorMessage }}</p>
             <div class="flex justify-end">
-              <n-button size="small" @click="closeDialog">关闭</n-button>
+              <n-button size="small" @click="closeDialog">{{ t('update.close') }}</n-button>
             </div>
           </div>
         </div>
@@ -80,8 +80,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { NCard, NButton, NProgress, NSpin } from 'naive-ui';
 
+const { t, locale } = useI18n();
 const showDialog = ref(false);
 const status = ref('idle'); // idle, checking, found, downloading, installing, error
 const updateInfo = ref(null);
@@ -153,17 +155,19 @@ const supportsAutoUpdate = async () => {
 
 const dialogTitle = computed(() => {
   switch (status.value) {
-    case 'checking': return '检查更新';
-    case 'found': return '发现新版本';
-    case 'downloading': return '下载更新';
-    case 'installing': return '安装更新';
-    case 'error': return '更新失败';
-    default: return '更新';
+    case 'checking': return t('update.checkingTitle');
+    case 'found': return t('update.foundTitle');
+    case 'downloading': return t('update.downloadingTitle');
+    case 'installing': return t('update.installingTitle');
+    case 'error': return t('update.errorTitle');
+    default: return t('update.defaultTitle');
   }
 });
 
-// 更新按钮文本（需要等待检测结果）
-const updateButtonText = ref('立即更新');
+const canAutoUpdateCurrentVersion = ref(true);
+const updateButtonText = computed(() => (
+  canAutoUpdateCurrentVersion.value ? t('update.updateNow') : t('update.goDownload')
+));
 
 // 检查更新
 const checkUpdate = async () => {
@@ -203,8 +207,7 @@ const checkUpdate = async () => {
       const canAutoUpdate = await supportsAutoUpdate();
       console.log('[UpdateDialog] 自动更新支持:', canAutoUpdate ? '是' : '否');
       
-      // 设置按钮文本
-      updateButtonText.value = canAutoUpdate ? '立即更新' : '前往下载';
+      canAutoUpdateCurrentVersion.value = canAutoUpdate;
       console.log('[UpdateDialog] 按钮文本设置为:', updateButtonText.value);
       
       // 支持自动更新的平台存储 update 对象
@@ -232,7 +235,7 @@ const checkUpdate = async () => {
     console.error('[UpdateDialog] ========== 检查更新失败 ==========');
     console.error('[UpdateDialog] 错误详情:', error);
     status.value = 'error';
-    errorMessage.value = error.message || '检查更新失败';
+    errorMessage.value = error.message || t('update.checkFailed');
   }
 };
 
@@ -249,7 +252,7 @@ const handleUpdate = async () => {
       skipUpdate(); // 关闭对话框
     } catch (error) {
       console.error('[UpdateDialog] 打开浏览器失败:', error);
-      errorMessage.value = '无法打开浏览器';
+      errorMessage.value = t('update.openBrowserFailed');
       status.value = 'error';
     }
     return;
@@ -257,7 +260,7 @@ const handleUpdate = async () => {
 
   // 支持自动更新：执行自动更新流程
   if (!pendingUpdate) {
-    errorMessage.value = '未找到待更新的版本';
+    errorMessage.value = t('update.pendingUpdateMissing');
     status.value = 'error';
     return;
   }
@@ -295,7 +298,7 @@ const handleUpdate = async () => {
     await relaunch();
   } catch (error) {
     status.value = 'error';
-    errorMessage.value = error.message || '更新失败';
+    errorMessage.value = error.message || t('update.updateFailed');
     downloading.value = false;
     console.error('[UpdateDialog] 更新失败:', error);
   }
@@ -307,6 +310,7 @@ const skipUpdate = () => {
   status.value = 'idle';
   updateInfo.value = null;
   pendingUpdate = null;
+  canAutoUpdateCurrentVersion.value = true;
 };
 
 // 关闭对话框
@@ -314,12 +318,13 @@ const closeDialog = () => {
   showDialog.value = false;
   status.value = 'idle';
   errorMessage.value = '';
+  canAutoUpdateCurrentVersion.value = true;
 };
 
 // 格式化日期
 const formatDate = (date) => {
   if (!date) return '';
-  return new Date(date).toLocaleDateString('zh-CN', {
+  return new Date(date).toLocaleDateString(locale.value, {
     year: 'numeric',
     month: 'long',
     day: 'numeric'

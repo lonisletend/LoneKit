@@ -7,17 +7,17 @@
         <!-- 固定的操作按钮 -->
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
           <n-tag size="large" type="warning">
-            输入
+            {{ t('common.input') }}
           </n-tag>
-          <n-button @click="readClipboard">剪贴板</n-button>
-          <n-button @click="showExample">示例</n-button>
-          <n-button @click="clear">清空</n-button>
-          <n-button @click="copySource">复制</n-button>
+          <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+          <n-button @click="showExample">{{ t('common.example') }}</n-button>
+          <n-button @click="clear">{{ t('common.clear') }}</n-button>
+          <n-button @click="copySource">{{ t('common.copy') }}</n-button>
         </div>
         <!-- 可滚动的输入区域 -->
         <div class="flex-1 w-full overflow-hidden">
           <n-input v-model:value="sourceText" type="textarea" class="w-full h-full text-lg"
-                   placeholder="输入包含 PlainText/JSON/XML 的文本" @input="handleSourceTextChange"/>
+                   :placeholder="t('tool.commonFormat.inputPlaceholder')" @input="handleSourceTextChange"/>
         </div>
       </div>
     </template>
@@ -26,8 +26,8 @@
       <div class="h-full p-2 flex flex-col">
         <!-- 固定的操作按钮 -->
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-          <n-tag size="large" type="success">输出</n-tag>
-          <n-button @click="copyAll">复制</n-button>
+          <n-tag size="large" type="success">{{ t('common.output') }}</n-tag>
+          <n-button @click="copyAll">{{ t('common.copy') }}</n-button>
           <n-button @click="collapseAll">
             <template #icon> <component :is="CollapseIcon" /> </template>
           </n-button>
@@ -123,6 +123,7 @@
 
 <script setup>
 import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { NInput, NTag, NButton, NDropdown, NIcon } from "naive-ui";
 import { 
   Copy24Regular as CopyIcon,
@@ -140,6 +141,7 @@ import { JsonFormat, XmlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
+const { t, locale } = useI18n();
 
 const props = defineProps({
   id: {
@@ -175,6 +177,11 @@ const exampleText = ref(`[2026-01-25 14:23:45.123] [INFO] [OrderService] - 开�
 [2026-01-25 14:23:45.756] [INFO] [OrderService] - 订单创建流程完成，订单号: ORD2026012545678
 [2026-01-25 14:23:45.789] [DEBUG] [OrderService] - 最终响应数据: {"success":true,"orderId":"ORD2026012545678","paymentUrl":"https://pay.example.com/checkout?token=abc123xyz","qrCode":"data:image/png;base64,iVBORw0KGgo...","estimatedDelivery":"2026-01-28","trackingEnabled":true,"message":"订单创建成功，请在15分钟内完成支付"}
 [2026-01-25 14:23:45.812] [INFO] [OrderService] - 请求处理完成，总耗时: 667ms`);
+const englishExampleText = `[2026-01-25 14:23:45.123] [INFO] [OrderService] - Start processing order creation request
+[2026-01-25 14:23:45.156] [DEBUG] [OrderService] - Received order payload: {"orderId":"ORD2026012545678","customerId":"CUST001","customerName":"LoneKit","items":[{"productId":"PROD001","productName":"iPhone 15 Pro","quantity":2,"price":7999.00},{"productId":"PROD002","productName":"AirPods Pro 2","quantity":1,"price":1899.00}],"shippingAddress":{"province":"Beijing","city":"Chaoyang","street":"Jianguo Road 88","zipCode":"100020"},"paymentMethod":"ALIPAY","totalAmount":17897.05,"status":"PENDING"}
+[2026-01-25 14:23:45.345] [INFO] [InventoryService] - Inventory check result: {"success":true,"availableStock":{"PROD001":150,"PROD002":89},"reservationId":"RSV20260125001","expireTime":"2026-01-25T14:33:45.000Z"}
+[2026-01-25 14:23:45.678] [INFO] [NotificationService] - Notification payload: <?xml version="1.0" encoding="UTF-8"?><notification><type>ORDER_CREATED</type><orderId>ORD2026012545678</orderId><customer><id>CUST001</id><name>LoneKit</name><level>VIP</level></customer><order><totalAmount>17897.05</totalAmount><itemCount>3</itemCount><status>PENDING</status><timestamp>2026-01-25T14:23:45.000Z</timestamp></order></notification>
+[2026-01-25 14:23:45.812] [INFO] [OrderService] - Request completed, elapsed: 667ms`;
 
 // 设置 JSON 格式化组件的 ref
 function setJsonFormatRef(el, index) {
@@ -193,7 +200,7 @@ function setXmlFormatRef(el, index) {
 // JSON 块操作方法
 async function copyJsonSegment(index) {
   await jsonFormatRefs.value[index]?.copyJson();
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function collapseJsonSegment(index) {
@@ -207,7 +214,7 @@ function expandJsonSegment(index) {
 // XML 块操作方法
 async function copyXmlSegment(index) {
   await xmlFormatRefs.value[index]?.copyXml();
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function collapseXmlSegment(index) {
@@ -498,7 +505,7 @@ function handleSourceTextChange() {
   try {
     parsedSegments.value = resolveText(sourceText.value);
   } catch (error) {
-    notify('error', '解析失败: ' + error.message);
+    notify('error', t('tool.parseFailed', { message: error.message }));
     parsedSegments.value = [{
       type: 'plainText',
       content: sourceText.value
@@ -515,7 +522,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  sourceText.value = exampleText.value;
+  sourceText.value = locale.value === 'en-US' ? englishExampleText : exampleText.value;
   handleSourceTextChange();
 }
 
@@ -588,17 +595,17 @@ function expandAll() {
 async function sendToDiff() {
   const text = await getFormattedText();
   if (!text) {
-    notify('warning', '没有可发送的内容')
+    notify('warning', t('tool.noSendableContent'))
     return
   }
 
   send('DiffTool', text)
-  notify('success', '已发送到文本对比，请点击菜单进入查看')
+  notify('success', t('tool.sentToDiff'))
 }
 
-const moreOptions = [
-  { label: '发送到文本对比', key: 'diff' }
-]
+const moreOptions = computed(() => [
+  { label: t('tool.sendToDiff'), key: 'diff' }
+])
 
 function handleMoreSelect(key) {
   if (key === 'diff') sendToDiff()

@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NDropdown, NIcon, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
@@ -17,6 +18,7 @@ import { XmlFormat } from 'lone-format';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
+const { t } = useI18n();
 
 const source = ref();
 const target = ref();
@@ -51,7 +53,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  source.value = `<?xml version="1.0" encoding="UTF-8"?><!-- 这是图书馆的 XML 数据 --><library><!-- 第一本书：TypeScript --><book id="1" category="programming"><title lang="en">Learning TypeScript</title><author>Josh Goldberg</author><year>2022</year><price currency="USD">39.99</price><example><![CDATA[const add = (a, b) => a + b; console.log(add(2, 3)); // 5]]></example><publisher><name>O'Reilly Media</name><location>Sebastopol, CA</location></publisher><tags><tag>TypeScript</tag><tag>JavaScript</tag><tag>Web Development</tag></tags></book><!-- 第二本书：Vue.js --><book id="2" category="web"><title lang="en">Vue.js 3 Cookbook</title><author>Heitor Ramon Ribeiro</author><year>2023</year><price currency="USD">44.99</price><publisher><name>Packt Publishing</name><location>Birmingham, UK</location></publisher><tags><tag>Vue.js</tag><tag>Frontend</tag><tag>Framework</tag></tags></book></library>`;
+  source.value = `<?xml version="1.0" encoding="UTF-8"?><library><book id="1" category="programming"><title lang="en">Learning TypeScript</title><author>Josh Goldberg</author><year>2022</year><price currency="USD">39.99</price><example><![CDATA[const add = (a, b) => a + b; console.log(add(2, 3)); // 5]]></example><publisher><name>O'Reilly Media</name><location>Sebastopol, CA</location></publisher><tags><tag>TypeScript</tag><tag>JavaScript</tag><tag>Web Development</tag></tags></book><book id="2" category="web"><title lang="en">Vue.js 3 Cookbook</title><author>Heitor Ramon Ribeiro</author><year>2023</year><price currency="USD">44.99</price><publisher><name>Packt Publishing</name><location>Birmingham, UK</location></publisher><tags><tag>Vue.js</tag><tag>Frontend</tag><tag>Framework</tag></tags></book></library>`;
   handleChange(source.value);
 }
 
@@ -70,7 +72,7 @@ function copySource() {
 
 async function copyValue() {
   await customXmlFormatRef.value?.copyXml()
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function executeFilter() {
@@ -123,16 +125,16 @@ async function sendToDiff() {
 
   const xml = await readFromClipboard();
   if (xml == null) {
-    notify('warning', '没有可发送的内容')
+    notify('warning', t('tool.noSendableContent'))
     return
   }
   send('DiffTool', xml)
-  notify('success', '已发送到文本对比，请点击菜单进入查看')
+  notify('success', t('tool.sentToDiff'))
 }
 
-const moreOptions = [
-  { label: '发送到文本对比', key: 'diff' }
-]
+const moreOptions = computed(() => [
+  { label: t('tool.sendToDiff'), key: 'diff' }
+])
 
 function handleMoreSelect(key) {
   if (key === 'diff') sendToDiff()
@@ -145,15 +147,15 @@ function handleMoreSelect(key) {
     <template #left>
       <div class="h-full p-2 flex flex-col">
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-          <n-tag size="large" type="warning">输入</n-tag>
-          <n-button @click="readClipboard">剪贴板</n-button>
-          <n-button @click="showExample">示例</n-button>
-          <n-button @click="clear">清空</n-button>
-          <n-button @click="compressive">压缩</n-button>
-          <n-button @click="copySource">复制</n-button>
+          <n-tag size="large" type="warning">{{ t('common.input') }}</n-tag>
+          <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+          <n-button @click="showExample">{{ t('common.example') }}</n-button>
+          <n-button @click="clear">{{ t('common.clear') }}</n-button>
+          <n-button @click="compressive">{{ t('common.compress') }}</n-button>
+          <n-button @click="copySource">{{ t('common.copy') }}</n-button>
         </div>
         <div class="flex-1 w-full overflow-hidden">
-          <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" placeholder="输入需要格式化的 XML"
+          <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" :placeholder="t('tool.format.xmlInputPlaceholder')"
             @input="handleChange" />
         </div>
       </div>
@@ -161,8 +163,8 @@ function handleMoreSelect(key) {
     <template #right>
       <div class="h-full p-2 flex flex-col">
         <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-          <n-tag size="large" type="success">输出</n-tag>
-          <n-button @click="copyValue">复制</n-button>
+          <n-tag size="large" type="success">{{ t('common.output') }}</n-tag>
+          <n-button @click="copyValue">{{ t('common.copy') }}</n-button>
           <n-button @click="collapseAll">
             <template #icon> <component :is="CollapseIcon" /> </template>
           </n-button>
@@ -185,7 +187,7 @@ function handleMoreSelect(key) {
               @keydown.enter="xmlFilter" 
               @clear="onFilterExpressionClear"
               clearable
-              placeholder="使用 XPath 进行过滤，如：//book[@category='programming']/title"
+              :placeholder="t('tool.format.xpathPlaceholder')"
             />
           </n-input-group>
         </div>

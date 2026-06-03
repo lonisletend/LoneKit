@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
 import { 
   ArrowMaximizeVertical24Regular as ExpandIcon,
@@ -13,6 +14,7 @@ import { useThemeMode } from "../../composables/useThemeMode";
 import { SqlFormat } from 'lone-format'
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { t } = useI18n();
 
 defineOptions({
   name: 'SQLFormatTool'
@@ -76,7 +78,7 @@ function clear() {
 
 async function copyValue() {
   await customSqlFormatRef.value?.copySql()
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function compressive() {
@@ -105,23 +107,23 @@ function collapseAll() {
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
             <n-tag size="large" type="warning">SQL</n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">清空</n-button>
-            <n-button @click="compressive">压缩</n-button>
-            <n-button @click="copySource">复制</n-button>
+            <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExample">{{ t('common.example') }}</n-button>
+            <n-button @click="clear">{{ t('common.clear') }}</n-button>
+            <n-button @click="compressive">{{ t('common.compress') }}</n-button>
+            <n-button @click="copySource">{{ t('common.copy') }}</n-button>
           </div>
           <div class="w-full h-full text-xl">
             <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                     placeholder="输入需要格式化的 SQL"/>
+                     :placeholder="t('tool.format.sqlInputPlaceholder')"/>
           </div>
         </div>
       </template>
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
           <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">结果</n-tag>
-            <n-button @click="copyValue">复制</n-button>
+            <n-tag size="large" type="success">{{ t('tool.codec.result') }}</n-tag>
+            <n-button @click="copyValue">{{ t('common.copy') }}</n-button>
             <n-select
               v-model:value="dialect"
               :options="dialectOptions"

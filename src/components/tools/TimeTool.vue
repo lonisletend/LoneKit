@@ -6,42 +6,42 @@
           <div class="tool-block">
             <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
               <n-tag size="large" type="warning">
-                时间戳转换
+                {{ t('tool.time.timestampConvert') }}
               </n-tag>
-              <n-button @click="readTimestampClipboard">剪贴板</n-button>
-              <n-button @click="showTimestampExample">示例</n-button>
-              <n-button @click="clearTimestampTool">清空</n-button>
+              <n-button @click="readTimestampClipboard">{{ t('common.clipboard') }}</n-button>
+              <n-button @click="showTimestampExample">{{ t('common.example') }}</n-button>
+              <n-button @click="clearTimestampTool">{{ t('common.clear') }}</n-button>
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">输入时间</n-input-group-label>
-                <n-input :style="{ flex: 1 }" placeholder="支持时间戳、YYYY-MM-DD、YYYY/MM/DD、ISO 等常见格式" :status="status.inputTime" clearable
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.inputTime') }}</n-input-group-label>
+                <n-input :style="{ flex: 1 }" :placeholder="t('tool.time.inputTimePlaceholder')" :status="status.inputTime" clearable
                         v-model:value="inputTime" @input="handleInputTimeChange" />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="timeNow">当前时间</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="timeNow">{{ t('tool.time.now') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">时间戳(s)</n-input-group-label>
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.timestampSeconds') }}</n-input-group-label>
                 <n-input-number :show-button="false" :style="{ flex: 1 }" placeholder="" :status="status.timestamp" clearable
                                 v-model:value="timestamp" @update:value="handleTimestampChange" />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyTimestamp">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyTimestamp">{{ t('common.copy') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">时间戳(ms)</n-input-group-label>
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.timestampMilliseconds') }}</n-input-group-label>
                 <n-input-number :show-button="false" :style="{ flex: 1 }" placeholder="" :status="status.milliTimestamp" clearable
                                 v-model:value="milliTimestamp" @update:value="handleMilliTimestampChange" />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyMilliTimestamp">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyMilliTimestamp">{{ t('common.copy') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">日期</n-input-group-label>
-                <n-date-picker v-model:value="milliTimestamp" type="date" :style="{ flex: 1 }" placeholder="选择日期" clearable
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.date') }}</n-input-group-label>
+                <n-date-picker v-model:value="milliTimestamp" type="date" :style="{ flex: 1 }" :placeholder="t('tool.time.datePlaceholder')" clearable
                               @update:value="handleMilliTimestampChange"/>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyDate">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyDate">{{ t('common.copy') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">日期时间</n-input-group-label>
-                <n-date-picker v-model:value="milliTimestamp" type="datetime" :style="{ flex: 1 }" placeholder="选择日期时间" clearable
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.dateTime') }}</n-input-group-label>
+                <n-date-picker v-model:value="milliTimestamp" type="datetime" :style="{ flex: 1 }" :placeholder="t('tool.time.dateTimePlaceholder')" clearable
                               @update:value="handleMilliTimestampChange"/>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyDateTime">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyDateTime">{{ t('common.copy') }}</n-button>
               </n-input-group>
             </div>
           </div>
@@ -51,43 +51,43 @@
           <div class="tool-block">
             <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
               <n-tag size="large" type="success">
-                时间间隔计算
+                {{ t('tool.time.intervalCalc') }}
               </n-tag>
-              <n-button @click="showIntervalExample">示例</n-button>
-              <n-button @click="clearIntervalTool">清空</n-button>
+              <n-button @click="showIntervalExample">{{ t('common.example') }}</n-button>
+              <n-button @click="clearIntervalTool">{{ t('common.clear') }}</n-button>
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">开始时间</n-input-group-label>
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.startTime') }}</n-input-group-label>
                 <n-date-picker
                   v-model:value="intervalStart"
                   type="datetime"
                   :style="{ flex: 1 }"
-                  placeholder="选择开始日期时间"
+                  :placeholder="t('tool.time.startDateTimePlaceholder')"
                   clearable
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalStart">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalStart">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">结束时间</n-input-group-label>
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.endTime') }}</n-input-group-label>
                 <n-date-picker
                   v-model:value="intervalEnd"
                   type="datetime"
                   :style="{ flex: 1 }"
-                  placeholder="选择结束日期时间"
+                  :placeholder="t('tool.time.endDateTimePlaceholder')"
                   clearable
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalEnd">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalEnd">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">间隔时间</n-input-group-label>
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.intervalTime') }}</n-input-group-label>
                 <n-input
                   :value="intervalResult"
                   readonly
                   :style="{ flex: 1 }"
-                  placeholder="请选择开始和结束时间"
+                  :placeholder="t('tool.time.intervalPlaceholder')"
                 />
                 <n-select
                   v-model:value="intervalUnit"
@@ -95,11 +95,11 @@
                   class="interval-unit-select"
                   :style="{ width: '90px' }"
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalResult">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalResult">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label class="interval-format-label" :style="{ width: '100px', 'text-align': 'center' }">格式化</n-input-group-label>
+                <n-input-group-label class="interval-format-label" :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.formatted') }}</n-input-group-label>
                 <div class="shift-fields interval-format-fields">
                   <div class="shift-field-item" v-for="item in intervalFormatItems" :key="item.key">
                     <n-input-group>
@@ -112,7 +112,7 @@
                     </n-input-group>
                   </div>
                 </div>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalFormattedResult">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalFormattedResult">{{ t('common.copy') }}</n-button>
               </n-input-group>
             </div>
           </div>
@@ -122,22 +122,22 @@
           <div class="tool-block">
             <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
               <n-tag size="large" type="info">
-                时间推移计算
+                {{ t('tool.time.shiftCalc') }}
               </n-tag>
-              <n-button @click="showShiftExample">示例</n-button>
-              <n-button @click="clearShiftTool">清空</n-button>
+              <n-button @click="showShiftExample">{{ t('common.example') }}</n-button>
+              <n-button @click="clearShiftTool">{{ t('common.clear') }}</n-button>
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">开始时间</n-input-group-label>
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.startTime') }}</n-input-group-label>
                 <n-date-picker
                   v-model:value="shiftStart"
                   type="datetime"
                   :style="{ flex: 1 }"
-                  placeholder="选择开始日期时间"
+                  :placeholder="t('tool.time.startDateTimePlaceholder')"
                   clearable
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftStart">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftStart">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
@@ -164,18 +164,18 @@
                     </n-input-group>
                   </div>
                 </div>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftInfo">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftInfo">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">结果时间</n-input-group-label>
+                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.resultTime') }}</n-input-group-label>
                 <n-input
                   :value="shiftResult"
                   readonly
                   :style="{ flex: 1 }"
-                  placeholder="请选择开始时间并输入推移信息"
+                  :placeholder="t('tool.time.shiftResultPlaceholder')"
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftResult">复制</n-button>
+                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftResult">{{ t('common.copy') }}</n-button>
               </n-input-group>
             </div>
           </div>
@@ -192,6 +192,7 @@
 
 <script setup>
 import { ref, onMounted, reactive, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { NInputGroup, NInputGroupLabel, NInput, NInputNumber, NButton, NDatePicker, NTag, NSelect, NDivider } from "naive-ui";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -201,6 +202,7 @@ import SplitPanel from '../common/SplitPanel.vue';
 dayjs.extend(customParseFormat);
 
 const { copyToClipboard, readFromClipboard, notify } = useCommon();
+const { t, locale } = useI18n();
 
 const inputTime = ref();
 const timestamp = ref();
@@ -247,38 +249,38 @@ const timestampExamples = [
 const intervalStart = ref(null);
 const intervalEnd = ref(null);
 const intervalUnit = ref('second');
-const intervalUnitOptions = [
-  { label: '年', value: 'year' },
-  { label: '月', value: 'month' },
-  { label: '天', value: 'day' },
-  { label: '小时', value: 'hour' },
-  { label: '分钟', value: 'minute' },
-  { label: '秒', value: 'second' },
-  { label: '毫秒', value: 'millisecond' },
-];
-const intervalFormatItems = [
-  { key: 'year', label: '年' },
-  { key: 'month', label: '月' },
-  { key: 'day', label: '天' },
-  { key: 'hour', label: '时' },
-  { key: 'minute', label: '分' },
-  { key: 'second', label: '秒' },
-];
+const intervalUnitOptions = computed(() => [
+  { label: t('tool.time.units.year'), value: 'year' },
+  { label: t('tool.time.units.month'), value: 'month' },
+  { label: t('tool.time.units.day'), value: 'day' },
+  { label: t('tool.time.units.hour'), value: 'hour' },
+  { label: t('tool.time.units.minute'), value: 'minute' },
+  { label: t('tool.time.units.second'), value: 'second' },
+  { label: t('tool.time.units.millisecond'), value: 'millisecond' },
+]);
+const intervalFormatItems = computed(() => [
+  { key: 'year', label: t('tool.time.units.year') },
+  { key: 'month', label: t('tool.time.units.month') },
+  { key: 'day', label: t('tool.time.units.day') },
+  { key: 'hour', label: t('tool.time.units.hourShort') },
+  { key: 'minute', label: t('tool.time.units.minuteShort') },
+  { key: 'second', label: t('tool.time.units.second') },
+]);
 
 const shiftStart = ref(null);
 const shiftDirection = ref('forward');
-const shiftDirectionOptions = [
-  { label: '向前', value: 'backward' },
-  { label: '向后', value: 'forward' },
-];
-const shiftItems = [
-  { key: 'year', label: '年' },
-  { key: 'month', label: '月' },
-  { key: 'day', label: '天' },
-  { key: 'hour', label: '时' },
-  { key: 'minute', label: '分' },
-  { key: 'second', label: '秒' },
-];
+const shiftDirectionOptions = computed(() => [
+  { label: t('tool.time.backward'), value: 'backward' },
+  { label: t('tool.time.forward'), value: 'forward' },
+]);
+const shiftItems = computed(() => [
+  { key: 'year', label: t('tool.time.units.year') },
+  { key: 'month', label: t('tool.time.units.month') },
+  { key: 'day', label: t('tool.time.units.day') },
+  { key: 'hour', label: t('tool.time.units.hourShort') },
+  { key: 'minute', label: t('tool.time.units.minuteShort') },
+  { key: 'second', label: t('tool.time.units.second') },
+]);
 const shiftValues = reactive({
   year: null,
   month: null,
@@ -376,17 +378,17 @@ const shiftResult = computed(() => {
 });
 
 const shiftInfoText = computed(() => {
-  const directionLabel = shiftDirection.value === 'backward' ? '向前' : '向后';
+  const directionLabel = shiftDirection.value === 'backward' ? t('tool.time.backward') : t('tool.time.forward');
   const parts = [];
 
-  shiftItems.forEach((item) => {
+  shiftItems.value.forEach((item) => {
     const value = shiftValues[item.key] ?? 0;
     if (value) {
-      parts.push(`${value}${item.label}`);
+      parts.push(formatDurationPart(value, item.label));
     }
   });
 
-  return `${directionLabel} ${parts.length ? parts.join('') : '0秒'}`;
+  return `${directionLabel} ${parts.length ? joinDurationParts(parts) : formatDurationPart(0, t('tool.time.units.second'))}`;
 });
 
 onMounted(() => {
@@ -482,7 +484,7 @@ async function readTimestampClipboard() {
     inputTime.value = text;
     handleInputTimeChange(inputTime.value);
   } else {
-    notify('warning', '剪贴板中没有可用文本');
+    notify('warning', t('tool.time.clipboardNoText'));
   }
 }
 
@@ -526,7 +528,7 @@ function showShiftExample() {
 function clearShiftTool() {
   shiftStart.value = null;
   shiftDirection.value = 'forward';
-  shiftItems.forEach((item) => {
+  shiftItems.value.forEach((item) => {
     shiftValues[item.key] = null;
   });
 }
@@ -574,44 +576,44 @@ function parseInputTime(value) {
 }
 
 function copyTimestamp() {
-  copyToClipboard(timestamp.value.toString(), '复制成功!');
+  copyToClipboard(timestamp.value.toString());
 }
 function copyMilliTimestamp() {
-  copyToClipboard(milliTimestamp.value.toString(), '复制成功!');
+  copyToClipboard(milliTimestamp.value.toString());
 }
 function copyDate() {
-  copyToClipboard(dayjs(milliTimestamp.value).format('YYYY-MM-DD'), '复制成功!');
+  copyToClipboard(dayjs(milliTimestamp.value).format('YYYY-MM-DD'));
 }
 function copyDateTime() {
-  copyToClipboard(dayjs(milliTimestamp.value).format('YYYY-MM-DD HH:mm:ss'), '复制成功!');
+  copyToClipboard(dayjs(milliTimestamp.value).format('YYYY-MM-DD HH:mm:ss'));
 }
 
 function copyIntervalStart() {
-  copyToClipboard(formatDateTime(intervalStart.value), '复制成功!');
+  copyToClipboard(formatDateTime(intervalStart.value));
 }
 
 function copyIntervalEnd() {
-  copyToClipboard(formatDateTime(intervalEnd.value), '复制成功!');
+  copyToClipboard(formatDateTime(intervalEnd.value));
 }
 
 function copyIntervalResult() {
-  copyToClipboard(intervalResult.value || '', '复制成功!');
+  copyToClipboard(intervalResult.value || '');
 }
 
 function copyIntervalFormattedResult() {
-  copyToClipboard(intervalFormattedResult.value || '', '复制成功!');
+  copyToClipboard(intervalFormattedResult.value || '');
 }
 
 function copyShiftStart() {
-  copyToClipboard(formatDateTime(shiftStart.value), '复制成功!');
+  copyToClipboard(formatDateTime(shiftStart.value));
 }
 
 function copyShiftInfo() {
-  copyToClipboard(shiftInfoText.value, '复制成功!');
+  copyToClipboard(shiftInfoText.value);
 }
 
 function copyShiftResult() {
-  copyToClipboard(shiftResult.value || '', '复制成功!');
+  copyToClipboard(shiftResult.value || '');
 }
 
 function formatDateTime(value) {
@@ -630,14 +632,22 @@ function formatDuration(startTime, endTime) {
   const parts = getDurationParts(startTime, endTime);
 
   const resultParts = [];
-  if (parts.years) resultParts.push(`${parts.years}年`);
-  if (parts.months) resultParts.push(`${parts.months}月`);
-  if (parts.days) resultParts.push(`${parts.days}天`);
-  if (parts.hours) resultParts.push(`${parts.hours}小时`);
-  if (parts.minutes) resultParts.push(`${parts.minutes}分`);
-  if (parts.seconds) resultParts.push(`${parts.seconds}秒`);
+  if (parts.years) resultParts.push(formatDurationPart(parts.years, t('tool.time.units.year')));
+  if (parts.months) resultParts.push(formatDurationPart(parts.months, t('tool.time.units.month')));
+  if (parts.days) resultParts.push(formatDurationPart(parts.days, t('tool.time.units.day')));
+  if (parts.hours) resultParts.push(formatDurationPart(parts.hours, t('tool.time.units.hour')));
+  if (parts.minutes) resultParts.push(formatDurationPart(parts.minutes, t('tool.time.units.minuteShort')));
+  if (parts.seconds) resultParts.push(formatDurationPart(parts.seconds, t('tool.time.units.second')));
 
-  return resultParts.length ? resultParts.join('') : '0秒';
+  return resultParts.length ? joinDurationParts(resultParts) : formatDurationPart(0, t('tool.time.units.second'));
+}
+
+function formatDurationPart(value, unitLabel) {
+  return locale.value === 'en-US' ? `${value} ${unitLabel}` : `${value}${unitLabel}`;
+}
+
+function joinDurationParts(parts) {
+  return locale.value === 'en-US' ? parts.join(' ') : parts.join('');
 }
 
 function getDurationParts(startTime, endTime) {

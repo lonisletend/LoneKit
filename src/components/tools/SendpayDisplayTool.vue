@@ -1,11 +1,13 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NEmpty, NIcon, NInput, NModal, NSelect, NSwitch, NTag } from "naive-ui";
 import { ChevronDownCircleOutline, ChevronUpCircleOutline } from "@vicons/ionicons5";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
 
 const { notify, readFromClipboard } = useCommon();
+const { t } = useI18n();
 
 const STORAGE_KEY = "lonekit-sendpay-config-profiles";
 const LEGACY_STORAGE_KEY = "lonekit-sendpay-explain-config";
@@ -54,7 +56,7 @@ function parseSendpayMap(raw) {
     if (!isObject(parsed)) {
       return {
         map: {},
-        error: "sendpayMap 需为 JSON 对象",
+        error: t("tool.sendpayDisplay.errors.sendpayMapMustBeObject"),
       };
     }
 
@@ -77,7 +79,7 @@ function parseSendpayMap(raw) {
   } catch {
     return {
       map: {},
-      error: "sendpayMap JSON 解析失败",
+      error: t("tool.sendpayDisplay.errors.sendpayMapParseFailed"),
     };
   }
 }
@@ -94,7 +96,7 @@ function parseExplainConfigPayload(payload) {
   if (!isObject(payload)) {
     return {
       ok: false,
-      message: "配置内容必须是 JSON 对象",
+      message: t("tool.sendpayDisplay.errors.configMustBeObject"),
       config: {},
       title: "",
       nameLocked: false,
@@ -110,7 +112,7 @@ function parseExplainConfigPayload(payload) {
     if (!title) {
       return {
         ok: false,
-        message: "新版本配置缺少有效 title",
+        message: t("tool.sendpayDisplay.errors.missingTitle"),
         config: {},
         title: "",
         nameLocked: false,
@@ -121,7 +123,7 @@ function parseExplainConfigPayload(payload) {
     if (!isObject(payload.config)) {
       return {
         ok: false,
-        message: "新版本配置中的 config 必须是 JSON 对象",
+        message: t("tool.sendpayDisplay.errors.configFieldMustBeObject"),
         config: {},
         title: "",
         nameLocked: false,
@@ -158,7 +160,7 @@ function isUrlFormatProfile(profile) {
 }
 
 function makeDefaultProfileName(index) {
-  return `配置${index + 1}`;
+  return t("tool.sendpayDisplay.defaultProfileName", { index: index + 1 });
 }
 
 function createProfile(partial = {}, index = 0) {
@@ -207,6 +209,12 @@ const profileOptions = computed(() => {
     label: `${item.name} (${item.format})`,
     value: item.id,
   }));
+});
+const sendpayMapPlaceholder = computed(() => {
+  return `${t("tool.sendpayDisplay.sendpayMapPlaceholderPrefix")} ${JSON.stringify({ 520: "1", 1002: "6", 1024: 9 })}`;
+});
+const configPlaceholder = computed(() => {
+  return JSON.stringify({ 1: [{ 0: t("tool.sendpayDisplay.configPlaceholderExample") }], 8: [{ 2: t("tool.sendpayDisplay.configPlaceholderExample8") }] });
 });
 
 const sendpayValue = computed(() => normalizeSendpay(sendpayInput.value));
@@ -433,7 +441,9 @@ const resolvedExplanationRows = computed(() => {
         positionLabel: item.label,
         value: attemptedValues.length ? attemptedValues.join(" / ") : "-",
         sourceLabel,
-        explanation: attemptedValues.length ? "当前输入未匹配到解释" : "当前无可用于匹配的输入值",
+        explanation: attemptedValues.length
+          ? t("tool.sendpayDisplay.unmatchedInput")
+          : t("tool.sendpayDisplay.noInputForMatch"),
         expandValueEntries: allValueEntries,
         matched: false,
       };
@@ -506,18 +516,18 @@ function isCompareRowExpanded(rowKey) {
 }
 
 function getDefaultConfigText() {
-  return `{
-  "1": [
-    {"0": "示例-单标位：第1位=0的含义"},
-    {"1": "示例-单标位：第1位=1的含义"}
-  ],
-  "3-5": [
-    {"123": "示例-区间：第3-5位=123的含义"}
-  ],
-  "3,5": [
-    {"1,4": "示例-多标位组合：第3位=1 且 第5位=4的含义"}
-  ]
-}`;
+  return JSON.stringify({
+    "1": [
+      { "0": t("tool.sendpayDisplay.examples.singleZero") },
+      { "1": t("tool.sendpayDisplay.examples.singleOne") },
+    ],
+    "3-5": [
+      { "123": t("tool.sendpayDisplay.examples.range") },
+    ],
+    "3,5": [
+      { "1,4": t("tool.sendpayDisplay.examples.combo") },
+    ],
+  }, null, 2);
 }
 
 function applyProfiles(profiles, preferCurrent = true) {
@@ -558,7 +568,7 @@ function loadProfilesFromStorage() {
       applyProfiles(parsed, true);
       return;
     } catch {
-      notify("warning", "配置列表读取失败，已重置为空");
+      notify("warning", t("tool.sendpayDisplay.profileListReadFailed"));
       configProfiles.value = [];
       selectedProfileId.value = null;
       saveProfilesToStorage([], false);
@@ -584,7 +594,7 @@ function loadProfilesFromStorage() {
       createProfile(
         {
           id: Date.now(),
-          name: "配置1",
+          name: makeDefaultProfileName(0),
           format: FORMAT_JSON,
           url: "",
           config: parsed,
@@ -595,7 +605,7 @@ function loadProfilesFromStorage() {
     applyProfiles(migrated, false);
     saveProfilesToStorage(migrated, false);
   } catch {
-    notify("warning", "旧配置读取失败，已重置为空");
+    notify("warning", t("tool.sendpayDisplay.legacyConfigReadFailed"));
     configProfiles.value = [];
     selectedProfileId.value = null;
     saveProfilesToStorage([], false);
@@ -605,19 +615,19 @@ function loadProfilesFromStorage() {
 async function fetchProfileConfigByUrl(profile) {
   const url = String(profile.url || "").trim();
   if (!url) {
-    return { ok: false, message: `配置「${profile.name}」未填写 URL` };
+    return { ok: false, message: t("tool.sendpayDisplay.profileUrlMissing", { name: profile.name }) };
   }
 
   try {
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) {
-      return { ok: false, message: `配置「${profile.name}」拉取失败: HTTP ${response.status}` };
+      return { ok: false, message: t("tool.sendpayDisplay.profileFetchHttpFailed", { name: profile.name, status: response.status }) };
     }
 
     const data = await response.json();
     const parsed = parseExplainConfigPayload(data);
     if (!parsed.ok) {
-      return { ok: false, message: `配置「${profile.name}」拉取失败: ${parsed.message}` };
+      return { ok: false, message: t("tool.sendpayDisplay.profileFetchFailed", { name: profile.name, message: parsed.message }) };
     }
 
     return {
@@ -628,7 +638,7 @@ async function fetchProfileConfigByUrl(profile) {
       raw: parsed.raw,
     };
   } catch {
-    return { ok: false, message: `配置「${profile.name}」拉取失败，请检查 URL 或跨域策略` };
+    return { ok: false, message: t("tool.sendpayDisplay.profileFetchNetworkFailed", { name: profile.name }) };
   }
 }
 
@@ -705,7 +715,7 @@ async function pullProfileConfig(profile) {
     profile.name = result.title;
   }
   profile.nameLocked = !!result.nameLocked;
-  notify("success", `配置「${profile.name}」拉取成功`);
+  notify("success", t("tool.sendpayDisplay.profileFetchSuccess", { name: profile.name }));
 }
 
 async function saveConfig() {
@@ -730,7 +740,7 @@ async function saveConfig() {
       } else {
         const parsedPayload = parseExplainConfigPayload(JSON.parse(profile.configText || "{}"));
         if (!parsedPayload.ok) {
-          notify("warning", `配置「${normalized.name}」${parsedPayload.message}`);
+          notify("warning", t("tool.sendpayDisplay.profileConfigInvalid", { name: normalized.name, message: parsedPayload.message }));
           return;
         }
         normalized.config = parsedPayload.config;
@@ -747,9 +757,9 @@ async function saveConfig() {
     saveProfilesToStorage(nextProfiles);
 
     showConfigModal.value = false;
-    notify("success", "标位解释配置已保存");
+    notify("success", t("tool.sendpayDisplay.configSaved"));
   } catch {
-    notify("error", "JSON 格式错误，请检查后重试");
+    notify("error", t("tool.sendpayDisplay.jsonFormatError"));
   }
 }
 
@@ -759,7 +769,7 @@ async function readClipboard() {
     sendpayInput.value = normalizeSendpay(text);
     return;
   }
-  notify("warning", "剪贴板中没有可用文本");
+  notify("warning", t("tool.sendpayDisplay.clipboardNoText"));
 }
 
 function showExample() {
@@ -808,7 +818,7 @@ function saveEdit(silent = false) {
 
   if (!/^\d$/.test(editingValue.value)) {
     if (!silent) {
-      notify("warning", "只能输入 1 位数字");
+      notify("warning", t("tool.sendpayDisplay.onlyOneDigit"));
     }
     cancelEdit();
     return;
@@ -860,7 +870,7 @@ function saveMapEdit(silent = false) {
   const newValue = editingMapValue.value.trim();
   if (!newValue) {
     if (!silent) {
-      notify("warning", "只能输入非空值");
+      notify("warning", t("tool.sendpayDisplay.nonEmptyValueOnly"));
     }
     cancelMapEdit();
     return;
@@ -873,7 +883,7 @@ function saveMapEdit(silent = false) {
     sendpayMapInput.value = JSON.stringify(parsed);
   } catch {
     if (!silent) {
-      notify("error", "sendpayMap JSON 格式错误，修改失败");
+      notify("error", t("tool.sendpayDisplay.sendpayMapEditFailed"));
     }
   }
   cancelMapEdit();
@@ -908,10 +918,10 @@ refreshUrlProfilesOnLoad();
     <div class="w-full flex flex-col gap-2">
       <div class="h-8 flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <n-tag size="large" type="warning">Sendpay 输入</n-tag>
-          <n-button @click="readClipboard">剪贴板</n-button>
-          <n-button @click="showExample">示例</n-button>
-          <n-button @click="clearAll">清空</n-button>
+          <n-tag size="large" type="warning">{{ t('tool.sendpayDisplay.input') }}</n-tag>
+          <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+          <n-button @click="showExample">{{ t('common.example') }}</n-button>
+          <n-button @click="clearAll">{{ t('common.clear') }}</n-button>
           <n-switch v-model:value="sendpayMapEnabled" size="large">
               <template #checked>sendpayMap</template>
               <template #unchecked>sendpayMap</template>
@@ -919,8 +929,8 @@ refreshUrlProfilesOnLoad();
         </div>
         <div class="flex items-center gap-2">
           <n-switch v-model:value="allExplainEnabled" size="large">
-            <template #checked>所有解释</template>
-            <template #unchecked>所有解释</template>
+            <template #checked>{{ t('tool.sendpayDisplay.allExplanations') }}</template>
+            <template #unchecked>{{ t('tool.sendpayDisplay.allExplanations') }}</template>
           </n-switch>
           <n-button
             quaternary
@@ -938,10 +948,10 @@ refreshUrlProfilesOnLoad();
             v-model:value="selectedProfileId"
             class="profile-select"
             :options="profileOptions"
-            placeholder="选择配置"
+            :placeholder="t('tool.sendpayDisplay.selectProfile')"
             clearable
           />
-          <n-button @click="openConfig">设置</n-button>
+          <n-button @click="openConfig">{{ t('tool.sendpayDisplay.settings') }}</n-button>
         </div>
       </div>
       <n-input
@@ -950,7 +960,7 @@ refreshUrlProfilesOnLoad();
         type="textarea"
         inputmode="numeric"
         :autosize="{ minRows: 3, maxRows: 10 }"
-        placeholder="输入订单 sendpay 信息"
+        :placeholder="t('tool.sendpayDisplay.sendpayPlaceholder')"
         @input="handleSendpayInput"
       />
       <n-input
@@ -959,7 +969,7 @@ refreshUrlProfilesOnLoad();
         class="sendpay-input"
         type="textarea"
         :autosize="{ minRows: 2, maxRows: 6 }"
-        placeholder='输入 sendpayMap，例如：{"520":"1","1002":"6","1024":9}'
+        :placeholder="sendpayMapPlaceholder"
       />
       <div v-if="sendpayMapEnabled && sendpayMapError" class="text-xs text-red-500">
         {{ sendpayMapError }}
@@ -1024,7 +1034,7 @@ refreshUrlProfilesOnLoad();
               </div>
             </div>
             <div v-else class="h-full flex items-center justify-center">
-              <n-empty description="请输入 sendpay 或 sendpayMap 信息" />
+              <n-empty :description="t('tool.sendpayDisplay.emptyInput')" />
             </div>
           </div>
         </template>
@@ -1032,13 +1042,13 @@ refreshUrlProfilesOnLoad();
         <template #right>
           <div class="h-full overflow-auto lk-result-surface p-2">
             <div v-if="!parsedConfigEntries.length" class="h-full flex items-center justify-center">
-              <n-empty description="当前配置暂无可展示解释" />
+              <n-empty :description="t('tool.sendpayDisplay.emptyConfig')" />
             </div>
             <div v-else-if="!allExplainEnabled && !hasExplainInput" class="h-full flex items-center justify-center">
-              <n-empty description="输入 sendpay 或 sendpayMap 后展示解释" />
+              <n-empty :description="t('tool.sendpayDisplay.inputToShowExplanation')" />
             </div>
             <div v-else-if="!displayExplanationRows.length" class="h-full flex items-center justify-center">
-              <n-empty description="当前配置中无可匹配解释" />
+              <n-empty :description="t('tool.sendpayDisplay.noMatchedExplanation')" />
             </div>
             <div v-else class="space-y-2">
               <div
@@ -1048,9 +1058,9 @@ refreshUrlProfilesOnLoad();
               >
                 <div class="explain-head">
                   <span>
-                    第 {{ row.positionLabel }} 位
+                    {{ t('tool.sendpayDisplay.positionLabel', { position: row.positionLabel }) }}
                     <template v-if="row.matched"> = {{ row.value }} ({{ row.sourceLabel }})</template>
-                    <template v-else> (未匹配)</template>
+                    <template v-else> ({{ t('tool.sendpayDisplay.unmatched') }})</template>
                   </span>
                   <button
                     v-if="row.expandValueEntries.length"
@@ -1078,17 +1088,17 @@ refreshUrlProfilesOnLoad();
       </SplitPanel>
     </div>
 
-    <n-modal v-model:show="showConfigModal" preset="card" title="标位解释配置" style="width: 860px" :mask-closable="false">
+    <n-modal v-model:show="showConfigModal" preset="card" :title="t('tool.sendpayDisplay.configTitle')" style="width: 860px" :mask-closable="false">
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <div class="text-sm text-slate-500 dark:text-slate-400">
-            支持多份配置，格式可选 URL/Json。URL 配置在保存和页面进入时会自动拉取并更新。
+            {{ t('tool.sendpayDisplay.configHelp') }}
           </div>
-          <n-button size="small" @click="addProfile">新增配置</n-button>
+          <n-button size="small" @click="addProfile">{{ t('tool.sendpayDisplay.addProfile') }}</n-button>
         </div>
 
         <div v-if="!editingProfiles.length" class="h-36 border border-dashed empty-result-surface flex items-center justify-center text-slate-400 dark:text-slate-500">
-          暂无配置，点击右上角“新增配置”创建。
+          {{ t('tool.sendpayDisplay.noProfileTip') }}
         </div>
 
         <div v-else class="max-h-[520px] overflow-auto pr-1 space-y-3">
@@ -1098,14 +1108,14 @@ refreshUrlProfilesOnLoad();
                 <span>#{{ index + 1 }}</span>
                 <span>ID: {{ profile.id }}</span>
               </div>
-              <n-button size="tiny" @click="removeProfile(profile.id)">删除</n-button>
+              <n-button size="tiny" @click="removeProfile(profile.id)">{{ t('tool.sendpayDisplay.deleteProfile') }}</n-button>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
               <n-input
                 v-model:value="profile.name"
                 class="config-setting-input"
-                placeholder="配置名称"
+                :placeholder="t('tool.sendpayDisplay.profileNamePlaceholder')"
                 :readonly="profile.nameLocked"
               />
               <n-select
@@ -1117,7 +1127,7 @@ refreshUrlProfilesOnLoad();
 
             <div v-if="isUrlFormatProfile(profile)" class="flex items-center gap-2">
               <n-input v-model:value="profile.url" class="config-setting-input" placeholder="https://example.com/config.json" />
-              <n-button @click="pullProfileConfig(profile)">拉取</n-button>
+              <n-button @click="pullProfileConfig(profile)">{{ t('tool.sendpayDisplay.pull') }}</n-button>
             </div>
 
             <n-input
@@ -1125,7 +1135,7 @@ refreshUrlProfilesOnLoad();
               class="config-setting-input"
               type="textarea"
               :autosize="{ minRows: 6, maxRows: 12 }"
-              placeholder='{"1":[{"0":"第1位0的含义"}],"8":[{"2":"第8位2的含义"}]}'
+              :placeholder="configPlaceholder"
               :readonly="isUrlFormatProfile(profile)"
             />
           </div>
@@ -1133,8 +1143,8 @@ refreshUrlProfilesOnLoad();
       </div>
       <template #action>
         <div class="w-full flex justify-end gap-2">
-          <n-button @click="showConfigModal = false">取消</n-button>
-          <n-button type="primary" @click="saveConfig">保存</n-button>
+          <n-button @click="showConfigModal = false">{{ t('tool.sendpayDisplay.cancel') }}</n-button>
+          <n-button type="primary" @click="saveConfig">{{ t('tool.sendpayDisplay.save') }}</n-button>
         </div>
       </template>
     </n-modal>
