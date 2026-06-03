@@ -146,7 +146,7 @@ function handleMoreSelect(key) {
   <SplitPanel>
     <template #left>
       <div class="h-full p-2 flex flex-col">
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+        <div class="lk-toolbar mb-2">
           <n-tag size="large" type="warning">{{ t('common.input') }}</n-tag>
           <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
           <n-button @click="showExample">{{ t('common.example') }}</n-button>
@@ -154,7 +154,7 @@ function handleMoreSelect(key) {
           <n-button @click="compressive">{{ t('common.compress') }}</n-button>
           <n-button @click="copySource">{{ t('common.copy') }}</n-button>
         </div>
-        <div class="flex-1 w-full overflow-hidden">
+        <div class="flex-1 min-h-0 w-full overflow-hidden">
           <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" :placeholder="t('tool.format.xmlInputPlaceholder')"
             @input="handleChange" />
         </div>
@@ -162,7 +162,7 @@ function handleMoreSelect(key) {
     </template>
     <template #right>
       <div class="h-full p-2 flex flex-col">
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+        <div class="lk-toolbar mb-2">
           <n-tag size="large" type="success">{{ t('common.output') }}</n-tag>
           <n-button @click="copyValue">{{ t('common.copy') }}</n-button>
           <n-button @click="collapseAll">
@@ -179,9 +179,10 @@ function handleMoreSelect(key) {
               <template #icon><n-icon :component="ChevronDownOutline" /></template>
             </n-button>
           </n-dropdown>
-          <n-input-group>
-            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
-            <n-input 
+          <n-input-group class="lk-toolbar-filter">
+            <n-select v-model:value="filterType" :options="filterTypeOptions" class="lk-fit-select" />
+            <n-input
+              class="lk-toolbar-filter-input"
               v-model:value="filterExpression" 
               type="text" 
               @keydown.enter="xmlFilter" 
@@ -191,7 +192,7 @@ function handleMoreSelect(key) {
             />
           </n-input-group>
         </div>
-        <div class="flex-1 w-full overflow-hidden text-lg lk-result-surface">
+        <div class="flex-1 min-h-0 w-full overflow-hidden text-lg lk-result-surface">
           <XmlFormat
             v-if="hasSourceContent"
             class="w-full h-full"

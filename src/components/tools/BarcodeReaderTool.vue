@@ -172,7 +172,7 @@ function syncScroll(e, target) {
     <SplitPanel>
       <template #left>
         <div class="flex flex-col h-full p-2 space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="warning">{{ t('tool.reader.uploadImage') }}</n-tag>
             <n-button @click="handleClipboardPaste">{{ t('tool.reader.readClipboard') }}</n-button>
             <n-button @click="clearAll" :disabled="historyList.length === 0">{{ t('tool.reader.deleteAll') }}</n-button>
@@ -234,7 +234,7 @@ function syncScroll(e, target) {
       
       <template #right>
         <div class="flex flex-col h-full p-2 space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="success">{{ t('tool.reader.result') }}</n-tag>
           </div>
           

@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-full overflow-hidden">
     <n-layout has-sider class="w-full h-full overflow-hidden">
-      <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="200" :collapsed="collapsed"
+      <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="siderWidth" :collapsed="collapsed"
         show-trigger @collapse="collapsed = true" @expand="collapsed = false">
         <div class="flex h-full min-h-0 flex-col overflow-hidden">
           <div
@@ -222,6 +222,10 @@ const { themeMode, setThemeMode } = useThemeMode();
 const { localeMode, toggleLocaleMode } = useLocaleMode();
 const themeModeOrder = ["light", "dark", "auto"];
 const localeButtonText = computed(() => (localeMode.value === "zh-CN" ? "EN" : "中"));
+const siderWidth = computed(() => {
+  const longestLabelLength = rawMenuItems.reduce((max, item) => Math.max(max, t(item.titleKey).length), 0);
+  return Math.min(260, Math.max(200, longestLabelLength * 8 + 96));
+});
 
 const currentThemeIcon = computed(() => {
   switch (themeMode.value) {
@@ -297,6 +301,8 @@ watch(
 }
 
 :deep(.menu-label-link) {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

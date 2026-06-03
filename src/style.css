@@ -39,6 +39,64 @@ html.dark {
   padding: var(--lk-surface-padding);
 }
 
+.lk-toolbar {
+  width: 100%;
+  min-height: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.lk-toolbar--compact {
+  gap: 0.5rem 0.5rem;
+}
+
+.lk-fit-select {
+  width: auto;
+  min-width: max-content;
+  flex: 0 0 auto;
+}
+
+.lk-fit-select .n-base-selection {
+  min-width: max-content;
+}
+
+.lk-fit-select .n-base-selection-label,
+.lk-fit-select .n-base-selection-placeholder {
+  padding-left: 12px;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+
+.lk-toolbar-filter {
+  flex: 1 1 320px;
+  min-width: min(100%, 320px);
+  max-width: none;
+}
+
+.lk-toolbar-filter .lk-fit-select {
+  width: max-content;
+  min-width: max-content;
+  flex: 0 0 max-content;
+}
+
+.lk-toolbar-filter .lk-fit-select .n-base-selection {
+  width: max-content;
+}
+
+.lk-toolbar-filter-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lk-toolbar .lk-fit-select {
+  width: max-content !important;
+  min-width: max-content;
+  flex: 0 0 max-content;
+}
+
 .empty-result-surface {
   border-color: var(--lk-surface-border);
   border-radius: var(--lk-surface-radius);

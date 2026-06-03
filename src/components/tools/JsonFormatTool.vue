@@ -4,7 +4,7 @@
       <!-- 左侧输入区域 -->
       <div class="h-full p-2 flex flex-col">
         <!-- 固定的操作按钮 -->
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+        <div class="lk-toolbar mb-2">
           <n-tag size="large" type="warning">
             {{ t('common.input') }}
           </n-tag>
@@ -15,7 +15,7 @@
           <n-button @click="copySource">{{ t('common.copy') }}</n-button>
         </div>
         <!-- 可滚动的输入区域 -->
-        <div class="flex-1 w-full overflow-hidden">
+        <div class="flex-1 min-h-0 w-full overflow-hidden">
           <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
                    :placeholder="t('tool.json.inputPlaceholder')" @input="handleSourceJsonChange"/>
         </div>
@@ -25,7 +25,7 @@
       <!-- 右侧输出区域 -->
       <div class="h-full p-2 flex flex-col">
         <!-- 固定的操作按钮 -->
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+        <div class="lk-toolbar mb-2">
           <n-tag size="large" type="success">{{ t('common.output') }}</n-tag>
           <n-button @click="copyJson">{{ t('common.copy') }}</n-button>
           <n-button @click="collapseAll">
@@ -42,9 +42,10 @@
               <template #icon><n-icon :component="ChevronDownOutline" /></template>
             </n-button>
           </n-dropdown>
-          <n-input-group>
-            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '146px' }" />
-            <n-input 
+          <n-input-group class="lk-toolbar-filter">
+            <n-select v-model:value="filterType" :options="filterTypeOptions" class="json-filter-type-select" />
+            <n-input
+              class="lk-toolbar-filter-input"
               v-model:value="filterExpression" 
               type="text" 
               @keydown.enter="jsonFilter" 
@@ -55,7 +56,7 @@
           </n-input-group>
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-hidden text-lg lk-result-surface">
+        <div class="flex-1 min-h-0 w-full overflow-hidden text-lg lk-result-surface">
           <JsonFormat
             v-if="hasSourceContent"
             class="w-full h-full"
@@ -242,5 +243,8 @@ function handleMoreSelect(key) {
 </script>
 
 <style scoped>
-/* 组件特有样式可以保留在这里 */
+.json-filter-type-select {
+  width: 120px;
+  flex: 0 0 120px;
+}
 </style>

@@ -101,7 +101,7 @@ function collapseAll() {
     <SplitPanel>
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="warning">SQL</n-tag>
             <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
             <n-button @click="showExample">{{ t('common.example') }}</n-button>
@@ -109,7 +109,7 @@ function collapseAll() {
             <n-button @click="compressive">{{ t('common.compress') }}</n-button>
             <n-button @click="copySource">{{ t('common.copy') }}</n-button>
           </div>
-          <div class="w-full h-full text-xl">
+          <div class="flex-1 min-h-0 w-full text-xl">
             <n-input v-model:value="source" type="textarea" class="w-full h-full"
                      :placeholder="t('tool.format.sqlInputPlaceholder')"/>
           </div>
@@ -117,13 +117,13 @@ function collapseAll() {
       </template>
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="success">{{ t('tool.codec.result') }}</n-tag>
             <n-button @click="copyValue">{{ t('common.copy') }}</n-button>
             <n-select
               v-model:value="dialect"
               :options="dialectOptions"
-              :style="{ width: '170px' }"
+              class="lk-sql-dialect-select"
             />
             <n-button @click="collapseAll">
               <template #icon> <component :is="CollapseIcon" /> </template>
@@ -132,7 +132,7 @@ function collapseAll() {
               <template #icon> <component :is="ExpandIcon" /> </template>
             </n-button>
           </div>
-          <div class="flex-1 w-full overflow-hidden text-lg lk-result-surface">
+          <div class="flex-1 min-h-0 w-full overflow-hidden text-lg lk-result-surface">
             <SqlFormat
               v-if="hasSourceContent"
               class="w-full h-full"
@@ -152,5 +152,12 @@ function collapseAll() {
 </template>
 
 <style scoped>
+.lk-sql-dialect-select {
+  width: 170px !important;
+  flex: 0 0 170px;
+}
 
+.lk-sql-dialect-select :deep(.n-base-selection) {
+  width: 100%;
+}
 </style>

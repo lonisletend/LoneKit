@@ -148,7 +148,7 @@ function copyValue(value) {
     <SplitPanel>
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="warning">{{ t('tool.codec.encrypt') }}</n-tag>
             <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
             <n-button @click="showExample">{{ t('common.example') }}</n-button>
@@ -161,7 +161,7 @@ function copyValue(value) {
           <div
             v-if="!isBatchInput"
             ref="leftScrollRef"
-            class="w-full h-full overflow-auto space-y-3"
+            class="flex-1 min-h-0 w-full overflow-auto space-y-3"
             @scroll="handleScroll('left', $event)"
           >
             <div
@@ -197,7 +197,7 @@ function copyValue(value) {
               />
             </div>
           </div>
-          <div v-else class="w-full h-full">
+          <div v-else class="flex-1 min-h-0 w-full">
             <n-input
               v-model:value="batchSourceText"
               type="textarea"
@@ -210,14 +210,14 @@ function copyValue(value) {
       </template>
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="success">{{ t('tool.codec.result') }}</n-tag>
             <n-button @click="copyValue(allResults)">{{ t('tool.codec.copyAll') }}</n-button>
           </div>
           <div
             v-if="!isBatchInput"
             ref="rightScrollRef"
-            class="w-full h-full text-lg transition overflow-auto space-y-3"
+            class="flex-1 min-h-0 w-full text-lg transition overflow-auto space-y-3"
             @scroll="handleScroll('right', $event)"
           >
             <div
@@ -251,7 +251,7 @@ function copyValue(value) {
               />
             </div>
           </div>
-          <div v-else class="w-full h-full">
+          <div v-else class="flex-1 min-h-0 w-full">
             <n-input
               :value="batchTargetText"
               type="textarea"

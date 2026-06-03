@@ -1,47 +1,48 @@
 <template>
-  <div class="w-full h-full">
+  <div class="w-full h-full" :style="{ '--time-field-label-width': timeFieldLabelWidth }">
     <SplitPanel :default-size="0.5">
       <template #left>
         <div class="h-full p-2 mr-4 overflow-y-auto overflow-x-hidden">
           <div class="tool-block">
-            <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <div class="flex-shrink-0 w-full min-h-8 flex flex-wrap items-center gap-2 mb-2">
               <n-tag size="large" type="warning">
                 {{ t('tool.time.timestampConvert') }}
               </n-tag>
               <n-button @click="readTimestampClipboard">{{ t('common.clipboard') }}</n-button>
+              <n-button @click="timeNow">{{ t('tool.time.now') }}</n-button>
               <n-button @click="showTimestampExample">{{ t('common.example') }}</n-button>
               <n-button @click="clearTimestampTool">{{ t('common.clear') }}</n-button>
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.inputTime') }}</n-input-group-label>
-                <n-input :style="{ flex: 1 }" :placeholder="t('tool.time.inputTimePlaceholder')" :status="status.inputTime" clearable
+                <n-input-group-label class="time-field-label">{{ t('tool.time.inputTime') }}</n-input-group-label>
+                <n-input class="time-flex-control" :placeholder="t('tool.time.inputTimePlaceholder')" :status="status.inputTime" clearable
                         v-model:value="inputTime" @input="handleInputTimeChange" />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="timeNow">{{ t('tool.time.now') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyInputTime">{{ t('common.copy') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.timestampSeconds') }}</n-input-group-label>
-                <n-input-number :show-button="false" :style="{ flex: 1 }" placeholder="" :status="status.timestamp" clearable
+                <n-input-group-label class="time-field-label">{{ t('tool.time.timestampSeconds') }}</n-input-group-label>
+                <n-input-number :show-button="false" class="time-flex-control" placeholder="" :status="status.timestamp" clearable
                                 v-model:value="timestamp" @update:value="handleTimestampChange" />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyTimestamp">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyTimestamp">{{ t('common.copy') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.timestampMilliseconds') }}</n-input-group-label>
-                <n-input-number :show-button="false" :style="{ flex: 1 }" placeholder="" :status="status.milliTimestamp" clearable
+                <n-input-group-label class="time-field-label">{{ t('tool.time.timestampMilliseconds') }}</n-input-group-label>
+                <n-input-number :show-button="false" class="time-flex-control" placeholder="" :status="status.milliTimestamp" clearable
                                 v-model:value="milliTimestamp" @update:value="handleMilliTimestampChange" />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyMilliTimestamp">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyMilliTimestamp">{{ t('common.copy') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.date') }}</n-input-group-label>
-                <n-date-picker v-model:value="milliTimestamp" type="date" :style="{ flex: 1 }" :placeholder="t('tool.time.datePlaceholder')" clearable
+                <n-input-group-label class="time-field-label">{{ t('tool.time.date') }}</n-input-group-label>
+                <n-date-picker v-model:value="milliTimestamp" type="date" class="time-flex-control" :placeholder="t('tool.time.datePlaceholder')" clearable
                               @update:value="handleMilliTimestampChange"/>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyDate">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyDate">{{ t('common.copy') }}</n-button>
               </n-input-group>
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.dateTime') }}</n-input-group-label>
-                <n-date-picker v-model:value="milliTimestamp" type="datetime" :style="{ flex: 1 }" :placeholder="t('tool.time.dateTimePlaceholder')" clearable
+                <n-input-group-label class="time-field-label">{{ t('tool.time.dateTime') }}</n-input-group-label>
+                <n-date-picker v-model:value="milliTimestamp" type="datetime" class="time-flex-control" :placeholder="t('tool.time.dateTimePlaceholder')" clearable
                               @update:value="handleMilliTimestampChange"/>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyDateTime">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyDateTime">{{ t('common.copy') }}</n-button>
               </n-input-group>
             </div>
           </div>
@@ -49,7 +50,7 @@
           <n-divider dashed class="my-12" />
 
           <div class="tool-block">
-            <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <div class="flex-shrink-0 w-full min-h-8 flex flex-wrap items-center gap-2 mb-2">
               <n-tag size="large" type="success">
                 {{ t('tool.time.intervalCalc') }}
               </n-tag>
@@ -58,48 +59,47 @@
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.startTime') }}</n-input-group-label>
+                <n-input-group-label class="time-field-label">{{ t('tool.time.startTime') }}</n-input-group-label>
                 <n-date-picker
                   v-model:value="intervalStart"
                   type="datetime"
-                  :style="{ flex: 1 }"
+                  class="time-flex-control"
                   :placeholder="t('tool.time.startDateTimePlaceholder')"
                   clearable
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalStart">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyIntervalStart">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.endTime') }}</n-input-group-label>
+                <n-input-group-label class="time-field-label">{{ t('tool.time.endTime') }}</n-input-group-label>
                 <n-date-picker
                   v-model:value="intervalEnd"
                   type="datetime"
-                  :style="{ flex: 1 }"
+                  class="time-flex-control"
                   :placeholder="t('tool.time.endDateTimePlaceholder')"
                   clearable
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalEnd">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyIntervalEnd">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.intervalTime') }}</n-input-group-label>
+                <n-input-group-label class="time-field-label">{{ t('tool.time.intervalTime') }}</n-input-group-label>
                 <n-input
                   :value="intervalResult"
                   readonly
-                  :style="{ flex: 1 }"
+                  class="time-flex-control"
                   :placeholder="t('tool.time.intervalPlaceholder')"
                 />
                 <n-select
                   v-model:value="intervalUnit"
                   :options="intervalUnitOptions"
                   class="interval-unit-select"
-                  :style="{ width: '90px' }"
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalResult">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyIntervalResult">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label class="interval-format-label" :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.formatted') }}</n-input-group-label>
+                <n-input-group-label class="interval-format-label time-field-label">{{ t('tool.time.formatted') }}</n-input-group-label>
                 <div class="shift-fields interval-format-fields">
                   <div class="shift-field-item" v-for="item in intervalFormatItems" :key="item.key">
                     <n-input-group>
@@ -112,7 +112,7 @@
                     </n-input-group>
                   </div>
                 </div>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyIntervalFormattedResult">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyIntervalFormattedResult">{{ t('common.copy') }}</n-button>
               </n-input-group>
             </div>
           </div>
@@ -120,7 +120,7 @@
           <n-divider dashed class="my-12" />
 
           <div class="tool-block">
-            <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+            <div class="flex-shrink-0 w-full min-h-8 flex flex-wrap items-center gap-2 mb-2">
               <n-tag size="large" type="info">
                 {{ t('tool.time.shiftCalc') }}
               </n-tag>
@@ -129,15 +129,15 @@
             </div>
             <div class="space-y-4">
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.startTime') }}</n-input-group-label>
+                <n-input-group-label class="time-field-label">{{ t('tool.time.startTime') }}</n-input-group-label>
                 <n-date-picker
                   v-model:value="shiftStart"
                   type="datetime"
-                  :style="{ flex: 1 }"
+                  class="time-flex-control"
                   :placeholder="t('tool.time.startDateTimePlaceholder')"
                   clearable
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftStart">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyShiftStart">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
@@ -145,7 +145,6 @@
                   v-model:value="shiftDirection"
                   :options="shiftDirectionOptions"
                   class="shift-direction-select"
-                  :style="{ width: '100px' }"
                 />
                 <div class="shift-fields">
                   <div class="shift-field-item" v-for="item in shiftItems" :key="item.key">
@@ -157,25 +156,25 @@
                         :step="1"
                         :precision="0"
                         placeholder="0"
-                        :style="{ flex: 1 }"
+                        class="time-flex-control"
                         @update:value="(val) => handleShiftValueChange(item.key, val)"
                       />
                       <n-input-group-label class="shift-unit-label">{{ item.label }}</n-input-group-label>
                     </n-input-group>
                   </div>
                 </div>
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftInfo">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyShiftInfo">{{ t('common.copy') }}</n-button>
               </n-input-group>
 
               <n-input-group class="w-full">
-                <n-input-group-label :style="{ width: '100px', 'text-align': 'center' }">{{ t('tool.time.resultTime') }}</n-input-group-label>
+                <n-input-group-label class="time-field-label">{{ t('tool.time.resultTime') }}</n-input-group-label>
                 <n-input
                   :value="shiftResult"
                   readonly
-                  :style="{ flex: 1 }"
+                  class="time-flex-control"
                   :placeholder="t('tool.time.shiftResultPlaceholder')"
                 />
-                <n-button type="primary" ghost :style="{ width: '80px', 'text-align': 'center' }" @click="copyShiftResult">{{ t('common.copy') }}</n-button>
+                <n-button type="primary" ghost class="time-action-button" @click="copyShiftResult">{{ t('common.copy') }}</n-button>
               </n-input-group>
             </div>
           </div>
@@ -254,8 +253,8 @@ const intervalFormatItems = computed(() => [
   { key: 'year', label: t('tool.time.units.year') },
   { key: 'month', label: t('tool.time.units.month') },
   { key: 'day', label: t('tool.time.units.day') },
-  { key: 'hour', label: t('tool.time.units.hourShort') },
-  { key: 'minute', label: t('tool.time.units.minuteShort') },
+  { key: 'hour', label: t('tool.time.units.hour') },
+  { key: 'minute', label: t('tool.time.units.minute') },
   { key: 'second', label: t('tool.time.units.second') },
 ]);
 
@@ -269,8 +268,8 @@ const shiftItems = computed(() => [
   { key: 'year', label: t('tool.time.units.year') },
   { key: 'month', label: t('tool.time.units.month') },
   { key: 'day', label: t('tool.time.units.day') },
-  { key: 'hour', label: t('tool.time.units.hourShort') },
-  { key: 'minute', label: t('tool.time.units.minuteShort') },
+  { key: 'hour', label: t('tool.time.units.hour') },
+  { key: 'minute', label: t('tool.time.units.minute') },
   { key: 'second', label: t('tool.time.units.second') },
 ]);
 const shiftValues = reactive({
@@ -280,6 +279,22 @@ const shiftValues = reactive({
   hour: null,
   minute: null,
   second: null,
+});
+const timeFieldLabelKeys = [
+  'tool.time.inputTime',
+  'tool.time.timestampSeconds',
+  'tool.time.timestampMilliseconds',
+  'tool.time.date',
+  'tool.time.dateTime',
+  'tool.time.startTime',
+  'tool.time.endTime',
+  'tool.time.intervalTime',
+  'tool.time.formatted',
+  'tool.time.resultTime',
+];
+const timeFieldLabelWidth = computed(() => {
+  const maxLength = timeFieldLabelKeys.reduce((max, key) => Math.max(max, t(key).length), 0);
+  return `${Math.min(180, Math.max(100, maxLength * 8 + 28))}px`;
 });
 
 const intervalResult = computed(() => {
@@ -568,6 +583,9 @@ function parseInputTime(value) {
 function copyTimestamp() {
   copyToClipboard(timestamp.value.toString());
 }
+function copyInputTime() {
+  copyToClipboard(inputTime.value?.toString() || '');
+}
 function copyMilliTimestamp() {
   copyToClipboard(milliTimestamp.value.toString());
 }
@@ -626,7 +644,7 @@ function formatDuration(startTime, endTime) {
   if (parts.months) resultParts.push(formatDurationPart(parts.months, t('tool.time.units.month')));
   if (parts.days) resultParts.push(formatDurationPart(parts.days, t('tool.time.units.day')));
   if (parts.hours) resultParts.push(formatDurationPart(parts.hours, t('tool.time.units.hour')));
-  if (parts.minutes) resultParts.push(formatDurationPart(parts.minutes, t('tool.time.units.minuteShort')));
+  if (parts.minutes) resultParts.push(formatDurationPart(parts.minutes, t('tool.time.units.minute')));
   if (parts.seconds) resultParts.push(formatDurationPart(parts.seconds, t('tool.time.units.second')));
 
   return resultParts.length ? joinDurationParts(resultParts) : formatDurationPart(0, t('tool.time.units.second'));
@@ -703,10 +721,63 @@ function toNonNegativeInteger(val) {
 </script>
 
 <style>
+.time-field-label {
+  width: var(--time-field-label-width);
+  min-width: var(--time-field-label-width);
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.time-flex-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.time-action-button {
+  min-width: max-content;
+  padding-left: 14px;
+  padding-right: 14px;
+  text-align: center;
+}
+
+.interval-unit-select,
+.shift-direction-select {
+  flex: 0 0 auto;
+}
+
+.interval-unit-select {
+  width: 130px;
+  min-width: 130px;
+}
+
+.shift-direction-select {
+  width: var(--time-field-label-width);
+  min-width: var(--time-field-label-width);
+}
+
+.interval-unit-select .n-base-selection,
+.shift-direction-select .n-base-selection {
+  min-width: max-content;
+}
+
+.shift-direction-select .n-base-selection {
+  width: 100%;
+}
+
+.interval-unit-select .n-base-selection-label,
+.interval-unit-select .n-base-selection-placeholder,
+.shift-direction-select .n-base-selection-label,
+.shift-direction-select .n-base-selection-placeholder {
+  padding-left: 12px;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+
 .shift-fields {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: 0;
   align-items: center;
   margin-left: -1px;
@@ -779,9 +850,10 @@ function toNonNegativeInteger(val) {
 }
 
 .shift-unit-label {
-  min-width: 32px;
+  min-width: max-content;
   text-align: center;
   padding-left: 8px;
   padding-right: 8px;
+  white-space: nowrap;
 }
 </style>

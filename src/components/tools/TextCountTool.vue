@@ -97,14 +97,14 @@ function copySource() {
     <SplitPanel :default-size="0.75">
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="warning">{{ t('common.input') }}</n-tag>
             <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
             <n-button @click="showExample">{{ t('common.example') }}</n-button>
             <n-button @click="clearAll">{{ t('common.clear') }}</n-button>
             <n-button @click="copySource">{{ t('common.copy') }}</n-button>
           </div>
-          <div class="w-full h-full text-xl">
+          <div class="flex-1 min-h-0 w-full text-xl">
             <n-input
               v-model:value="source"
               type="textarea"
@@ -117,7 +117,7 @@ function copySource() {
 
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="success">{{ t('tool.textCount.stats') }}</n-tag>
           </div>
           <div class="flex-1 overflow-auto space-y-2 pr-1">

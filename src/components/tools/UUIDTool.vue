@@ -166,12 +166,12 @@ onMounted(() => {
     <SplitPanel>
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-3">
+          <div class="lk-toolbar lk-toolbar--compact">
             <n-tag size="large" type="warning">{{ t('tool.uuid.generate') }}</n-tag>
             <n-select
               v-model:value="version"
               :options="versionOptions"
-              :style="{ width: '80px' }"
+              class="lk-fit-select"
             />
             <n-input-number
               v-model:value="count"
@@ -188,7 +188,7 @@ onMounted(() => {
             <n-button @click="copyAll">{{ t('common.copy') }}</n-button>
             <n-button @click="takeOne">{{ t('tool.uuid.takeOne') }}</n-button>
           </div>
-          <div class="flex-1 w-full overflow-hidden">
+          <div class="flex-1 min-h-0 w-full overflow-hidden">
             <n-input
               :value="uuidText"
               type="textarea"
@@ -202,15 +202,16 @@ onMounted(() => {
 
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-3">
+          <div class="lk-toolbar lk-toolbar--compact">
             <n-tag size="large" type="success">{{ t('tool.uuid.parse') }}</n-tag>
             <n-input
+              class="uuid-parse-input"
               v-model:value="parseInput"
               :placeholder="t('tool.uuid.parsePlaceholder')"
               clearable
             />
           </div>
-          <div class="flex-1 w-full overflow-auto text-sm lk-result-surface lk-result-surface-padded">
+          <div class="flex-1 min-h-0 w-full overflow-auto text-sm lk-result-surface lk-result-surface-padded">
             <div v-if="!parseResult" class="text-gray-500">{{ t('tool.uuid.emptyParse') }}</div>
             <div v-else-if="!parseResult.valid" class="space-y-2">
               <div class="text-red-500">{{ parseResult.message }}</div>
@@ -231,4 +232,9 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.uuid-parse-input {
+  flex: 1 1 320px;
+  min-width: min(100%, 320px);
+}
+</style>
