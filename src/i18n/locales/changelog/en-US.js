@@ -1,5 +1,17 @@
 export default [
   {
+    date: '2026.06.03',
+    version: 'v0.9.8',
+    added: [
+      'Added bilingual i18n support, allowing interface text and changelog entries to switch between Chinese and English.',
+      'Localized tool example data so Chinese and English environments show matching examples.',
+    ],
+    optimized: [
+      'Added surface theme variables and Naive UI overrides to unify component visuals in light/dark mode.',
+      'Improved responsive i18n layout behavior for narrow screens and longer translated copy.',
+    ],
+  },
+  {
     date: '2026.06.02',
     version: 'v0.9.7',
     added: [
