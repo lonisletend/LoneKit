@@ -1,5 +1,14 @@
 export default [
   {
+    date: '2026.06.04',
+    version: 'v0.9.9',
+    added: [
+      'Added Text Process Tool with a side-by-side input/output layout and local scripts that chain atomic text operations.',
+      'Text processing scripts now support whole-text, line-level, and join/split operation groups, including prefixes/suffixes, line numbering, empty-line removal, line sorting, line deduplication, line joining, delimiter splitting, and space compression.',
+      'Text processing script settings now support local saving, multi-operation pipelines, two-level cascader operation selection, per-script collapse/expand, and collapse all/expand all.',
+    ],
+  },
+  {
     date: '2026.06.03',
     version: 'v0.9.8',
     added: [

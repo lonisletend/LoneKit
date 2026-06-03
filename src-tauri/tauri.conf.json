@@ -19,7 +19,7 @@
   },
   "productName": "LoneKit",
   "mainBinaryName": "LoneKit",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "identifier": "com.lonestack.lonekit",
   "plugins": {
     "updater": {
