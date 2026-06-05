@@ -1,5 +1,15 @@
 export default [
   {
+    date: '2026.06.05',
+    version: 'v0.9.10',
+    optimized: [
+      'Optimized frontend chunk splitting to reduce large dependencies preloaded on the first screen and improve home page startup speed.',
+      'Changed locale messages to load on demand: only the current locale is loaded at startup, and the target locale loads when switching languages.',
+      'Preloaded high-frequency tools such as Common/JSON/XML formatters after the home page is ready and the browser is idle, reducing first-open latency.',
+      'Cleaned up tool dependency loading boundaries: the barcode component now loads locally, while the Excel export dependency remains loaded only when exporting.',
+    ],
+  },
+  {
     date: '2026.06.04',
     version: 'v0.9.9',
     added: [
