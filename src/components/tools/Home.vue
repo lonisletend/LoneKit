@@ -67,12 +67,17 @@
 <script setup>
 
 import { NTabs, NTabPane, NTimeline, NTimelineItem, NTag } from "naive-ui";
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
+import { preloadToolsAfterHomeReady } from '../../utils/preloadTools';
 
 const { t, tm, rt } = useI18n();
 const changeLogs = computed(() => tm('home.changeLogs'));
+
+onMounted(() => {
+  preloadToolsAfterHomeReady();
+});
 
 </script>
 
