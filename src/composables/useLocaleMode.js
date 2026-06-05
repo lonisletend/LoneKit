@@ -1,9 +1,10 @@
 import { computed, ref, watch } from "vue";
 import { dateEnUS, dateZhCN, enUS, zhCN } from "naive-ui";
-import { i18n, LOCALE_STORAGE_KEY, normalizeLocale } from "../i18n";
+import { i18n, loadLocaleMessages, LOCALE_STORAGE_KEY, normalizeLocale } from "../i18n";
 
 const localeMode = ref(normalizeLocale(i18n.global.locale.value));
 let initialized = false;
+let localeRequestId = 0;
 
 const localeOptions = [
   { labelKey: "common.chinese", value: "zh-CN" },
@@ -28,10 +29,15 @@ function initLocaleMode() {
 
   watch(
     localeMode,
-    (locale) => {
+    async (locale) => {
       const normalizedLocale = normalizeLocale(locale);
       if (normalizedLocale !== localeMode.value) {
         localeMode.value = normalizedLocale;
+        return;
+      }
+      const requestId = ++localeRequestId;
+      await loadLocaleMessages(normalizedLocale);
+      if (requestId !== localeRequestId) {
         return;
       }
       i18n.global.locale.value = normalizedLocale;

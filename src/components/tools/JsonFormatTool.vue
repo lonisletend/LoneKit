@@ -75,7 +75,7 @@
 
 <script setup>
 
-import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {NInput, NInputGroup, NSelect, NTag, NButton, NDropdown, NIcon} from "naive-ui";
 import { 
@@ -84,12 +84,12 @@ import {
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
 import { ChevronDownOutline } from '@vicons/ionicons5';
-import jsonpath from 'jsonpath';
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
 import { useDataTransfer } from '../../composables/useDataTransfer';
 import { useThemeMode } from "../../composables/useThemeMode";
-import { JsonFormat } from 'lone-format';
+import JsonFormat from 'lone-format/json-format';
+import 'lone-format/style.css';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
@@ -105,7 +105,6 @@ const props = defineProps({
 
 const customJsonFormatRef = ref(null)
 const sourceJson = ref();
-const jsonObject = ref();
 const filterType = ref('jsonpath');
 const filterExpression = ref('');
 const isSorted = ref(false);
@@ -131,18 +130,7 @@ watch(filterType, () => {
 });
 
 function handleSourceJsonChange(val) {
-  try {
-    if (sourceJson.value.trim() === '') {
-      throw new Error('The input is empty!')
-    }
-    if (filterExpression.value) {
-      jsonObject.value = jsonpath.query(JSON.parse(sourceJson.value), filterExpression.value);
-    } else {
-      jsonObject.value = JSON.parse(sourceJson.value);
-    }
-  } catch (error) {
-    jsonObject.value = error;
-  }
+  sourceJson.value = val ?? '';
 }
 
 async function readClipboard() {

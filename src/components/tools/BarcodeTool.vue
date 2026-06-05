@@ -8,6 +8,7 @@ import { useCommon } from '../../composables/useCommon';
 import { useSyncedScroll } from '../../composables/useSyncedScroll';
 import { useAutoAppendEntries } from '../../composables/useAutoAppendEntries';
 import JsBarcode from 'jsbarcode';
+import VueBarcode from '@chenfengyuan/vue-barcode';
 
 const { notify, readFromClipboard, copyCanvasImage, exportCanvasToExcel } = useCommon();
 const { t, tm } = useI18n();
@@ -288,7 +289,7 @@ function exportToExcel() {
                     <n-button size="small" @click="copyCanvasImage(`barcode-${entry.id}`, t('tool.generator.barcodeImageCopied'))">{{ t('common.copy') }}</n-button>
                   </div>
                   <div class="flex-1 flex justify-center items-center overflow-hidden" :id="`barcode-${entry.id}`">
-                    <vue-barcode :key="`${entry.id}-${barcodeFormat}`" :value="entry.content" :options="{ format: barcodeFormat, displayValue: false, lineColor: color, height: barcodeSize.height, width: barcodeSize.width }"></vue-barcode>
+                    <VueBarcode :key="`${entry.id}-${barcodeFormat}`" :value="entry.content" :options="{ format: barcodeFormat, displayValue: false, lineColor: color, height: barcodeSize.height, width: barcodeSize.width }" />
                   </div>
                 </template>
                 <div v-else class="flex-1 flex flex-col justify-center items-center text-red-400 text-sm">

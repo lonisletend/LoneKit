@@ -11,7 +11,8 @@ import {
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon'
 import { useThemeMode } from "../../composables/useThemeMode";
-import { SqlFormat } from 'lone-format'
+import SqlFormat from 'lone-format/sql-format'
+import 'lone-format/style.css';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { t, tm } = useI18n();

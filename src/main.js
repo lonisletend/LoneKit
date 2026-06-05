@@ -2,18 +2,20 @@ import { createApp } from "vue";
 import "./style.css";
 import App from "./App.vue";
 import router from "./router";
-import { i18n } from "./i18n";
-import VueBarcode from '@chenfengyuan/vue-barcode';
-import 'lone-format/style.css';
+import { getInitialLocale, i18n, loadLocaleMessages } from "./i18n";
 
-const app = createApp(App);
-app.use(router);
-app.use(i18n);
+async function bootstrap() {
+  await loadLocaleMessages(getInitialLocale());
 
-const meta = document.createElement('meta')
-meta.name = 'naive-ui-style'
-document.head.appendChild(meta)
+  const app = createApp(App);
+  app.use(router);
+  app.use(i18n);
 
-app.component(VueBarcode.name, VueBarcode)
+  const meta = document.createElement('meta')
+  meta.name = 'naive-ui-style'
+  document.head.appendChild(meta)
 
-app.mount("#app");
+  app.mount("#app");
+}
+
+bootstrap();

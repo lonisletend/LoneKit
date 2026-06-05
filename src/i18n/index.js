@@ -1,14 +1,12 @@
 import { createI18n } from "vue-i18n";
-import zhCN from "./locales/zh-CN";
-import enUS from "./locales/en-US";
 
 export const LOCALE_STORAGE_KEY = "lonekit.locale";
 export const DEFAULT_LOCALE = "zh-CN";
 export const SUPPORTED_LOCALES = ["zh-CN", "en-US"];
 
-const messages = {
-  "zh-CN": zhCN,
-  "en-US": enUS,
+const localeLoaders = {
+  "zh-CN": () => import("./locales/zh-CN"),
+  "en-US": () => import("./locales/en-US"),
 };
 
 export function normalizeLocale(value) {
@@ -42,5 +40,24 @@ export const i18n = createI18n({
   globalInjection: true,
   locale: getInitialLocale(),
   fallbackLocale: DEFAULT_LOCALE,
-  messages,
+  messages: {},
 });
+
+const loadedLocales = new Set();
+
+export async function loadLocaleMessages(locale) {
+  const normalizedLocale = normalizeLocale(locale);
+  if (loadedLocales.has(normalizedLocale)) {
+    return normalizedLocale;
+  }
+
+  const loader = localeLoaders[normalizedLocale];
+  if (!loader) {
+    return DEFAULT_LOCALE;
+  }
+
+  const messages = await loader();
+  i18n.global.setLocaleMessage(normalizedLocale, messages.default);
+  loadedLocales.add(normalizedLocale);
+  return normalizedLocale;
+}

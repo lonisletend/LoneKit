@@ -137,7 +137,9 @@ import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
 import { useDataTransfer } from '../../composables/useDataTransfer';
 import { useThemeMode } from "../../composables/useThemeMode";
-import { JsonFormat, XmlFormat } from 'lone-format'
+import JsonFormat from 'lone-format/json-format'
+import XmlFormat from 'lone-format/xml-format'
+import 'lone-format/style.css';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
 const { send } = useDataTransfer();
