@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { NButton, NCascader, NIcon, NInput, NModal, NSelect, NTag } from "naive-ui";
+import { NButton, NCascader, NDropdown, NIcon, NInput, NModal, NSelect, NTag } from "naive-ui";
 import {
   Add24Regular as AddIcon,
   ArrowMaximizeVertical24Regular as ExpandAllIcon,
@@ -12,8 +12,10 @@ import {
   Play24Regular as PlayIcon,
   Settings24Regular as SettingsIcon,
 } from "@vicons/fluent";
+import { ChevronDownOutline } from "@vicons/ionicons5";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
+import { useDataTransfer } from "../../composables/useDataTransfer";
 
 const STORAGE_KEY = "lonekit.textProcess.scripts";
 
@@ -58,6 +60,7 @@ const OP_TYPES = [
 
 const { t, tm } = useI18n();
 const { notify, readFromClipboard, copyToClipboard } = useCommon();
+const { send } = useDataTransfer();
 
 const source = ref("");
 const result = ref("");
@@ -277,6 +280,40 @@ function copyResult() {
   copyToClipboard(result.value);
 }
 
+function sendTextToDiff(text) {
+  if (!text) {
+    notify("warning", t("tool.noSendableContent"));
+    return;
+  }
+
+  send("DiffTool", text);
+  notify("success", t("tool.sentToDiff"));
+}
+
+function sendSourceToDiff() {
+  sendTextToDiff(source.value);
+}
+
+function sendResultToDiff() {
+  sendTextToDiff(result.value);
+}
+
+const sourceMoreOptions = computed(() => [
+  { label: t("tool.sendToDiff"), key: "diff" },
+]);
+
+const resultMoreOptions = computed(() => [
+  { label: t("tool.sendToDiff"), key: "diff" },
+]);
+
+function handleSourceMoreSelect(key) {
+  if (key === "diff") sendSourceToDiff();
+}
+
+function handleResultMoreSelect(key) {
+  if (key === "diff") sendResultToDiff();
+}
+
 function openSettings() {
   editingScripts.value = scripts.value.map((script, index) => ({
     ...normalizeScript(script, index),
@@ -339,6 +376,13 @@ function saveSettings() {
             <n-button @click="showExample">{{ t('common.example') }}</n-button>
             <n-button @click="clearAll">{{ t('common.clear') }}</n-button>
             <n-button @click="copySource">{{ t('common.copy') }}</n-button>
+            <n-dropdown :options="sourceMoreOptions" @select="handleSourceMoreSelect">
+              <n-button>
+                <template #icon>
+                  <n-icon :component="ChevronDownOutline" />
+                </template>
+              </n-button>
+            </n-dropdown>
           </div>
           <div class="flex-1 min-h-0 w-full text-xl">
             <n-input
@@ -368,6 +412,13 @@ function saveSettings() {
               {{ t('tool.textProcess.execute') }}
             </n-button>
             <n-button @click="copyResult">{{ t('common.copy') }}</n-button>
+            <n-dropdown :options="resultMoreOptions" @select="handleResultMoreSelect">
+              <n-button>
+                <template #icon>
+                  <n-icon :component="ChevronDownOutline" />
+                </template>
+              </n-button>
+            </n-dropdown>
             <n-button class="text-process-settings-button" circle :title="t('tool.textProcess.settings')" @click="openSettings">
               <template #icon>
                 <n-icon :component="SettingsIcon" />
@@ -474,6 +525,7 @@ function saveSettings() {
 <style scoped>
 .text-process-toolbar {
   min-height: 34px;
+  flex-wrap: wrap;
 }
 
 .text-process-script-select {

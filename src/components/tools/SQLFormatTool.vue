@@ -1,20 +1,23 @@
 <script setup>
 
-import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import {NButton, NInput, NSelect, NTag, useNotification} from "naive-ui";
+import {NButton, NDropdown, NIcon, NInput, NSelect, NTag} from "naive-ui";
 import { 
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
+import { ChevronDownOutline } from '@vicons/ionicons5';
 
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon'
+import { useDataTransfer } from '../../composables/useDataTransfer';
 import { useThemeMode } from "../../composables/useThemeMode";
 import SqlFormat from 'lone-format/sql-format'
 import 'lone-format/style.css';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { send } = useDataTransfer();
 const { t, tm } = useI18n();
 
 defineOptions({
@@ -94,6 +97,32 @@ function collapseAll() {
   customSqlFormatRef.value?.collapseAll();
 }
 
+async function sendToDiff() {
+  if (!hasSourceContent.value) {
+    notify('warning', t('tool.noSendableContent'))
+    return
+  }
+
+  await customSqlFormatRef.value?.copySql();
+
+  const sql = await readFromClipboard();
+  if (!sql) {
+    notify('warning', t('tool.noSendableContent'))
+    return
+  }
+
+  send('DiffTool', sql)
+  notify('success', t('tool.sentToDiff'))
+}
+
+const moreOptions = computed(() => [
+  { label: t('tool.sendToDiff'), key: 'diff' }
+])
+
+function handleMoreSelect(key) {
+  if (key === 'diff') sendToDiff()
+}
+
 
 </script>
 
@@ -132,6 +161,11 @@ function collapseAll() {
             <n-button @click="expandAll">
               <template #icon> <component :is="ExpandIcon" /> </template>
             </n-button>
+            <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+              <n-button>
+                <template #icon><n-icon :component="ChevronDownOutline" /></template>
+              </n-button>
+            </n-dropdown>
           </div>
           <div class="flex-1 min-h-0 w-full overflow-hidden text-lg lk-result-surface">
             <SqlFormat
