@@ -298,6 +298,9 @@ export default {
       deleteOperation: "Delete operation",
       operationPlaceholder: "Select operation",
       paramPlaceholder: "Parameter (leave empty for parameterless operations)",
+      searchPlaceholder: "Find text",
+      regexPatternPlaceholder: "Regex pattern, e.g. /foo/gi",
+      replacementPlaceholder: "Replace with",
       noScriptSelected: "Create and select a script first",
       saved: "Scripts saved",
       save: "Save",
@@ -310,6 +313,8 @@ export default {
       operations: {
         prefix: "Prefix",
         suffix: "Suffix",
+        stringReplace: "String Replace",
+        regexReplace: "Regex Replace",
         linePrefix: "Line Prefix",
         lineSuffix: "Line Suffix",
         lineSuffixExceptLast: "Line Suffix (Except Last)",

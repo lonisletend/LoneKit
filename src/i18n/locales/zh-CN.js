@@ -298,6 +298,9 @@ export default {
       deleteOperation: "删除操作",
       operationPlaceholder: "选择原子操作",
       paramPlaceholder: "参数内容（无参数操作可留空）",
+      searchPlaceholder: "查找内容",
+      regexPatternPlaceholder: "正则表达式，如：/foo/gi",
+      replacementPlaceholder: "替换为",
       noScriptSelected: "请先创建并选择脚本",
       saved: "脚本已保存",
       save: "保存",
@@ -310,6 +313,8 @@ export default {
       operations: {
         prefix: "前缀",
         suffix: "后缀",
+        stringReplace: "字符串替换",
+        regexReplace: "正则替换",
         linePrefix: "行前缀",
         lineSuffix: "行后缀",
         lineSuffixExceptLast: "行后缀（忽略尾行）",

@@ -21,6 +21,8 @@ const STORAGE_KEY = "lonekit.textProcess.scripts";
 
 const OP_PREFIX = "prefix";
 const OP_SUFFIX = "suffix";
+const OP_STRING_REPLACE = "stringReplace";
+const OP_REGEX_REPLACE = "regexReplace";
 const OP_LINE_PREFIX = "linePrefix";
 const OP_LINE_SUFFIX = "lineSuffix";
 const OP_LINE_SUFFIX_EXCEPT_LAST = "lineSuffixExceptLast";
@@ -40,6 +42,8 @@ const OP_ADD_EMPTY_LINE_SPACING = "addEmptyLineSpacing";
 const OP_TYPES = [
   OP_PREFIX,
   OP_SUFFIX,
+  OP_STRING_REPLACE,
+  OP_REGEX_REPLACE,
   OP_LINE_PREFIX,
   OP_LINE_SUFFIX,
   OP_LINE_SUFFIX_EXCEPT_LAST,
@@ -76,6 +80,8 @@ const operationOptions = computed(() => [
     children: [
       { label: t("tool.textProcess.operations.prefix"), value: OP_PREFIX },
       { label: t("tool.textProcess.operations.suffix"), value: OP_SUFFIX },
+      { label: t("tool.textProcess.operations.stringReplace"), value: OP_STRING_REPLACE },
+      { label: t("tool.textProcess.operations.regexReplace"), value: OP_REGEX_REPLACE },
     ],
   },
   {
@@ -122,11 +128,12 @@ function createId(prefix = "id") {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function createOperation(type = "", value = "") {
+function createOperation(type = "", value = "", value2 = "") {
   return {
     id: createId("operation"),
     type,
     value,
+    value2,
   };
 }
 
@@ -138,9 +145,17 @@ function createScript(name = "") {
   };
 }
 
+function isReplaceOperationType(type) {
+  return type === OP_STRING_REPLACE || type === OP_REGEX_REPLACE;
+}
+
 function normalizeOperation(operation) {
   if (!OP_TYPES.includes(operation?.type)) return null;
-  return createOperation(operation.type, String(operation?.value ?? ""));
+  return createOperation(
+    operation.type,
+    String(operation?.value ?? ""),
+    String(operation?.value2 ?? "")
+  );
 }
 
 function normalizeScript(script, index) {
@@ -188,9 +203,46 @@ function parsePositiveInteger(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function findLastUnescapedSlash(value) {
+  for (let index = value.length - 1; index > 0; index -= 1) {
+    if (value[index] !== "/") continue;
+
+    let backslashCount = 0;
+    for (let cursor = index - 1; cursor >= 0 && value[cursor] === "\\"; cursor -= 1) {
+      backslashCount += 1;
+    }
+    if (backslashCount % 2 === 0) return index;
+  }
+  return -1;
+}
+
+function normalizeRegexFlags(flags) {
+  return Array.from(new Set(`${flags || ""}g`.split(""))).join("");
+}
+
+function parseRegexReplacement(value) {
+  if (!value) return null;
+
+  if (!value.startsWith("/")) {
+    return {
+      pattern: value,
+      flags: "g",
+    };
+  }
+
+  const lastSlashIndex = findLastUnescapedSlash(value);
+  if (lastSlashIndex <= 0) return null;
+
+  return {
+    pattern: value.slice(1, lastSlashIndex),
+    flags: normalizeRegexFlags(value.slice(lastSlashIndex + 1)),
+  };
+}
+
 function applyOperation(input, operation) {
   const text = String(input ?? "");
   const value = String(operation.value ?? "");
+  const value2 = String(operation.value2 ?? "");
   if (!OP_TYPES.includes(operation.type)) return text;
 
   switch (operation.type) {
@@ -198,6 +250,20 @@ function applyOperation(input, operation) {
       return `${value}${text}`;
     case OP_SUFFIX:
       return `${text}${value}`;
+    case OP_STRING_REPLACE: {
+      return value ? text.split(value).join(value2) : text;
+    }
+    case OP_REGEX_REPLACE: {
+      const parsed = parseRegexReplacement(value);
+      if (!parsed?.pattern) return text;
+
+      try {
+        return text.replace(new RegExp(parsed.pattern, parsed.flags), value2);
+      } catch (error) {
+        console.warn("[text-process] invalid regex replacement", error);
+        return text;
+      }
+    }
     case OP_LINE_PREFIX:
       return splitLines(text).map((line) => `${value}${line}`).join("\n");
     case OP_LINE_SUFFIX:
@@ -484,7 +550,12 @@ function saveSettings() {
             </div>
 
             <div v-if="!script.collapsed" class="space-y-2">
-              <div v-for="(operation, operationIndex) in script.operations" :key="operation.id" class="text-process-operation-row">
+              <div
+                v-for="(operation, operationIndex) in script.operations"
+                :key="operation.id"
+                class="text-process-operation-row"
+                :class="{ 'text-process-operation-row--dual': isReplaceOperationType(operation.type) }"
+              >
                 <span class="text-xs text-slate-500 dark:text-slate-400 tabular-nums">{{ operationIndex + 1 }}</span>
                 <n-cascader
                   v-model:value="operation.type"
@@ -494,7 +565,14 @@ function saveSettings() {
                   :placeholder="t('tool.textProcess.operationPlaceholder')"
                   class="text-process-operation-cascader"
                 />
-                <n-input v-model:value="operation.value" :placeholder="t('tool.textProcess.paramPlaceholder')" />
+                <template v-if="isReplaceOperationType(operation.type)">
+                  <n-input
+                    v-model:value="operation.value"
+                    :placeholder="operation.type === OP_REGEX_REPLACE ? t('tool.textProcess.regexPatternPlaceholder') : t('tool.textProcess.searchPlaceholder')"
+                  />
+                  <n-input v-model:value="operation.value2" :placeholder="t('tool.textProcess.replacementPlaceholder')" />
+                </template>
+                <n-input v-else v-model:value="operation.value" :placeholder="t('tool.textProcess.paramPlaceholder')" />
                 <n-button size="small" circle :title="t('tool.textProcess.deleteOperation')" @click="removeOperation(script, operation.id)">
                   <template #icon>
                     <n-icon :component="DeleteIcon" />
@@ -546,6 +624,10 @@ function saveSettings() {
   gap: 8px;
 }
 
+.text-process-operation-row--dual {
+  grid-template-columns: 24px 210px minmax(0, 1fr) minmax(0, 1fr) 34px;
+}
+
 .text-process-operation-cascader {
   width: 210px;
 }
@@ -561,6 +643,10 @@ function saveSettings() {
   }
 
   .text-process-operation-row {
+    grid-template-columns: 24px minmax(0, 1fr) 34px;
+  }
+
+  .text-process-operation-row--dual {
     grid-template-columns: 24px minmax(0, 1fr) 34px;
   }
 
