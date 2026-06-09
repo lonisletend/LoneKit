@@ -15,9 +15,6 @@ jobs:
       matrix:
         include:
           - platform: macos-latest
-            tauriTarget: universal-apple-darwin
-            rustTargets: aarch64-apple-darwin,x86_64-apple-darwin
-          - platform: macos-latest
             tauriTarget: aarch64-apple-darwin
             rustTargets: aarch64-apple-darwin
           - platform: macos-latest
