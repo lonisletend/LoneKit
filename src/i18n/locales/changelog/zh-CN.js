@@ -2,6 +2,7 @@ export default [
   {
     date: '2026.06.09',
     version: 'v0.9.13',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.13',
     optimized: [
       '更新浏览器 favicon 与 Tauri 桌面应用图标，并补齐 favicon、Apple Touch Icon 与 Web App Manifest 引用。',
       '移除默认 Vite/Tauri 示例图标资源，统一应用品牌图标展示。',
@@ -10,6 +11,7 @@ export default [
   {
     date: '2026.06.09',
     version: 'v0.9.12',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.12',
     optimized: [
       'GitHub Actions 发布流程改为自动读取当前版本的中英文更新日志，并写入 GitHub Release 与 latest.json notes，保证自动更新弹窗展示真实版本说明。',
     ],
@@ -20,6 +22,7 @@ export default [
   {
     date: '2026.06.09',
     version: 'v0.9.11',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.11',
     added: [
       'SQL 格式化与文本处理工具新增「发送到文本对比」，方便将格式化或处理后的文本直接送入文本对比工具。',
       '文本处理工具新增替换类操作，支持普通替换与正则替换，可加入文本处理流水线组合使用。',

@@ -2,6 +2,7 @@ export default [
   {
     date: '2026.06.09',
     version: 'v0.9.13',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.13',
     optimized: [
       'Updated the browser favicon and Tauri desktop app icons, and added favicon, Apple Touch Icon, and Web App Manifest references.',
       'Removed default Vite/Tauri sample icon assets so app branding is consistent.',
@@ -10,6 +11,7 @@ export default [
   {
     date: '2026.06.09',
     version: 'v0.9.12',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.12',
     optimized: [
       'GitHub Actions publishing now automatically reads the current version changelog in Chinese and English and writes it to GitHub Release plus latest.json notes, so updater dialogs show the real release notes.',
     ],
@@ -20,6 +22,7 @@ export default [
   {
     date: '2026.06.09',
     version: 'v0.9.11',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.11',
     added: [
       'Added "Send to Text Diff" actions to SQL Formatter and Text Process Tool, making it easier to compare formatted or processed text.',
       'Added replace operations to Text Process Tool, supporting direct replacement and regular-expression replacement in text processing pipelines.',
