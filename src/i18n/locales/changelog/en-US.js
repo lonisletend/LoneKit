@@ -1,6 +1,14 @@
 export default [
   {
     date: '2026.06.09',
+    version: 'v0.9.13',
+    optimized: [
+      'Updated the browser favicon and Tauri desktop app icons, and added favicon, Apple Touch Icon, and Web App Manifest references.',
+      'Removed default Vite/Tauri sample icon assets so app branding is consistent.',
+    ],
+  },
+  {
+    date: '2026.06.09',
     version: 'v0.9.12',
     optimized: [
       'GitHub Actions publishing now automatically reads the current version changelog in Chinese and English and writes it to GitHub Release plus latest.json notes, so updater dialogs show the real release notes.',

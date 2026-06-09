@@ -1,6 +1,14 @@
 export default [
   {
     date: '2026.06.09',
+    version: 'v0.9.13',
+    optimized: [
+      '更新浏览器 favicon 与 Tauri 桌面应用图标，并补齐 favicon、Apple Touch Icon 与 Web App Manifest 引用。',
+      '移除默认 Vite/Tauri 示例图标资源，统一应用品牌图标展示。',
+    ],
+  },
+  {
+    date: '2026.06.09',
     version: 'v0.9.12',
     optimized: [
       'GitHub Actions 发布流程改为自动读取当前版本的中英文更新日志，并写入 GitHub Release 与 latest.json notes，保证自动更新弹窗展示真实版本说明。',
