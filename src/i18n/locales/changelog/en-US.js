@@ -1,5 +1,22 @@
 export default [
   {
+    date: '2026.06.09',
+    version: 'v0.9.11',
+    added: [
+      'Added "Send to Text Diff" actions to SQL Formatter and Text Process Tool, making it easier to compare formatted or processed text.',
+      'Added replace operations to Text Process Tool, supporting direct replacement and regular-expression replacement in text processing pipelines.',
+    ],
+    optimized: [
+      'Upgraded lone-format to 0.16.1 to follow the latest formatter component behavior.',
+      'Changed the updater endpoint to GitHub Release latest.json and completed updater relaunch support after installation.',
+      'Changed macOS release packaging back to a universal build to avoid native aarch64 package signature issues and improve install reliability on Apple Silicon Macs.',
+      'In the Tauri desktop app, clipboard text read/write now prefers the native clipboard manager API, avoiding the extra macOS WebKit Paste confirmation popover.',
+    ],
+    fixed: [
+      'Fixed GitHub Actions npm install failures caused by stale package-lock tarball URLs.',
+    ],
+  },
+  {
     date: '2026.06.05',
     version: 'v0.9.10',
     optimized: [
