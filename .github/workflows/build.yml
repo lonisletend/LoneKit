@@ -53,6 +53,16 @@ jobs:
       - name: install frontend dependencies
         run: npm install
 
+      - name: Generate release notes
+        id: release_notes
+        shell: bash
+        run: |
+          {
+            echo 'body<<EOF'
+            node scripts/generate-release-notes.mjs
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +71,7 @@ jobs:
         with:
           tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseBody: ${{ steps.release_notes.outputs.body }}
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.tauriTarget != '' && format('--target {0}', matrix.tauriTarget) || '' }}
