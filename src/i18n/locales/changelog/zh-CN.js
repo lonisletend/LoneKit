@@ -1,5 +1,22 @@
 export default [
   {
+    date: '2026.06.09',
+    version: 'v0.9.11',
+    added: [
+      'SQL 格式化与文本处理工具新增「发送到文本对比」，方便将格式化或处理后的文本直接送入文本对比工具。',
+      '文本处理工具新增替换类操作，支持普通替换与正则替换，可加入文本处理流水线组合使用。',
+    ],
+    optimized: [
+      '升级 lone-format 到 0.16.1，跟进格式化组件最新行为。',
+      '更新自动更新地址为 GitHub Release latest.json，并补齐更新安装完成后的应用重启支持。',
+      'macOS 发布包改回 universal 构建，规避原生 aarch64 包签名异常导致的安装后无法打开问题，提升 Apple Silicon 设备安装可靠性。',
+      'Tauri 桌面端读写文本剪贴板时优先使用原生 clipboard manager API，避免 macOS WebKit 额外弹出 Paste 确认浮层。',
+    ],
+    fixed: [
+      '修复 package-lock 中旧版 npm tarball 地址导致 GitHub Actions npm install 失败的问题。',
+    ],
+  },
+  {
     date: '2026.06.05',
     version: 'v0.9.10',
     optimized: [

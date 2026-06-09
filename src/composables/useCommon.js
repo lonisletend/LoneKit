@@ -10,6 +10,10 @@ export function useCommon() {
   const notification = useNotification();
   const { t, locale } = useI18n();
 
+  function isTauriRuntime() {
+    return Boolean(globalThis.__TAURI_IPC__ || globalThis.isTauri);
+  }
+
   /**
    * 显示通知消息
    * @param {string} type - 通知类型: 'success' | 'error' | 'warning' | 'info'
@@ -37,16 +41,15 @@ export function useCommon() {
     }
 
     try {
-      // 优先使用 Web Clipboard API
-      if (navigator && navigator.clipboard) {
-        await navigator.clipboard.writeText(text);
+      // Tauri 剪贴板 API 不会触发 macOS WebKit 的 Paste 确认浮层。
+      if (isTauriRuntime()) {
+        await writeText(text.toString());
         notify('success', successMessage);
         return true;
       }
       
-      // Tauri 环境下使用 Tauri API
-      if (window.__TAURI_IPC__) {
-        await writeText(text.toString());
+      if (navigator && navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
         notify('success', successMessage);
         return true;
       }
@@ -66,14 +69,13 @@ export function useCommon() {
    */
   async function readClipboard() {
     try {
-      // 优先使用 Web Clipboard API
+      // Tauri 剪贴板 API 不会触发 macOS WebKit 的 Paste 确认浮层。
+      if (isTauriRuntime()) {
+        return await readText();
+      }
+
       if (navigator && navigator.clipboard) {
         return await navigator.clipboard.readText();
-      }
-      
-      // Tauri 环境下使用 Tauri API
-      if (window.__TAURI_IPC__) {
-        return await readText();
       }
 
       notify('error', t('common.clipboardUnavailable'));
