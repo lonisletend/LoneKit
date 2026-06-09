@@ -1,6 +1,16 @@
 export default [
   {
     date: '2026.06.09',
+    version: 'v0.9.12',
+    optimized: [
+      'GitHub Actions 发布流程改为自动读取当前版本的中英文更新日志，并写入 GitHub Release 与 latest.json notes，保证自动更新弹窗展示真实版本说明。',
+    ],
+    fixed: [
+      '修复 Tauri 桌面端未注册 OS 插件导致 macOS 自动更新能力检测失败、更新按钮退化为手动下载的问题。',
+    ],
+  },
+  {
+    date: '2026.06.09',
     version: 'v0.9.11',
     added: [
       'SQL 格式化与文本处理工具新增「发送到文本对比」，方便将格式化或处理后的文本直接送入文本对比工具。',
