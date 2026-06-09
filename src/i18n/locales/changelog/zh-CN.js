@@ -1,6 +1,14 @@
 export default [
   {
     date: '2026.06.09',
+    version: 'v0.9.14',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.14',
+    optimized: [
+      '优化浏览器 favicon 与 Tauri 桌面应用图标样式，提升多平台图标显示效果。',
+    ],
+  },
+  {
+    date: '2026.06.09',
     version: 'v0.9.13',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.13',
     optimized: [

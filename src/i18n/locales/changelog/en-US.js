@@ -1,6 +1,14 @@
 export default [
   {
     date: '2026.06.09',
+    version: 'v0.9.14',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.14',
+    optimized: [
+      'Refined the browser favicon and Tauri desktop app icon styling for better cross-platform display.',
+    ],
+  },
+  {
+    date: '2026.06.09',
     version: 'v0.9.13',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.13',
     optimized: [
