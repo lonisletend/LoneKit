@@ -1,6 +1,16 @@
 export default [
   {
     date: '2026.06.09',
+    version: 'v0.9.12',
+    optimized: [
+      'GitHub Actions publishing now automatically reads the current version changelog in Chinese and English and writes it to GitHub Release plus latest.json notes, so updater dialogs show the real release notes.',
+    ],
+    fixed: [
+      'Fixed macOS auto-update capability detection falling back to manual download because the Tauri OS plugin was not registered in the desktop app.',
+    ],
+  },
+  {
+    date: '2026.06.09',
     version: 'v0.9.11',
     added: [
       'Added "Send to Text Diff" actions to SQL Formatter and Text Process Tool, making it easier to compare formatted or processed text.',
