@@ -8,7 +8,7 @@ Desktop developer toolkit built with Tauri 2 + Vue 3.
 
 LoneKit brings together a range of commonly used features, including text formatting, encoding and decoding, QR codes and barcodes, text comparison, and date and time handling. Its aim is to consolidate frequently used tools into a lightweight, user-friendly desktop application. With the right set of tools, you can save five minutes a day.
 
-- Current version: `0.9.13`
+- Current version: `0.9.14`
 - Stack: `Tauri 2`, `Vue 3`, `Vite`, `Naive UI`, `Tailwind CSS`
 - Runtime: cross-platform desktop app (web frontend + Tauri/Rust shell)
 
