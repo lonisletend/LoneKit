@@ -1,23 +1,25 @@
 <script setup>
 
-import { computed, defineAsyncComponent, ref, watch } from "vue";
-import { NButton, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
+import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { NButton, NDropdown, NIcon, NInput, NInputGroup, NSelect, NTag } from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
+import { ChevronDownOutline } from '@vicons/ionicons5';
 
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
-
-const loadLoneFormat = () => Promise.all([
-  import('lone-format/lone-format.css'),
-  import('lone-format')
-]).then(([, m]) => m);
-const XmlFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.XmlFormat));
+import { useDataTransfer } from '../../composables/useDataTransfer';
+import { useThemeMode } from "../../composables/useThemeMode";
+import XmlFormat from 'lone-format/xml-format';
+import 'lone-format/style.css';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { send } = useDataTransfer();
+const { t, tm } = useI18n();
 
 const source = ref();
 const target = ref();
@@ -26,6 +28,8 @@ const filterType = ref('xpath');
 const filterExpression = ref('');
 const isSorted = ref(false);
 const hasSourceContent = computed(() => !!source.value?.trim());
+const { resolvedTheme } = useThemeMode();
+const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
 
 // 过滤类型选项
 const filterTypeOptions = [
@@ -50,7 +54,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  source.value = `<?xml version="1.0" encoding="UTF-8"?><!-- 这是图书馆的 XML 数据 --><library><!-- 第一本书：TypeScript --><book id="1" category="programming"><title lang="en">Learning TypeScript</title><author>Josh Goldberg</author><year>2022</year><price currency="USD">39.99</price><example><![CDATA[const add = (a, b) => a + b; console.log(add(2, 3)); // 5]]></example><publisher><name>O'Reilly Media</name><location>Sebastopol, CA</location></publisher><tags><tag>TypeScript</tag><tag>JavaScript</tag><tag>Web Development</tag></tags></book><!-- 第二本书：Vue.js --><book id="2" category="web"><title lang="en">Vue.js 3 Cookbook</title><author>Heitor Ramon Ribeiro</author><year>2023</year><price currency="USD">44.99</price><publisher><name>Packt Publishing</name><location>Birmingham, UK</location></publisher><tags><tag>Vue.js</tag><tag>Frontend</tag><tag>Framework</tag></tags></book></library>`;
+  source.value = tm('examples.xmlFormat');
   handleChange(source.value);
 }
 
@@ -69,7 +73,7 @@ function copySource() {
 
 async function copyValue() {
   await customXmlFormatRef.value?.copyXml()
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function executeFilter() {
@@ -117,31 +121,51 @@ function toggleSort() {
   }
 }
 
+async function sendToDiff() {
+  await customXmlFormatRef.value?.copyXml();
+
+  const xml = await readFromClipboard();
+  if (xml == null) {
+    notify('warning', t('tool.noSendableContent'))
+    return
+  }
+  send('DiffTool', xml)
+  notify('success', t('tool.sentToDiff'))
+}
+
+const moreOptions = computed(() => [
+  { label: t('tool.sendToDiff'), key: 'diff' }
+])
+
+function handleMoreSelect(key) {
+  if (key === 'diff') sendToDiff()
+}
+
 </script>
 
 <template>
   <SplitPanel>
     <template #left>
       <div class="h-full p-2 flex flex-col">
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-          <n-tag size="large" type="warning">输入</n-tag>
-          <n-button @click="readClipboard">剪贴板</n-button>
-          <n-button @click="showExample">示例</n-button>
-          <n-button @click="clear">清空</n-button>
-          <n-button @click="compressive">压缩</n-button>
-          <n-button @click="copySource">复制</n-button>
+        <div class="lk-toolbar mb-2">
+          <n-tag size="large" type="warning">{{ t('common.input') }}</n-tag>
+          <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+          <n-button @click="showExample">{{ t('common.example') }}</n-button>
+          <n-button @click="clear">{{ t('common.clear') }}</n-button>
+          <n-button @click="compressive">{{ t('common.compress') }}</n-button>
+          <n-button @click="copySource">{{ t('common.copy') }}</n-button>
         </div>
-        <div class="flex-1 w-full overflow-hidden">
-          <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" placeholder="输入需要格式化的 XML"
+        <div class="flex-1 min-h-0 w-full overflow-hidden">
+          <n-input v-model:value="source" type="textarea" class="w-full h-full text-xl" :placeholder="t('tool.format.xmlInputPlaceholder')"
             @input="handleChange" />
         </div>
       </div>
     </template>
     <template #right>
       <div class="h-full p-2 flex flex-col">
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-          <n-tag size="large" type="success">输出</n-tag>
-          <n-button @click="copyValue">复制</n-button>
+        <div class="lk-toolbar mb-2">
+          <n-tag size="large" type="success">{{ t('common.output') }}</n-tag>
+          <n-button @click="copyValue">{{ t('common.copy') }}</n-button>
           <n-button @click="collapseAll">
             <template #icon> <component :is="CollapseIcon" /> </template>
           </n-button>
@@ -151,28 +175,34 @@ function toggleSort() {
           <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
             <template #icon> <component :is="SortIcon" /> </template>
           </n-button>
-          <n-input-group>
-            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '140px' }" />
-            <n-input 
+          <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+            <n-button>
+              <template #icon><n-icon :component="ChevronDownOutline" /></template>
+            </n-button>
+          </n-dropdown>
+          <n-input-group class="lk-toolbar-filter">
+            <n-select v-model:value="filterType" :options="filterTypeOptions" class="lk-fit-select" />
+            <n-input
+              class="lk-toolbar-filter-input"
               v-model:value="filterExpression" 
               type="text" 
               @keydown.enter="xmlFilter" 
               @clear="onFilterExpressionClear"
               clearable
-              placeholder="使用 XPath 进行过滤，如：//book[@category='programming']/title"
+              :placeholder="t('tool.format.xpathPlaceholder')"
             />
           </n-input-group>
         </div>
-        <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
+        <div class="flex-1 min-h-0 w-full overflow-hidden text-lg lk-result-surface">
           <XmlFormat
             v-if="hasSourceContent"
             class="w-full h-full"
             ref="customXmlFormatRef"
             v-model="source"
-            theme="min-light"
+            :theme="formatTheme"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-            输入内容后加载格式化视图
+            <!-- 输入内容后加载格式化视图 -->
           </div>
         </div>
       </div>

@@ -1,10 +1,12 @@
 <script setup>
 import { ref, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NCard, NUpload, NIcon, NText, NTag, NEmpty } from "naive-ui";
 import { CloudUploadOutline } from "@vicons/ionicons5";
 import { readBarcodesFromImageFile } from 'zxing-wasm/reader';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
+import { useThemeMode } from '../../composables/useThemeMode';
 
 // 历史记录数组
 const historyList = ref([]);
@@ -12,6 +14,8 @@ const isLoading = ref(false);
 const isProcessing = ref(false);
 
 const { notify, copyToClipboard } = useCommon();
+const { t } = useI18n();
+const { resolvedTheme } = useThemeMode();
 
 // 处理图片文件并识别条形码（通用逻辑）
 async function processImageFile(imageFile) {
@@ -20,7 +24,7 @@ async function processImageFile(imageFile) {
   
   // 验证文件类型
   if (!imageFile.type.startsWith('image/')) {
-    notify('error', '请选择图片文件');
+    notify('error', t('tool.reader.selectImageFile'));
     return;
   }
   
@@ -55,7 +59,7 @@ async function processImageFile(imageFile) {
       timestamp: new Date().toLocaleString()
     });
     
-    notify('success', '识别成功');
+    notify('success', t('tool.reader.recognized'));
     
     // 滚动到底部
     await nextTick();
@@ -66,7 +70,7 @@ async function processImageFile(imageFile) {
     
   } catch (error) {
     console.error('识别失败:', error);
-    notify('error', '未能识别条形码，请确保图片包含清晰的条形码');
+    notify('error', t('tool.reader.barcodeFailed'));
   } finally {
     isLoading.value = false;
     isProcessing.value = false;
@@ -94,7 +98,7 @@ async function handleClipboardPaste() {
   try {
     // 检查是否支持剪贴板 API
     if (!navigator.clipboard || !navigator.clipboard.read) {
-      notify('warning', '当前浏览器不支持读取剪贴板');
+      notify('warning', t('tool.reader.clipboardUnsupported'));
       return;
     }
     
@@ -113,13 +117,13 @@ async function handleClipboardPaste() {
       }
     }
     
-    notify('warning', '剪贴板中没有图片');
+    notify('warning', t('tool.reader.clipboardNoImage'));
   } catch (error) {
     console.error('读取剪贴板失败:', error);
     if (error.name === 'NotAllowedError') {
-      notify('error', '没有读取剪贴板的权限，请允许浏览器访问剪贴板');
+      notify('error', t('tool.reader.clipboardPermissionDenied'));
     } else {
-      notify('error', '读取剪贴板失败');
+      notify('error', t('tool.reader.readClipboardFailed'));
     }
   }
 }
@@ -127,7 +131,7 @@ async function handleClipboardPaste() {
 function clearAll() {
   historyList.value = [];
   isProcessing.value = false;
-  notify('success', '已清空所有记录');
+  notify('success', t('tool.reader.cleared'));
 }
 
 function deleteItem(id) {
@@ -164,14 +168,14 @@ function syncScroll(e, target) {
 </script>
 
 <template>
-  <div class="h-full flex flex-col overflow-hidden">
+  <div class="barcode-reader-root h-full flex flex-col overflow-hidden" :class="{ 'is-dark': resolvedTheme === 'dark' }">
     <SplitPanel>
       <template #left>
         <div class="flex flex-col h-full p-2 space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="warning">上传图片</n-tag>
-            <n-button @click="handleClipboardPaste">剪贴板读取</n-button>
-            <n-button @click="clearAll" :disabled="historyList.length === 0">删除全部</n-button>
+          <div class="lk-toolbar">
+            <n-tag size="large" type="warning">{{ t('tool.reader.uploadImage') }}</n-tag>
+            <n-button @click="handleClipboardPaste">{{ t('tool.reader.readClipboard') }}</n-button>
+            <n-button @click="clearAll" :disabled="historyList.length === 0">{{ t('tool.reader.deleteAll') }}</n-button>
           </div>
           
           <div class="flex-1 overflow-auto barcode-scroll-left" @scroll="syncScroll($event, '.barcode-scroll-right')">
@@ -187,12 +191,12 @@ function syncScroll(e, target) {
                   @click="deleteItem(item.id)"
                   style="position: absolute; bottom: 8px; right: 8px; z-index: 10;"
                 >
-                  删除
+                  {{ t('tool.reader.delete') }}
                 </n-button>
                 <n-card size="small">
                   <img 
                     :src="item.imageUrl" 
-                    alt="条形码图片" 
+                    :alt="t('tool.reader.barcodeImageAlt')" 
                     class="w-full h-auto"
                     style="max-height: 200px; object-fit: contain;"
                   />
@@ -217,10 +221,10 @@ function syncScroll(e, target) {
                   </n-icon>
                 </div>
                 <n-text style="font-size: 14px">
-                  {{ isLoading ? '识别中...' : '点击或拖拽图片到此区域上传' }}
+                  {{ isLoading ? t('tool.reader.recognizing') : t('tool.reader.uploadHint') }}
                 </n-text>
                 <n-text depth="3" style="margin-top: 8px; font-size: 12px">
-                  支持 jpg、png、gif、webp 等格式
+                  {{ t('tool.reader.imageFormatHint') }}
                 </n-text>
               </div>
             </n-upload>
@@ -230,8 +234,8 @@ function syncScroll(e, target) {
       
       <template #right>
         <div class="flex flex-col h-full p-2 space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">识别结果</n-tag>
+          <div class="lk-toolbar">
+            <n-tag size="large" type="success">{{ t('tool.reader.result') }}</n-tag>
           </div>
           
           <div class="flex-1 overflow-auto barcode-scroll-right" @scroll="syncScroll($event, '.barcode-scroll-left')">
@@ -247,7 +251,7 @@ function syncScroll(e, target) {
                   @click="copyText(item.result)"
                   style="position: absolute; bottom: 8px; right: 8px; z-index: 10;"
                 >
-                  复制
+                  {{ t('tool.reader.copy') }}
                 </n-button>
                 <n-tag v-if="item.format" size="small" type="info"
                   style="position: absolute; top: 8px; right: 8px; z-index: 10;">
@@ -273,7 +277,7 @@ function syncScroll(e, target) {
             
             <!-- 提示区域 -->
             <div class="result-placeholder">
-              <n-empty description="识别结果将显示在这里" />
+              <n-empty :description="t('tool.reader.resultPlaceholder')" />
             </div>
           </div>
         </div>
@@ -283,19 +287,52 @@ function syncScroll(e, target) {
 </template>
 
 <style scoped>
+.barcode-reader-root {
+  --reader-result-text: #334155;
+  --reader-result-bg: transparent;
+  --reader-placeholder-border: var(--lk-surface-border);
+  --reader-placeholder-bg: var(--lk-surface-bg);
+  --reader-placeholder-hover-border: var(--lk-surface-border-hover);
+  --reader-placeholder-text: rgba(0, 0, 0, 0.45);
+  --reader-link: #18a058;
+  --reader-link-hover: #36ad6a;
+}
+
+.barcode-reader-root.is-dark {
+  --reader-result-text: #d4d4d8;
+  --reader-result-bg: transparent;
+  --reader-placeholder-border: var(--lk-surface-border);
+  --reader-placeholder-bg: var(--lk-surface-bg);
+  --reader-placeholder-hover-border: var(--lk-surface-border-hover);
+  --reader-placeholder-text: #a1a1aa;
+  --reader-link: #4ade80;
+  --reader-link-hover: #86efac;
+}
+
 .history-item {
   scroll-margin-top: 1rem;
+}
+
+.history-item :deep(.n-card) {
+  border: 1px solid var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
+  background: var(--lk-surface-bg);
+}
+
+.history-item :deep(.n-card__content) {
+  padding: var(--lk-surface-padding);
 }
 
 .result-text {
   font-family: Monaco, Consolas, 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.6;
-  padding: 40px 8px 8px 8px;
-  border-radius: 4px;
+  padding: 24px 0 40px 0;
   min-height: 200px;
   max-height: 200px;
   overflow-y: auto;
+  color: var(--reader-result-text, #334155);
+  background: var(--reader-result-bg, transparent);
 }
 
 /* 统一左右两侧提示区域样式 */
@@ -304,21 +341,21 @@ function syncScroll(e, target) {
   width: 100%;
   min-height: 150px;
   height: 150px;
-  border: 2px dashed #d9d9d9;
-  border-radius: 4px;
-  background-color: #fafafa;
-  padding: 20px;
+  border: 1px dashed var(--reader-placeholder-border, #d9d9d9) !important;
+  border-radius: var(--lk-surface-radius);
+  background-color: var(--reader-placeholder-bg, #fafafa);
+  padding: var(--lk-surface-padding);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, background-color 0.3s;
   box-sizing: border-box;
 }
 
 .upload-placeholder:hover {
-  border-color: #40a9ff;
+  border-color: var(--reader-placeholder-hover-border, #40a9ff) !important;
 }
 
 .result-placeholder {
@@ -328,7 +365,7 @@ function syncScroll(e, target) {
 /* 统一空状态文字颜色 */
 .upload-placeholder :deep(.n-text),
 .result-placeholder :deep(.n-empty__description) {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--reader-placeholder-text, rgba(0, 0, 0, 0.45));
 }
 
 /* 让 n-upload 组件占满整个容器宽度 */
@@ -342,13 +379,13 @@ function syncScroll(e, target) {
 
 /* URL 链接样式 */
 .result-link {
-  color: #18a058;
+  color: var(--reader-link, #18a058);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .result-link:hover {
-  color: #36ad6a;
+  color: var(--reader-link-hover, #36ad6a);
   text-decoration: underline;
 }
 </style>

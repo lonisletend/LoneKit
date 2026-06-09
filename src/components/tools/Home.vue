@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-full">
     <n-tabs type="line" animated>
-      <n-tab-pane name="version" tab="更新日志">
+      <n-tab-pane name="version" :tab="t('home.changelog')">
         <div class="w-full px-4 py-2">
           <n-timeline>
             <n-timeline-item 
@@ -10,53 +10,49 @@
               :type="log.type || 'success'"
             >
               <template #header>
-                <div class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <div class="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <span>{{ log.date }}</span>
                   <span class="text-green-600">{{ log.version }}</span>
                   <a v-if="log.releaseLink" :href="log.releaseLink" target="_blank" rel="noopener noreferrer" class="inline-flex items-center hover:opacity-70 transition-opacity">
-                    <component :is="GithubIcon" class="w-5 h-5 text-gray-600" />
+                    <component :is="GithubIcon" class="w-5 h-5 text-slate-600 dark:text-slate-300" />
                   </a>
                 </div>
               </template>
               
               <div class="mt-2 space-y-3">
-                <!-- 新增 -->
                 <div v-if="log.added && log.added.length > 0" class="changelog-section">
                   <div class="changelog-title">
-                    <n-tag type="success" size="small">新增</n-tag>
+                    <n-tag type="success" size="small">{{ t('home.added') }}</n-tag>
                   </div>
                   <ul class="changelog-list">
-                    <li v-for="(item, i) in log.added" :key="i">{{ item }}</li>
+                    <li v-for="(item, i) in log.added" :key="i">{{ rt(item) }}</li>
                   </ul>
                 </div>
 
-                <!-- 优化 -->
                 <div v-if="log.optimized && log.optimized.length > 0" class="changelog-section">
                   <div class="changelog-title">
-                    <n-tag type="info" size="small">优化</n-tag>
+                    <n-tag type="info" size="small">{{ t('home.optimized') }}</n-tag>
                   </div>
                   <ul class="changelog-list">
-                    <li v-for="(item, i) in log.optimized" :key="i">{{ item }}</li>
+                    <li v-for="(item, i) in log.optimized" :key="i">{{ rt(item) }}</li>
                   </ul>
                 </div>
 
-                <!-- 修复 -->
                 <div v-if="log.fixed && log.fixed.length > 0" class="changelog-section">
                   <div class="changelog-title">
-                    <n-tag type="warning" size="small">修复</n-tag>
+                    <n-tag type="warning" size="small">{{ t('home.fixed') }}</n-tag>
                   </div>
                   <ul class="changelog-list">
-                    <li v-for="(item, i) in log.fixed" :key="i">{{ item }}</li>
+                    <li v-for="(item, i) in log.fixed" :key="i">{{ rt(item) }}</li>
                   </ul>
                 </div>
 
-                <!-- 删除 -->
                 <div v-if="log.removed && log.removed.length > 0" class="changelog-section">
                   <div class="changelog-title">
-                    <n-tag type="error" size="small">删除</n-tag>
+                    <n-tag type="error" size="small">{{ t('home.removed') }}</n-tag>
                   </div>
                   <ul class="changelog-list">
-                    <li v-for="(item, i) in log.removed" :key="i">{{ item }}</li>
+                    <li v-for="(item, i) in log.removed" :key="i">{{ rt(item) }}</li>
                   </ul>
                 </div>
               </div>
@@ -71,329 +67,17 @@
 <script setup>
 
 import { NTabs, NTabPane, NTimeline, NTimelineItem, NTag } from "naive-ui";
-import { ref } from "vue";
+import { computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { LogoGithub as GithubIcon } from '@vicons/ionicons5';
+import { preloadToolsAfterHomeReady } from '../../utils/preloadTools';
 
-const changeLogs = ref([
-  {
-    date: '2026.05.17',
-    version: 'v0.9.4',
-    added: [
-      '新增 Unicode 工具，支持 Unicode 编码/解码、批量输入、剪贴板读取与逐项操作。',
-      'MD5、Base64、Unicode、字符串16进制工具新增快捷键：在非批量模式下按 Ctrl/Cmd + Enter 可快速跳转到下一输入框。',
-    ],
-    optimized: [
-      '统一规范工具路由 URL，采用更简短命名，并保留旧路由别名兼容访问。',
-    ],
-  },
-  {
-    date: '2026.05.07',
-    version: 'v0.9.3',
-    fixed: [
-      '通用格式化工具，修复同名标签嵌套时 XML 片段识别错误的问题，解析引擎从正则匹配升级为深度追踪算法。',
-      'Sendpay 工具，修复了 sendpayMap 展示不能编辑的问题。',
-      '升级 lone-format@0.12.1，修复了 XML 格式化同级多个重名标签自闭合标签识别有问题的情况。',
-    ],
-  },
-  {
-    date: '2026.04.28',
-    version: 'v0.9.2',
-    added: [
-      'Sendpay 工具新增 sendpayMap 解析支持，支持与 sendpay 同时输入并联合匹配解释。',
-      'Sendpay 匹配解释区新增「所有解释」模式，未匹配项支持红色高亮与展开查看。',
-      'Sendpay 匹配解释支持「展开全部/折叠全部」，并支持解释文本中的 \\n 自动换行展示。',
-      'Sendpay 解释配置支持配置文件固定标题，方便复用。',
-    ],
-  },
-  {
-    date: '2026.04.21',
-    version: 'v0.9.1',
-    optimized: [
-      'Sendpay 工具，优化编辑体验，增加同标位匹配对比展示。',
-      '优化打包配置，大幅减小js包体积，提升启动性能。',
-    ],
-  },
-  {
-    date: '2026.04.21',
-    version: 'v0.9.0',
-    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.0',
-    added: [
-      '新增条形码识别工具，支持上传、粘贴、拖拽图片识别多种条形码格式，并显示识别到的格式标签。',
-      '条形码生成工具新增格式选择器，支持 CODE128、CODE39、EAN13、EAN8、UPC、ITF14、MSI、Pharmacode、Codabar 共 9 种格式。',
-      '新增 Sendpay 展示工具，支持展示、修改、解释配置匹配等。一定是你用过最好用的 Sendpay 展示工具！',
-    ],
-    optimized: [
-      '侧边栏二维码识别、条形码识别、文本计数图标更换为 Fluent 图标库，统一视觉风格。',
-      '二维码识别、条形码识别工具操作按钮从右上角移至右下角，提升交互一致性。',
-    ],
-  },
-  {
-    date: '2026.04.15',
-    version: 'v0.8.2',
-    added: [
-      '条形码生成工具、二维码生成工具，结果列表支持单项复制图片到剪贴板。',
-      '条形码生成工具、二维码生成工具，新增「导出 Excel」功能，导出包含文本与对应图片的 Excel 文件。',
-    ],
-  },
-  {
-    date: '2026.04.02',
-    version: 'v0.8.1',
-    added: [
-      '时间戳转换工具升级为多 Tab 模式，支持同屏并行处理多组时间任务。',
-      '时间工具新增「时间间隔计算」与「时间推移计算」两大功能块，支持开始/结束时间差值、方向推移计算与一键复制。',
-    ],
-  },
-  {
-    date: '2026.03.25',
-    version: 'v0.8.0',
-    added: [
-      '二维码生成与条形码生成工具重构为多输入卡片模式，支持末尾自动补空、逐项删除、左右滚动同步与尺寸自适配。',
-      'MD5、Base64、字符串16进制工具重构为统一双栏卡片布局，支持逐项操作按钮与批量复制。',
-    ],
-    optimized: [
-      '统一多个工具页的交互风格与样式细节，降低重复代码并提升维护性。',
-    ],
-    fixed: [
-      '修复侧边菜单路由激活逻辑，页面切换时菜单高亮与当前路由保持一致。直接访问工具页面时，侧边菜单正确高亮对应项。',
-    ],
-  },
-  {
-    date: '2026.03.24',
-    version: 'v0.7.3',
-    added: [
-      '新增文本计数工具，支持字符数、单词数、行数、段落数、UTF-8 字节数、阅读时长统计。',
-    ],
-  },
-  {
-    date: '2026.03.23',
-    version: 'v0.7.2',
-    added: [
-      '新增文件夹对比工具，支持左右目录双树对照、差异状态标记与文件内容对比预览。',
-    ],
-  },
-  {
-    date: '2026.03.10',
-    version: 'v0.7.1',
-    added: [
-      '新增 UUID 工具，支持 v4 生成与解析。',
-    ],
-  },
-  {
-    date: '2026.01.25',
-    version: 'v0.7.0',
-    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.7.0',
-    added: [
-      '通用格式化工具，渲染区域新增「折叠全部」、「展开全部」功能。JSON/XML 块支持排序。',
-      'XML 格式化工具，新增「排序」功能。',
-      'Tauri 升级到 v2，打包增加对 Apple Silicon 支持，增加 RPM 格式支持。增加版本检查和自动升级功能。',
-    ],
-    optimized: [
-      '优化若干样式细节。升级依赖版本。',
-    ],
-  },
-  {
-    date: '2026.01.21',
-    version: 'v0.6.3',
-    optimized: [
-      '通用格式化工具，优化展示区域字体和样式。',
-      '文本对比工具，优化对比展示字体和样式。支持选择并排/逐行对比模式。'
-    ],
-  },
-  {
-    date: '2026.01.20',
-    version: 'v0.6.2',
-    added: [
-      '新增通用格式化工具，支持包含 PlainText/JSON/XML 的文本分段格式化。日志分析利器！🎉'
-    ],
-    optimized: [
-      '优化多个工具的展示样式细节。更新依赖版本。'
-    ],
-  },
-  {
-    date: '2026.01.18',
-    version: 'v0.6.1',
-    added: [
-      'SQL 格式化，支持高亮、折叠。'
-    ],
-    optimized: [
-      '删除已废弃实现，减少依赖。'
-    ],
-  },
-  {
-    date: '2026.01.14',
-    version: 'v0.6.0',
-    added: [
-      '新增二维码识别工具，支持图片拖拽、点击上传、剪贴板读取、历史列表、URL 自动渲染等。'
-    ]
-  },
-  {
-    date: '2026.01.14',
-    version: 'v0.5.2',
-    fixed: [
-      '修复多 Tab 页面编辑 Tab 标题后，页面内容丢失的问题。'
-    ],
-  },
-  {
-    date: '2026.01.05',
-    version: 'v0.5.1',
-    added: [
-      '所有多 Tab 页面支持双击编辑 Tab 标题功能。'
-    ],
-  },
-  {
-    date: '2025.12.19',
-    version: 'v0.5.0',
-    added: [
-      'Json 格式化、XML 格式化 支持全部折叠/全部展开。',
-      'SQL 格式化 (Beta) 。'
-    ],
-    optimized: [
-      '所有左右分栏工具宽度调整分隔条支持双击还原左右 1:1 布局。'
-    ],
-    fixed: [
-      'XML 格式化 修复 CDATA 中内容被错误识别为非法实体引用问题。',
-    ],
-  }, 
-  {
-    date: '2025.12.10',
-    version: 'v0.4.3',
-    fixed: [
-      'XML 格式化 修复空内容默认自闭合标签问题，保留原格式。',
-      'XML 格式化 修复实体引用校验错误问题。'
-    ],
-  },  
-  {
-    date: '2025.12.07',
-    version: 'v0.4.2',
-    added: [
-      'Json 格式化 支持格式化结果 key 排序功能。',
-      'XML 格式化 支持 XPath 过滤功能。',
-    ],
-  },  
-  {
-    date: '2025.12.05',
-    version: 'v0.4.1',
-    optimized: [
-      'Json 格式化 JavaScript 过滤，修改为 $ 指代当前数据，与 JsonPath 保持一致。'
-    ],
-    fixed: [
-      'Json 格式化 JavaScript 过滤，修复保护小数过滤匹配错误问题。'
-    ],
-  },  
-  {
-    date: '2025.12.03',
-    version: 'v0.4.0',
-    optimized: [
-      'Json 格式化 优化编辑样式。'
-    ],
-    added: [
-      'XML 格式化 (Beta) 转正，支持编辑功能，增加对齐线，优化展示。'
-    ],
-  },  
-  {
-    date: '2025.11.19',
-    version: 'v0.3.6',
-    optimized: [
-      'Json 格式化、XML 格式化 (Beta)  折叠提示效果。',
-    ],
-    fixed: [
-      'Json 格式化字符串类型大数编辑保存后格式错误问题。',
-    ],
-  },
-  {
-    date: '2025.11.16',
-    version: 'v0.3.5',
-    optimized: [
-      'DiffTool、SQLTool 支持多 Tab 模式。',
-      '所有左右分栏工具支持可拖动调整宽度，分隔条默认隐藏，hover 显示。',
-      'JSON 格式化、XML 格式化 渲染结果区域滚动。',
-    ],
-  },
-  {
-    date: '2025.11.03',
-    version: 'v0.3.0',
-    added: [
-      'XML 格式化 (Beta)，使用 lone-format 实现，支持节点折叠/展开。',
-    ],
-    optimized: [
-      'Json 格式化 Beta 转正。',
-    ],
-  },
-  {
-    date: '2025.08.05',
-    version: 'v0.1.4',
-    added: [],
-    optimized: [
-      'Json 格式化 (Beta) 长文本长数字换行逗号展示优化。',
-      'Json 格式化支持 JsonPath/JavaScript 过滤。',
-    ],
-  },
-  {
-    date: '2025.08.05',
-    version: 'v0.1.2',
-    added: [
-      'Json 格式化 (Beta)，使用 lone-format 组件，支持大数、支持编辑。',
-    ],
-  },
-  {
-    date: '2025.04.01',
-    version: 'v0.1.0',
-    added: [
-      'XML 格式化。',
-    ],
-    removed: [
-      '通用格式化（依赖太多，性能太差）。',
-    ]
-  },
-  {
-    date: '2025.02.23',
-    version: 'v0.0.9',
-    added: [
-      '通用格式化，支持 XML、Java 格式化。',
-    ],
-  },
-  {
-    date: '2024.10.10',
-    version: 'v0.0.8',
-    optimized: [
-      'Json 格式化 (Wrap模式) 支持 Tab，终于不用打开多个浏览器 Tab 啦！',
-    ],
-  },
-  {
-    date: '2024.06.09',
-    version: 'v0.0.7',
-    added: [
-      '字符串16进制转换。',
-    ],
-  },
-  {
-    date: '2024.02.20',
-    version: 'v0.0.6',
-    added: [
-      'SQL 格式化。',
-      '文本对比。',
-    ],
-  },
-  {
-    date: '2024.01.04',
-    version: 'v0.0.5',
-    added: [
-      '时间戳转换。',
-      'Json 格式化。',
-      'Base64 编解码。',
-      'MD5 加密。',
-      '二维码生成。',
-      '条形码生成。',
-    ],
-  },
-  {
-    date: '2023.12.10',
-    version: 'v0.0.1',
-    added: [
-      '项目初始化。',
-    ],
-  }
-]);
+const { t, tm, rt } = useI18n();
+const changeLogs = computed(() => tm('home.changeLogs'));
+
+onMounted(() => {
+  preloadToolsAfterHomeReady();
+});
 
 </script>
 
@@ -409,7 +93,12 @@ const changeLogs = ref([
 .changelog-list {
   margin-left: 24px;
   list-style-type: disc;
-  color: #666;
+  color: #64748b;
+}
+
+:global(html.dark .changelog-list),
+:global(html[data-theme='dark'] .changelog-list) {
+  color: #94a3b8;
 }
 
 .changelog-list li {

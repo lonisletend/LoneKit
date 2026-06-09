@@ -1,22 +1,24 @@
 <script setup>
 
-import { computed, defineAsyncComponent, ref } from "vue";
-import {NButton, NInput, NTag, useNotification} from "naive-ui";
+import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import {NButton, NDropdown, NIcon, NInput, NSelect, NTag} from "naive-ui";
 import { 
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
+import { ChevronDownOutline } from '@vicons/ionicons5';
 
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon'
-
-const loadLoneFormat = () => Promise.all([
-  import('lone-format/lone-format.css'),
-  import('lone-format')
-]).then(([, m]) => m);
-const SqlFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.SqlFormat));
+import { useDataTransfer } from '../../composables/useDataTransfer';
+import { useThemeMode } from "../../composables/useThemeMode";
+import SqlFormat from 'lone-format/sql-format'
+import 'lone-format/style.css';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { send } = useDataTransfer();
+const { t, tm } = useI18n();
 
 defineOptions({
   name: 'SQLFormatTool'
@@ -25,6 +27,39 @@ defineOptions({
 const source = ref();
 const customSqlFormatRef = ref(null)
 const hasSourceContent = computed(() => !!source.value?.trim());
+const { resolvedTheme } = useThemeMode();
+const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
+const DIALECT_STORAGE_KEY = 'sql-format-dialect';
+const dialectOptions = [
+  { label: 'SQL(generic)', value: 'sql' },
+  { label: 'BigQuery', value: 'bigquery' },
+  { label: 'ClickHouse', value: 'clickhouse' },
+  { label: 'DB2', value: 'db2' },
+  { label: 'DB2i', value: 'db2i' },
+  { label: 'DuckDB', value: 'duckdb' },
+  { label: 'Hive', value: 'hive' },
+  { label: 'MariaDB', value: 'mariadb' },
+  { label: 'MySQL', value: 'mysql' },
+  { label: 'N1QL', value: 'n1ql' },
+  { label: 'PL/SQL', value: 'plsql' },
+  { label: 'PostgreSQL', value: 'postgresql' },
+  { label: 'Redshift', value: 'redshift' },
+  { label: 'Spark', value: 'spark' },
+  { label: 'SQLite', value: 'sqlite' },
+  { label: 'TiDB', value: 'tidb' },
+  { label: 'Trino', value: 'trino' },
+  { label: 'Transact-SQL', value: 'transactsql' },
+  { label: 'T-SQL', value: 'tsql' },
+  { label: 'SingleStoreDB', value: 'singlestoredb' },
+  { label: 'Snowflake', value: 'snowflake' }
+];
+const dialectValues = new Set(dialectOptions.map((option) => option.value));
+const savedDialect = localStorage.getItem(DIALECT_STORAGE_KEY);
+const dialect = ref(dialectValues.has(savedDialect) ? savedDialect : 'sql');
+
+watch(dialect, (value) => {
+  localStorage.setItem(DIALECT_STORAGE_KEY, value);
+});
 
 async function readClipboard() {
   const text = await readFromClipboard();
@@ -34,11 +69,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  source.value = 'select supplier_name,city from\n' +
-      '(select * from suppliers join addresses on suppliers.address_id=addresses.id)\n' +
-      'as suppliers\n' +
-      'where supplier_id > 500\n' +
-      'order by supplier_name asc,city desc;';
+  source.value = tm('examples.sqlFormat');
 }
 
 function clear() {
@@ -47,7 +78,7 @@ function clear() {
 
 async function copyValue() {
   await customSqlFormatRef.value?.copySql()
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function compressive() {
@@ -66,6 +97,32 @@ function collapseAll() {
   customSqlFormatRef.value?.collapseAll();
 }
 
+async function sendToDiff() {
+  if (!hasSourceContent.value) {
+    notify('warning', t('tool.noSendableContent'))
+    return
+  }
+
+  await customSqlFormatRef.value?.copySql();
+
+  const sql = await readFromClipboard();
+  if (!sql) {
+    notify('warning', t('tool.noSendableContent'))
+    return
+  }
+
+  send('DiffTool', sql)
+  notify('success', t('tool.sentToDiff'))
+}
+
+const moreOptions = computed(() => [
+  { label: t('tool.sendToDiff'), key: 'diff' }
+])
+
+function handleMoreSelect(key) {
+  if (key === 'diff') sendToDiff()
+}
+
 
 </script>
 
@@ -74,42 +131,53 @@ function collapseAll() {
     <SplitPanel>
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
+          <div class="lk-toolbar">
             <n-tag size="large" type="warning">SQL</n-tag>
-            <n-button @click="readClipboard">剪贴板</n-button>
-            <n-button @click="showExample">示例</n-button>
-            <n-button @click="clear">清空</n-button>
-            <n-button @click="compressive">压缩</n-button>
-            <n-button @click="copySource">复制</n-button>
+            <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExample">{{ t('common.example') }}</n-button>
+            <n-button @click="clear">{{ t('common.clear') }}</n-button>
+            <n-button @click="compressive">{{ t('common.compress') }}</n-button>
+            <n-button @click="copySource">{{ t('common.copy') }}</n-button>
           </div>
-          <div class="w-full h-full text-xl">
+          <div class="flex-1 min-h-0 w-full text-xl">
             <n-input v-model:value="source" type="textarea" class="w-full h-full"
-                     placeholder="输入需要格式化的 SQL"/>
+                     :placeholder="t('tool.format.sqlInputPlaceholder')"/>
           </div>
         </div>
       </template>
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">结果</n-tag>
-            <n-button @click="copyValue">复制</n-button>
+          <div class="lk-toolbar">
+            <n-tag size="large" type="success">{{ t('tool.codec.result') }}</n-tag>
+            <n-button @click="copyValue">{{ t('common.copy') }}</n-button>
+            <n-select
+              v-model:value="dialect"
+              :options="dialectOptions"
+              class="lk-sql-dialect-select"
+            />
             <n-button @click="collapseAll">
               <template #icon> <component :is="CollapseIcon" /> </template>
             </n-button>
             <n-button @click="expandAll">
               <template #icon> <component :is="ExpandIcon" /> </template>
             </n-button>
+            <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+              <n-button>
+                <template #icon><n-icon :component="ChevronDownOutline" /></template>
+              </n-button>
+            </n-dropdown>
           </div>
-          <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
+          <div class="flex-1 min-h-0 w-full overflow-hidden text-lg lk-result-surface">
             <SqlFormat
               v-if="hasSourceContent"
               class="w-full h-full"
               ref="customSqlFormatRef"
               v-model="source"
-              theme="min-light"
+              :theme="formatTheme"
+              :dialect="dialect"
             />
             <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-              输入内容后加载格式化视图
+              <!-- 输入内容后加载格式化视图 -->
             </div>
           </div>
         </div>
@@ -119,5 +187,12 @@ function collapseAll() {
 </template>
 
 <style scoped>
+.lk-sql-dialect-select {
+  width: 170px !important;
+  flex: 0 0 170px;
+}
 
+.lk-sql-dialect-select :deep(.n-base-selection) {
+  width: 100%;
+}
 </style>

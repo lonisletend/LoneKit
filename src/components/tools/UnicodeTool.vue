@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { NButton, NInput, NSwitch, NTag } from "naive-ui";
 import SplitPanel from "../common/SplitPanel.vue";
 import { useCommon } from "../../composables/useCommon";
@@ -9,6 +10,7 @@ import { useAutoAppendEntries } from "../../composables/useAutoAppendEntries";
 import { useEntryJump } from "../../composables/useEntryJump";
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { t, tm } = useI18n();
 
 const cardHeight = 220;
 const inputRows = 6;
@@ -200,26 +202,26 @@ async function readClipboardByType(type) {
     }
     ensureEntries();
   } else {
-    notify("warning", "剪贴板中没有可用文本");
+    notify('warning', t('tool.codec.noClipboardText'));
   }
 }
 
 function showExampleByType(type) {
   if (isBatchInput.value) {
     if (type === 1) {
-      batchSourceText.value = "test\nLoneKit";
+      batchSourceText.value = tm('examples.codec.plainBatch');
       applyBatchSource(batchSourceText.value);
     } else {
-      batchTargetText.value = "\\u0074\\u0065\\u0073\\u0074\n\\u004C\\u006F\\u006E\\u0065\\u004B\\u0069\\u0074";
+      batchTargetText.value = tm('examples.codec.unicodeBatch');
       applyBatchTarget(batchTargetText.value);
     }
     return;
   }
 
   if (type === 1) {
-    resetEntries([createEntry("test", ""), createEntry()]);
+    resetEntries([createEntry(tm('examples.codec.plain'), ''), createEntry()]);
   } else {
-    resetEntries([createEntry("", "\\u0074\\u0065\\u0073\\u0074"), createEntry()]);
+    resetEntries([createEntry('', tm('examples.codec.unicode')), createEntry()]);
   }
 }
 
@@ -237,18 +239,18 @@ function clear() {
 function copyValue(type) {
   const value = type === 1 ? allSource.value : allTarget.value;
   if (!value) {
-    notify("warning", "没有可复制内容");
+    notify('warning', t('tool.codec.noCopyableContent'));
     return;
   }
-  copyToClipboard(value, "复制成功!");
+  copyToClipboard(value);
 }
 
 function copyEntryValue(value) {
   if (!value) {
-    notify("warning", "没有可复制内容");
+    notify('warning', t('tool.codec.noCopyableContent'));
     return;
   }
-  copyToClipboard(value, "复制成功!");
+  copyToClipboard(value);
 }
 
 </script>
@@ -258,21 +260,21 @@ function copyEntryValue(value) {
     <SplitPanel>
       <template #left>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="warning">编码</n-tag>
-            <n-button @click="readClipboardByType(1)">剪贴板</n-button>
-            <n-button @click="showExampleByType(1)">示例</n-button>
-            <n-button @click="clear">删除全部</n-button>
-            <n-button @click="copyValue(1)">复制全部</n-button>
+          <div class="lk-toolbar">
+            <n-tag size="large" type="warning">{{ t('tool.codec.encode') }}</n-tag>
+            <n-button @click="readClipboardByType(1)">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExampleByType(1)">{{ t('common.example') }}</n-button>
+            <n-button @click="clear">{{ t('tool.codec.deleteAll') }}</n-button>
+            <n-button @click="copyValue(1)">{{ t('tool.codec.copyAll') }}</n-button>
             <n-switch v-model:value="isBatchInput" size="large">
-              <template #checked>批量输入</template>
-              <template #unchecked>批量输入</template>
+              <template #checked>{{ t('tool.codec.batchInput') }}</template>
+              <template #unchecked>{{ t('tool.codec.batchInput') }}</template>
             </n-switch>
           </div>
           <div
             v-if="!isBatchInput"
             ref="leftScrollRef"
-            class="w-full h-full overflow-auto space-y-3"
+            class="flex-1 min-h-0 w-full overflow-auto space-y-3"
             @scroll="handleScroll('left', $event)"
           >
             <div
@@ -282,8 +284,8 @@ function copyEntryValue(value) {
               :style="{ height: `${cardHeight}px` }"
             >
               <div class="entry-actions">
-                <n-button size="small" @click="copyEntryValue(entry.source)">复制</n-button>
-                <n-button size="small" @click="removeRow(index)" :disabled="entries.length === 1">删除</n-button>
+                <n-button size="small" @click="copyEntryValue(entry.source)">{{ t('common.copy') }}</n-button>
+                <n-button size="small" @click="removeRow(index)" :disabled="entries.length === 1">{{ t('tool.codec.delete') }}</n-button>
               </div>
               <n-input
                 v-model:value="entry.source"
@@ -291,18 +293,18 @@ function copyEntryValue(value) {
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
-                placeholder="输入原文字符串"
+                :placeholder="t('tool.codec.plainInputPlaceholder')"
                 @input="(val) => handleSourceInput(index, val)"
                 @keydown="(event) => handleJumpKeydown(event, 'left', index)"
               />
             </div>
           </div>
-          <div v-else class="w-full h-full">
+          <div v-else class="flex-1 min-h-0 w-full">
             <n-input
               v-model:value="batchSourceText"
               type="textarea"
               class="w-full h-full batch-input"
-              placeholder="每行一条原文，按换行分割批量编码"
+              :placeholder="t('tool.codec.batchPlainEncodePlaceholder')"
               @input="onBatchSourceInput"
             />
           </div>
@@ -310,16 +312,16 @@ function copyEntryValue(value) {
       </template>
       <template #right>
         <div class="h-full p-2 flex flex-col space-y-2">
-          <div class="w-full h-8 flex items-center space-x-4">
-            <n-tag size="large" type="success">解码</n-tag>
-            <n-button @click="readClipboardByType(2)">剪贴板</n-button>
-            <n-button @click="showExampleByType(2)">示例</n-button>
-            <n-button @click="copyValue(2)">复制全部</n-button>
+          <div class="lk-toolbar">
+            <n-tag size="large" type="success">{{ t('tool.codec.decode') }}</n-tag>
+            <n-button @click="readClipboardByType(2)">{{ t('common.clipboard') }}</n-button>
+            <n-button @click="showExampleByType(2)">{{ t('common.example') }}</n-button>
+            <n-button @click="copyValue(2)">{{ t('tool.codec.copyAll') }}</n-button>
           </div>
           <div
             v-if="!isBatchInput"
             ref="rightScrollRef"
-            class="w-full h-full text-lg transition overflow-auto space-y-3"
+            class="flex-1 min-h-0 w-full text-lg transition overflow-auto space-y-3"
             @scroll="handleScroll('right', $event)"
           >
             <div
@@ -329,8 +331,8 @@ function copyEntryValue(value) {
               :style="{ height: `${cardHeight}px` }"
             >
               <div class="entry-actions">
-                <n-button size="small" @click="copyEntryValue(entry.target)">复制</n-button>
-                <n-button size="small" @click="removeRow(index)" :disabled="entries.length === 1">删除</n-button>
+                <n-button size="small" @click="copyEntryValue(entry.target)">{{ t('common.copy') }}</n-button>
+                <n-button size="small" @click="removeRow(index)" :disabled="entries.length === 1">{{ t('tool.codec.delete') }}</n-button>
               </div>
               <n-input
                 v-model:value="entry.target"
@@ -338,18 +340,18 @@ function copyEntryValue(value) {
                 type="textarea"
                 class="w-full h-full entry-input"
                 :autosize="{ minRows: inputRows, maxRows: inputRows }"
-                placeholder="输入 Unicode 字符串"
+                :placeholder="t('tool.codec.unicodeInputPlaceholder')"
                 @input="(val) => handleTargetInput(index, val)"
                 @keydown="(event) => handleJumpKeydown(event, 'right', index)"
               />
             </div>
           </div>
-          <div v-else class="w-full h-full">
+          <div v-else class="flex-1 min-h-0 w-full">
             <n-input
               v-model:value="batchTargetText"
               type="textarea"
               class="w-full h-full batch-input"
-              placeholder="每行一条 Unicode，按换行分割批量解码"
+              :placeholder="t('tool.codec.batchUnicodeDecodePlaceholder')"
               @input="onBatchTargetInput"
             />
           </div>

@@ -31,6 +31,12 @@ const routes = [
         component: () => import("/src/components/wrapper/TextCountToolWrapper.vue"),
       },
       {
+        path: "/text",
+        alias: ["/text-process", "/textProcess"],
+        name: "TextProcessToolWrapper",
+        component: () => import("/src/components/wrapper/TextProcessToolWrapper.vue"),
+      },
+      {
         path: "/json",
         alias: ["/jsonFormatWrapper"],
         name: "JsonFormatWrapper",

@@ -21,69 +21,14 @@ export default defineConfig(async () => ({
     
     rollupOptions: {
       output: {
-        // 手动分块，将大型依赖库分离
+        // 仅保留核心运行时分包，工具页依赖交给动态导入边界处理，避免首屏预加载全量依赖。
         manualChunks: (id) => {
-          // Naive UI 打成单独 chunk，避免内部循环依赖在分包后触发初始化时序问题
-          if (id.includes('node_modules/naive-ui/es')) {
-            return 'naive-ui';
-          }
-
-          if (id.includes('node_modules/naive-ui')) {
-            return 'naive-ui';
-          }
-
-          // lone-format 库单独打包
-          if (id.includes('lone-format')) {
-            return 'lone-format';
-          }
-          
-          // dayjs 时间库单独打包
-          if (id.includes('dayjs')) {
-            return 'dayjs';
-          }
-          
-          // 代码对比库单独打包
-          if (id.includes('v-code-diff')) {
-            return 'v-code-diff';
-          }
-
-          // Excel 导出库按需加载并独立打包
-          if (id.includes('exceljs')) {
-            return 'exceljs';
-          }
-          
-          // jsonpath 库单独打包
-          if (id.includes('jsonpath')) {
-            return 'jsonpath';
-          }
-          
-          // QRCode 和 Barcode 相关库单独打包
-          if (id.includes('qrcode') || id.includes('barcode') || id.includes('jsbarcode')) {
-            return 'qr-bar-code';
-          }
-
-          // Vue 运行时与路由拆分
           if (id.includes('node_modules/vue/') || id.includes('node_modules/@vue/')) {
             return 'vue-core';
           }
 
           if (id.includes('node_modules/vue-router/')) {
             return 'vue-router';
-          }
-
-          // Tauri 相关 API 拆分
-          if (id.includes('node_modules/@tauri-apps/')) {
-            return 'tauri';
-          }
-
-          // 图标库拆分
-          if (id.includes('node_modules/@vicons/')) {
-            return 'vicons';
-          }
-          
-          // node_modules 中的其他库
-          if (id.includes('node_modules')) {
-            return 'vendor';
           }
         },
         

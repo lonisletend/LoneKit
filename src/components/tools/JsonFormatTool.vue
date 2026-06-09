@@ -4,20 +4,20 @@
       <!-- 左侧输入区域 -->
       <div class="h-full p-2 flex flex-col">
         <!-- 固定的操作按钮 -->
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
+        <div class="lk-toolbar mb-2">
           <n-tag size="large" type="warning">
-            输入
+            {{ t('common.input') }}
           </n-tag>
-          <n-button @click="readClipboard">剪贴板</n-button>
-          <n-button @click="showExample">示例</n-button>
-          <n-button @click="clear">清空</n-button>
-          <n-button @click="compressive">压缩</n-button>
-          <n-button @click="copySource">复制</n-button>
+          <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
+          <n-button @click="showExample">{{ t('common.example') }}</n-button>
+          <n-button @click="clear">{{ t('common.clear') }}</n-button>
+          <n-button @click="compressive">{{ t('common.compress') }}</n-button>
+          <n-button @click="copySource">{{ t('common.copy') }}</n-button>
         </div>
         <!-- 可滚动的输入区域 -->
-        <div class="flex-1 w-full overflow-hidden">
+        <div class="flex-1 min-h-0 w-full overflow-hidden">
           <n-input v-model:value="sourceJson" type="textarea" class="w-full h-full text-lg"
-                   placeholder="输入 Json 字符串" @input="handleSourceJsonChange"/>
+                   :placeholder="t('tool.json.inputPlaceholder')" @input="handleSourceJsonChange"/>
         </div>
       </div>
     </template>
@@ -25,9 +25,9 @@
       <!-- 右侧输出区域 -->
       <div class="h-full p-2 flex flex-col">
         <!-- 固定的操作按钮 -->
-        <div class="flex-shrink-0 w-full h-8 flex items-center space-x-4 mb-2">
-          <n-tag size="large" type="success">输出</n-tag>
-          <n-button @click="copyJson">复制</n-button>
+        <div class="lk-toolbar mb-2">
+          <n-tag size="large" type="success">{{ t('common.output') }}</n-tag>
+          <n-button @click="copyJson">{{ t('common.copy') }}</n-button>
           <n-button @click="collapseAll">
             <template #icon> <component :is="CollapseIcon" /> </template>
           </n-button>
@@ -37,29 +37,35 @@
           <n-button @click="toggleSort" :secondary="isSorted" :type="isSorted ? 'success' : 'default'">
             <template #icon> <component :is="SortIcon" /> </template>
           </n-button>
-          <n-input-group>
-            <n-select v-model:value="filterType" :options="filterTypeOptions" :style="{ width: '146px' }" />
-            <n-input 
+          <n-dropdown :options="moreOptions" @select="handleMoreSelect">
+            <n-button>
+              <template #icon><n-icon :component="ChevronDownOutline" /></template>
+            </n-button>
+          </n-dropdown>
+          <n-input-group class="lk-toolbar-filter">
+            <n-select v-model:value="filterType" :options="filterTypeOptions" class="json-filter-type-select" />
+            <n-input
+              class="lk-toolbar-filter-input"
               v-model:value="filterExpression" 
               type="text" 
               @keydown.enter="jsonFilter" 
               @clear="onFilterExpressionClear"
               clearable
-              :placeholder="filterType === 'jsonpath' ? '使用 JsonPath 进行过滤，如：$.data[*].title' : '使用 JavaScript 进行过滤，如：$.data.filter(item => item.rating > 0.5)'"
+              :placeholder="filterPlaceholder"
             />
           </n-input-group>
         </div>
         <!-- 可滚动的输出区域 -->
-        <div class="flex-1 w-full overflow-hidden text-lg border border-gray-300 rounded">
+        <div class="flex-1 min-h-0 w-full overflow-hidden text-lg lk-result-surface">
           <JsonFormat
             v-if="hasSourceContent"
             class="w-full h-full"
             ref="customJsonFormatRef"
             v-model="sourceJson"
-            theme="min-light"
+            :theme="formatTheme"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-            输入内容后加载格式化视图
+            <!-- 输入内容后加载格式化视图 -->
           </div>
         </div>
       </div>
@@ -69,24 +75,25 @@
 
 <script setup>
 
-import { computed, defineAsyncComponent, ref, watch } from "vue";
-import {NInput, NInputGroup, NSelect, NTag, NButton} from "naive-ui";
+import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import {NInput, NInputGroup, NSelect, NTag, NButton, NDropdown, NIcon} from "naive-ui";
 import { 
   TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
 } from '@vicons/fluent';
-import jsonpath from 'jsonpath';
+import { ChevronDownOutline } from '@vicons/ionicons5';
 import SplitPanel from '../common/SplitPanel.vue'
 import { useCommon } from '../../composables/useCommon';
-
-const loadLoneFormat = () => Promise.all([
-  import('lone-format/lone-format.css'),
-  import('lone-format')
-]).then(([, m]) => m);
-const JsonFormat = defineAsyncComponent(() => loadLoneFormat().then((m) => m.JsonFormat));
+import { useDataTransfer } from '../../composables/useDataTransfer';
+import { useThemeMode } from "../../composables/useThemeMode";
+import JsonFormat from 'lone-format/json-format';
+import 'lone-format/style.css';
 
 const { notify, copyToClipboard, readFromClipboard } = useCommon();
+const { send } = useDataTransfer();
+const { t, tm } = useI18n();
 
 const props = defineProps({
   id: {
@@ -98,12 +105,17 @@ const props = defineProps({
 
 const customJsonFormatRef = ref(null)
 const sourceJson = ref();
-const exampleJsonStr = ref(`{"status":200,"text":"","error":null,"data":[{"news_id":123456789012345678901234567890,"title":"iPhone X Review: Innovative future with real black technology","source":"Netease phone","rating":0.5},{"news_id":123456789012345678901234567891,"title":"Traffic paradise: How to design streets for people and unmanned vehicles in the future?","source":"Netease smart","link":"http://netease.smart/traffic-paradise/1235","rating":0.60},{"news_id":123456789012345678901234567892,"title":"Teslamask's American Business Relations: The government does not pay billions to build factories","source":"AI Finance","rating":0.8000,"members":["Daniel","Mike","John"]}]}`);
-const jsonObject = ref();
 const filterType = ref('jsonpath');
 const filterExpression = ref('');
 const isSorted = ref(false);
 const hasSourceContent = computed(() => !!sourceJson.value?.trim());
+const { resolvedTheme } = useThemeMode();
+const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
+const filterPlaceholder = computed(() => (
+  filterType.value === 'jsonpath'
+    ? t('tool.json.jsonPathPlaceholder')
+    : t('tool.json.jsFilterPlaceholder')
+));
 
 // 过滤类型选项
 const filterTypeOptions = [
@@ -118,18 +130,7 @@ watch(filterType, () => {
 });
 
 function handleSourceJsonChange(val) {
-  try {
-    if (sourceJson.value.trim() === '') {
-      throw new Error('The input is empty!')
-    }
-    if (filterExpression.value) {
-      jsonObject.value = jsonpath.query(JSON.parse(sourceJson.value), filterExpression.value);
-    } else {
-      jsonObject.value = JSON.parse(sourceJson.value);
-    }
-  } catch (error) {
-    jsonObject.value = error;
-  }
+  sourceJson.value = val ?? '';
 }
 
 async function readClipboard() {
@@ -141,7 +142,7 @@ async function readClipboard() {
 }
 
 function showExample() {
-  sourceJson.value = exampleJsonStr.value;
+  sourceJson.value = tm('examples.jsonFormat');
   handleSourceJsonChange(sourceJson.value);
 }
 
@@ -159,7 +160,7 @@ function clear() {
 
 async function copyJson() {
   await customJsonFormatRef.value?.copyJson()
-  notify('success', '复制成功!');
+  notify('success', t('common.copied'));
 }
 
 function executeFilter() {
@@ -207,8 +208,31 @@ function collapseAll() {
   customJsonFormatRef.value?.collapseAll();
 }
 
+async function sendToDiff() {
+  await customJsonFormatRef.value?.copyJson();
+  
+  const json = await readFromClipboard();
+  if (json == null) {
+    notify('warning', t('tool.noSendableContent'))
+    return
+  }
+  send('DiffTool', json)
+  notify('success', t('tool.sentToDiff'))
+}
+
+const moreOptions = computed(() => [
+  { label: t('tool.sendToDiff'), key: 'diff' }
+])
+
+function handleMoreSelect(key) {
+  if (key === 'diff') sendToDiff()
+}
+
 </script>
 
 <style scoped>
-/* 组件特有样式可以保留在这里 */
+.json-filter-type-select {
+  width: 120px;
+  flex: 0 0 120px;
+}
 </style>

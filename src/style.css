@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+  --lk-surface-bg: #ffffff;
+  --lk-surface-muted-bg: #f8fafc;
+  --lk-surface-border: #cbd5e1;
+  --lk-surface-border-hover: #94a3b8;
+  --lk-surface-radius: 6px;
+  --lk-surface-padding: 12px;
+}
+
+html.dark {
+  color-scheme: dark;
+  --lk-surface-bg: #18181b;
+  --lk-surface-muted-bg: #27272a;
+  --lk-surface-border: #3f3f46;
+  --lk-surface-border-hover: #71717a;
+}
+
 /* 全局输入框代码字体样式 */
 .n-input .n-input__textarea,
 .n-input .n-input__input-el,
@@ -9,6 +27,79 @@
   font-family: Monaco, Consolas, 'Courier New', monospace !important;
   font-size: 14px !important;
   line-height: 1.5 !important;
+}
+
+.lk-result-surface {
+  border: 1px solid var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
+  background: var(--lk-surface-bg);
+}
+
+.lk-result-surface-padded {
+  padding: var(--lk-surface-padding);
+}
+
+.lk-toolbar {
+  width: 100%;
+  min-height: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.lk-toolbar--compact {
+  gap: 0.5rem 0.5rem;
+}
+
+.lk-fit-select {
+  width: auto;
+  min-width: max-content;
+  flex: 0 0 auto;
+}
+
+.lk-fit-select .n-base-selection {
+  min-width: max-content;
+}
+
+.lk-fit-select .n-base-selection-label,
+.lk-fit-select .n-base-selection-placeholder {
+  padding-left: 12px;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+
+.lk-toolbar-filter {
+  flex: 1 1 320px;
+  min-width: min(100%, 320px);
+  max-width: none;
+}
+
+.lk-toolbar-filter .lk-fit-select {
+  width: max-content;
+  min-width: max-content;
+  flex: 0 0 max-content;
+}
+
+.lk-toolbar-filter .lk-fit-select .n-base-selection {
+  width: max-content;
+}
+
+.lk-toolbar-filter-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lk-toolbar .lk-fit-select {
+  width: max-content !important;
+  min-width: max-content;
+  flex: 0 0 max-content;
+}
+
+.empty-result-surface {
+  border-color: var(--lk-surface-border);
+  border-radius: var(--lk-surface-radius);
 }
 
 /* JSON格式化组件样式 */

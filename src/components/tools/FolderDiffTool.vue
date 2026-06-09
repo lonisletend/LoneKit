@@ -1,5 +1,6 @@
 <script setup>
 import { computed, h, nextTick, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { NAlert, NButton, NCard, NIcon, NModal, NSpin, NTree } from 'naive-ui';
 import {
   ArrowClockwise24Regular as RefreshIcon,
@@ -10,12 +11,16 @@ import {
 import { CodeDiff } from 'v-code-diff';
 import SplitPanel from '../common/SplitPanel.vue';
 import { useCommon } from '../../composables/useCommon';
+import { useThemeMode } from '../../composables/useThemeMode';
 
 defineOptions({
   name: 'FolderDiffTool'
 });
 
 const { notify } = useCommon();
+const { resolvedTheme } = useThemeMode();
+const { t } = useI18n();
+const diffTheme = computed(() => (resolvedTheme.value === 'dark' ? 'dark' : 'light'));
 
 const leftInputRef = ref(null);
 const rightInputRef = ref(null);
@@ -24,8 +29,8 @@ const rightTreeBodyRef = ref(null);
 const leftDirHandle = ref(null);
 const rightDirHandle = ref(null);
 
-const leftFolderName = ref('未选择文件夹');
-const rightFolderName = ref('未选择文件夹');
+const leftFolderName = ref('');
+const rightFolderName = ref('');
 
 const leftFilesMap = ref(new Map());
 const rightFilesMap = ref(new Map());
@@ -55,12 +60,12 @@ const hoveredSamePath = ref('');
 const statusFilter = ref('all');
 const hasComparedResult = ref(false);
 
-const statusLabelMap = {
-  'left-only': '仅左侧',
-  'right-only': '仅右侧',
-  modified: '变更',
-  same: '相同'
-};
+const statusLabelMap = computed(() => ({
+  'left-only': t('tool.folderDiff.status.leftOnly'),
+  'right-only': t('tool.folderDiff.status.rightOnly'),
+  modified: t('tool.folderDiff.status.modified'),
+  same: t('tool.folderDiff.status.same')
+}));
 
 const statusShortMap = {
   'left-only': 'L',
@@ -101,6 +106,18 @@ const rightExpandedKeys = computed(() => {
 });
 
 let isSyncingScroll = false;
+
+function getUnknownError(error) {
+  return error?.message || t('tool.folderDiff.unknownError');
+}
+
+function getSideName(side) {
+  return side === 'left' ? t('tool.folderDiff.side.left') : t('tool.folderDiff.side.right');
+}
+
+function getSideLoadingKey(side, action) {
+  return `tool.folderDiff.loading.${action}${side === 'left' ? 'Left' : 'Right'}`;
+}
 
 function collectDirKeys(nodes, keySet) {
   nodes.forEach((node) => {
@@ -186,11 +203,11 @@ async function pickFolder(side) {
 async function pickFolderWithFSAccess(side) {
   try {
     loading.value = true;
-    loadingText.value = side === 'left' ? '正在加载左侧文件夹...' : '正在加载右侧文件夹...';
+    loadingText.value = t(getSideLoadingKey(side, 'loading'));
 
     const handle = await window.showDirectoryPicker();
 
-    loadingText.value = side === 'left' ? '正在扫描左侧文件夹...' : '正在扫描右侧文件夹...';
+    loadingText.value = t(getSideLoadingKey(side, 'scanning'));
     const fileMap = new Map();
     await collectFilesFromDirectoryHandle(handle, '', fileMap);
 
@@ -207,7 +224,7 @@ async function pickFolderWithFSAccess(side) {
     await handleFolderSelectionChange();
   } catch (error) {
     if (error?.name !== 'AbortError') {
-      notify('error', `文件夹选择失败: ${error?.message || '未知错误'}`);
+      notify('error', t('tool.folderDiff.pickFailed', { message: getUnknownError(error) }));
     }
   } finally {
     loading.value = false;
@@ -249,12 +266,12 @@ async function handleFileInputChange(event, side) {
   }
 
   loading.value = true;
-  loadingText.value = side === 'left' ? '正在加载左侧文件夹...' : '正在加载右侧文件夹...';
+  loadingText.value = t(getSideLoadingKey(side, 'loading'));
   await nextTick();
 
   try {
     const map = new Map();
-    let folderName = '已选择文件夹';
+    let folderName = t('tool.folderDiff.selectedFolder');
 
     files.forEach((file) => {
       const rawPath = file.webkitRelativePath || file.name;
@@ -400,7 +417,7 @@ async function startCompare() {
   }
 
   loading.value = true;
-  loadingText.value = '正在比较文件夹内容，请稍候...';
+  loadingText.value = t('tool.folderDiff.loading.comparing');
 
   try {
     const compareMap = await buildFileDiffMap(leftFilesMap.value, rightFilesMap.value);
@@ -415,9 +432,9 @@ async function startCompare() {
     leftSelectedKeys.value = [];
     rightSelectedKeys.value = [];
 
-    notify('success', `文件夹比较完成，共 ${compareMap.size} 个文件项目`);
+    notify('success', t('tool.folderDiff.compareSuccess', { count: compareMap.size }));
   } catch (error) {
-    notify('error', `文件夹比较失败: ${error?.message || '未知错误'}`);
+    notify('error', t('tool.folderDiff.compareFailed', { message: getUnknownError(error) }));
   } finally {
     loading.value = false;
     loadingText.value = '';
@@ -629,13 +646,13 @@ function buildTreeData(side, sideFileMap, compareMap, directoryMap, filterStatus
 function clearSideFolder(side) {
   if (side === 'left') {
     leftDirHandle.value = null;
-    leftFolderName.value = '未选择文件夹';
+    leftFolderName.value = '';
     leftFilesMap.value = new Map();
     leftTreeData.value = [];
     leftSelectedKeys.value = [];
   } else {
     rightDirHandle.value = null;
-    rightFolderName.value = '未选择文件夹';
+    rightFolderName.value = '';
     rightFilesMap.value = new Map();
     rightTreeData.value = [];
     rightSelectedKeys.value = [];
@@ -705,7 +722,7 @@ async function expandSideAll(side) {
     return;
   }
 
-  const startedAt = await beginUiLoading(side === 'left' ? '正在展开左侧文件树...' : '正在展开右侧文件树...');
+  const startedAt = await beginUiLoading(t(getSideLoadingKey(side, 'expanding')));
   try {
     const sideKeys = getSideTreeDirKeys(side);
     expandedDirKeys.value = Array.from(new Set([...expandedDirKeys.value, ...sideKeys]));
@@ -719,7 +736,7 @@ async function collapseSideAll(side) {
     return;
   }
 
-  const startedAt = await beginUiLoading(side === 'left' ? '正在折叠左侧文件树...' : '正在折叠右侧文件树...');
+  const startedAt = await beginUiLoading(t(getSideLoadingKey(side, 'collapsing')));
   try {
     const sideKeys = getSideTreeDirKeys(side);
     expandedDirKeys.value = expandedDirKeys.value.filter((key) => !sideKeys.has(key));
@@ -735,20 +752,20 @@ async function refreshSide(side) {
 
   const hasFolder = side === 'left' ? hasLeftFolder.value : hasRightFolder.value;
   if (!hasFolder) {
-    notify('warning', `请先选择${side === 'left' ? '左侧' : '右侧'}文件夹`);
+    notify('warning', t('tool.folderDiff.selectSideFirst', { side: getSideName(side) }));
     return;
   }
 
   const handle = side === 'left' ? leftDirHandle.value : rightDirHandle.value;
   if (!handle) {
-    notify('warning', '当前文件夹为上传模式，无法自动刷新，请重新选择该侧文件夹');
+    notify('warning', t('tool.folderDiff.uploadModeRefreshUnsupported'));
     await pickFolder(side);
     return;
   }
 
   try {
     loading.value = true;
-    loadingText.value = side === 'left' ? '正在刷新左侧文件夹...' : '正在刷新右侧文件夹...';
+    loadingText.value = t(getSideLoadingKey(side, 'refreshing'));
 
     const fileMap = new Map();
     await collectFilesFromDirectoryHandle(handle, '', fileMap);
@@ -763,7 +780,7 @@ async function refreshSide(side) {
 
     await handleFolderSelectionChange();
   } catch (error) {
-    notify('error', `刷新失败: ${error?.message || '未知错误'}`);
+    notify('error', t('tool.folderDiff.refreshFailed', { message: getUnknownError(error) }));
   } finally {
     loading.value = false;
     loadingText.value = '';
@@ -893,7 +910,7 @@ async function openDiffModal(path) {
   }
 
   modalVisible.value = true;
-  modalTitle.value = `${path} [${statusLabelMap[compare.status]}]`;
+  modalTitle.value = `${path} [${statusLabelMap.value[compare.status]}]`;
   previewLoading.value = true;
   previewType.value = 'message';
   previewMessage.value = '';
@@ -908,7 +925,7 @@ async function openDiffModal(path) {
 
     if ((leftRead.exists && !leftRead.isText) || (rightRead.exists && !rightRead.isText)) {
       previewType.value = 'binary';
-      previewMessage.value = '该文件是二进制或不可安全解码的文本，暂不展示内容级 diff。';
+      previewMessage.value = t('tool.folderDiff.binaryPreviewUnsupported');
       return;
     }
 
@@ -917,7 +934,7 @@ async function openDiffModal(path) {
     previewType.value = 'diff';
   } catch (error) {
     previewType.value = 'message';
-    previewMessage.value = `读取文件失败: ${error?.message || '未知错误'}`;
+    previewMessage.value = t('tool.folderDiff.readFileFailed', { message: getUnknownError(error) });
   } finally {
     previewLoading.value = false;
   }
@@ -925,7 +942,7 @@ async function openDiffModal(path) {
 </script>
 
 <template>
-  <div class="w-full h-full p-2">
+  <div class="folder-diff-root w-full h-full p-2" :class="{ 'is-dark': resolvedTheme === 'dark' }">
     <input
       ref="leftInputRef"
       type="file"
@@ -946,42 +963,42 @@ async function openDiffModal(path) {
     >
 
     <div class="h-full flex flex-col space-y-2">
-      <div class="w-full h-8 flex items-center space-x-2 text-sm">
+      <div class="legend-bar w-full h-8 flex items-center space-x-2 text-sm">
         <span
           class="legend-item status-total"
           :class="{ active: statusFilter === 'all' }"
           @click="handleLegendFilterClick('all')"
-        ><i class="legend-dot"></i>总数 {{ stats.total }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.total') }} {{ stats.total }}</span>
         <span
           class="legend-item status-left-only"
           :class="{ active: statusFilter === 'left-only' }"
           @click="handleLegendFilterClick('left-only')"
-        ><i class="legend-dot"></i>仅左侧 {{ stats['left-only'] }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.leftOnly') }} {{ stats['left-only'] }}</span>
         <span
           class="legend-item status-right-only"
           :class="{ active: statusFilter === 'right-only' }"
           @click="handleLegendFilterClick('right-only')"
-        ><i class="legend-dot"></i>仅右侧 {{ stats['right-only'] }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.rightOnly') }} {{ stats['right-only'] }}</span>
         <span
           class="legend-item status-modified"
           :class="{ active: statusFilter === 'modified' }"
           @click="handleLegendFilterClick('modified')"
-        ><i class="legend-dot"></i>变更 {{ stats.modified }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.modified') }} {{ stats.modified }}</span>
         <span
           class="legend-item status-same"
           :class="{ active: statusFilter === 'same' }"
           @click="handleLegendFilterClick('same')"
-        ><i class="legend-dot"></i>相同 {{ stats.same }}</span>
+        ><i class="legend-dot"></i>{{ t('tool.folderDiff.status.same') }} {{ stats.same }}</span>
       </div>
 
-      <n-spin :show="loading" :description="loadingText || '处理中...'" class="folder-diff-spin flex-1 min-h-0">
+      <n-spin :show="loading" :description="loadingText || t('tool.folderDiff.loading.processing')" class="folder-diff-spin flex-1 min-h-0">
         <div class="h-full min-h-0">
           <SplitPanel>
           <template #left>
             <div class="h-full px-2">
-              <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
+              <div class="folder-panel h-full p-2 flex flex-col rounded">
                 <div class="tree-header pb-2">
-                  <n-button v-if="!hasLeftFolder" type="warning" ghost size="small" circle title="选择左侧文件夹" @click="pickLeftFolder">
+                  <n-button v-if="!hasLeftFolder" type="warning" ghost size="small" circle :title="t('tool.folderDiff.selectLeftFolder')" @click="pickLeftFolder">
                     <template #icon>
                       <n-icon>
                         <FolderIcon />
@@ -991,21 +1008,21 @@ async function openDiffModal(path) {
                   <template v-else>
                     <span class="tree-title" :title="leftFolderName">{{ leftFolderName }}</span>
                     <div class="header-actions">
-                      <n-button quaternary size="small" title="展开全部" @click="expandSideAll('left')">
+                      <n-button quaternary size="small" :title="t('common.expandAll')" @click="expandSideAll('left')">
                         <template #icon>
                           <n-icon>
                             <ExpandIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="折叠全部" @click="collapseSideAll('left')">
+                      <n-button quaternary size="small" :title="t('common.collapseAll')" @click="collapseSideAll('left')">
                         <template #icon>
                           <n-icon>
                             <CollapseIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="刷新" @click="refreshSide('left')">
+                      <n-button quaternary size="small" :title="t('tool.folderDiff.refresh')" @click="refreshSide('left')">
                         <template #icon>
                           <n-icon>
                             <RefreshIcon />
@@ -1030,7 +1047,7 @@ async function openDiffModal(path) {
                     @update:expanded-keys="handleExpandedUpdate"
                     @update:selected-keys="handleLeftSelected"
                   />
-                  <div v-else class="empty-tip">请选择文件夹</div>
+                  <div v-else class="empty-tip">{{ t('tool.folderDiff.selectFolder') }}</div>
                 </div>
               </div>
             </div>
@@ -1038,9 +1055,9 @@ async function openDiffModal(path) {
 
           <template #right>
             <div class="h-full px-2">
-              <div class="h-full p-2 flex flex-col border border-gray-200 rounded bg-white">
+              <div class="folder-panel h-full p-2 flex flex-col rounded">
                 <div class="tree-header pb-2">
-                  <n-button v-if="!hasRightFolder" type="primary" ghost size="small" circle title="选择右侧文件夹" @click="pickRightFolder">
+                  <n-button v-if="!hasRightFolder" type="primary" ghost size="small" circle :title="t('tool.folderDiff.selectRightFolder')" @click="pickRightFolder">
                     <template #icon>
                       <n-icon>
                         <FolderIcon />
@@ -1050,21 +1067,21 @@ async function openDiffModal(path) {
                   <template v-else>
                     <span class="tree-title" :title="rightFolderName">{{ rightFolderName }}</span>
                     <div class="header-actions">
-                      <n-button quaternary size="small" title="展开全部" @click="expandSideAll('right')">
+                      <n-button quaternary size="small" :title="t('common.expandAll')" @click="expandSideAll('right')">
                         <template #icon>
                           <n-icon>
                             <ExpandIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="折叠全部" @click="collapseSideAll('right')">
+                      <n-button quaternary size="small" :title="t('common.collapseAll')" @click="collapseSideAll('right')">
                         <template #icon>
                           <n-icon>
                             <CollapseIcon />
                           </n-icon>
                         </template>
                       </n-button>
-                      <n-button quaternary size="small" title="刷新" @click="refreshSide('right')">
+                      <n-button quaternary size="small" :title="t('tool.folderDiff.refresh')" @click="refreshSide('right')">
                         <template #icon>
                           <n-icon>
                             <RefreshIcon />
@@ -1089,7 +1106,7 @@ async function openDiffModal(path) {
                     @update:expanded-keys="handleExpandedUpdate"
                     @update:selected-keys="handleRightSelected"
                   />
-                  <div v-else class="empty-tip">请选择文件夹</div>
+                  <div v-else class="empty-tip">{{ t('tool.folderDiff.selectFolder') }}</div>
                 </div>
               </div>
             </div>
@@ -1115,15 +1132,16 @@ async function openDiffModal(path) {
       >
         <div class="w-full flex-1 min-h-0 flex flex-col gap-2">
           <div class="flex-1 min-h-0 overflow-auto diff-preview-area">
-            <div v-if="previewLoading" class="text-sm text-gray-500">正在读取文件内容...</div>
+            <div v-if="previewLoading" class="text-sm text-slate-500 dark:text-slate-400">{{ t('tool.folderDiff.loading.readingFile') }}</div>
             <n-alert v-else-if="previewType !== 'diff'" type="info" :show-icon="false">
-              {{ previewMessage || '当前文件无法展示内容对比。' }}
+              {{ previewMessage || t('tool.folderDiff.previewUnavailable') }}
             </n-alert>
             <CodeDiff
               v-else
               :old-string="leftText"
               :new-string="rightText"
               output-format="side-by-side"
+              :theme="diffTheme"
             />
           </div>
         </div>
@@ -1138,6 +1156,55 @@ async function openDiffModal(path) {
   height: 100%;
 }
 
+.folder-diff-root {
+  --folder-diff-surface: var(--lk-surface-bg);
+  --folder-diff-panel-bg: var(--lk-surface-bg);
+  --folder-diff-header-bg: transparent;
+  --folder-diff-border: var(--lk-surface-border);
+  --folder-diff-border-strong: var(--lk-surface-border);
+  --folder-diff-border-hover: var(--lk-surface-border-hover);
+  --folder-diff-text-muted: #6b7280;
+  --folder-diff-text-main: #374151;
+  --folder-diff-dot-total: #6b7280;
+  --folder-diff-legend-bg: #f8fafc;
+  --folder-diff-legend-hover-bg: #f1f5f9;
+  --folder-diff-legend-active-bg: #eef2f7;
+  --folder-diff-left-only: #f59e0b;
+  --folder-diff-right-only: #3b82f6;
+  --folder-diff-modified: #ef4444;
+  --folder-diff-same: #10b981;
+  --folder-diff-sync-hover: rgba(16, 185, 129, 0.12);
+  --folder-diff-left-only-name: #b45309;
+  --folder-diff-right-only-name: #1d4ed8;
+  --folder-diff-modified-name: #b91c1c;
+  --folder-diff-same-name: #065f46;
+  color: var(--folder-diff-text-main);
+}
+
+.folder-diff-root.is-dark {
+  --folder-diff-surface: var(--lk-surface-bg);
+  --folder-diff-panel-bg: var(--lk-surface-bg);
+  --folder-diff-header-bg: var(--lk-surface-muted-bg);
+  --folder-diff-border: var(--lk-surface-border);
+  --folder-diff-border-strong: var(--lk-surface-border);
+  --folder-diff-border-hover: var(--lk-surface-border-hover);
+  --folder-diff-text-muted: #a1a1aa;
+  --folder-diff-text-main: #d4d4d8;
+  --folder-diff-dot-total: #a1a1aa;
+  --folder-diff-legend-bg: #1f1f23;
+  --folder-diff-legend-hover-bg: #27272a;
+  --folder-diff-legend-active-bg: #27272a;
+  --folder-diff-left-only: #fbbf24;
+  --folder-diff-right-only: #60a5fa;
+  --folder-diff-modified: #f87171;
+  --folder-diff-same: #34d399;
+  --folder-diff-sync-hover: rgba(16, 185, 129, 0.22);
+  --folder-diff-left-only-name: #fbbf24;
+  --folder-diff-right-only-name: #60a5fa;
+  --folder-diff-modified-name: #fca5a5;
+  --folder-diff-same-name: #6ee7b7;
+}
+
 .folder-diff-spin :deep(.n-spin-container),
 .folder-diff-spin :deep(.n-spin-body),
 .folder-diff-spin :deep(.n-spin-content) {
@@ -1150,6 +1217,16 @@ async function openDiffModal(path) {
   flex-direction: column;
 }
 
+.legend-bar {
+  color: var(--folder-diff-text-main);
+}
+
+.folder-panel {
+  border: 1px solid var(--folder-diff-border);
+  border-radius: var(--lk-surface-radius);
+  background-color: var(--folder-diff-panel-bg);
+}
+
 .tree-header {
   flex: 0 0 auto;
   height: 30px;
@@ -1158,7 +1235,9 @@ async function openDiffModal(path) {
   justify-content: space-between;
   gap: 8px;
   font-weight: 600;
-  border-bottom: 1px solid #f0f0f0;
+  color: var(--folder-diff-text-main);
+  background-color: var(--folder-diff-header-bg);
+  border-bottom: 1px solid var(--folder-diff-border);
 }
 
 .tree-title {
@@ -1167,6 +1246,7 @@ async function openDiffModal(path) {
   text-align: left;
   font-size: 12px;
   font-weight: 500;
+  color: var(--folder-diff-text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1178,6 +1258,10 @@ async function openDiffModal(path) {
   gap: 2px;
 }
 
+.header-actions :deep(.n-button) {
+  color: var(--folder-diff-text-main);
+}
+
 .tree-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -1186,7 +1270,7 @@ async function openDiffModal(path) {
 }
 
 .empty-tip {
-  color: #6b7280;
+  color: var(--folder-diff-text-muted);
   font-size: 13px;
   margin-top: 8px;
 }
@@ -1199,18 +1283,22 @@ async function openDiffModal(path) {
   padding: 0 10px;
   font-size: 12px;
   border-radius: 4px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--folder-diff-border);
+  color: var(--folder-diff-text-main);
+  background-color: var(--folder-diff-legend-bg);
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
 }
 
 .legend-item:hover {
-  border-color: #9ca3af;
+  background-color: var(--folder-diff-legend-hover-bg);
+  border-color: var(--folder-diff-border-hover);
 }
 
 .legend-item.active {
   font-weight: 600;
+  background-color: var(--folder-diff-legend-active-bg);
 }
 
 .legend-dot {
@@ -1221,32 +1309,32 @@ async function openDiffModal(path) {
 }
 
 .legend-item.status-total .legend-dot {
-  background: #6b7280;
+  background: var(--folder-diff-dot-total);
 }
 
 .legend-item.status-total.active {
-  border-color: #6b7280;
-  box-shadow: inset 0 0 0 1px #6b7280;
+  border-color: var(--folder-diff-dot-total);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-dot-total);
 }
 
 .legend-item.status-left-only.active {
-  border-color: #f59e0b;
-  box-shadow: inset 0 0 0 1px #f59e0b;
+  border-color: var(--folder-diff-left-only);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-left-only);
 }
 
 .legend-item.status-right-only.active {
-  border-color: #3b82f6;
-  box-shadow: inset 0 0 0 1px #3b82f6;
+  border-color: var(--folder-diff-right-only);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-right-only);
 }
 
 .legend-item.status-modified.active {
-  border-color: #ef4444;
-  box-shadow: inset 0 0 0 1px #ef4444;
+  border-color: var(--folder-diff-modified);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-modified);
 }
 
 .legend-item.status-same.active {
-  border-color: #10b981;
-  box-shadow: inset 0 0 0 1px #10b981;
+  border-color: var(--folder-diff-same);
+  box-shadow: inset 0 0 0 1px var(--folder-diff-same);
 }
 
 :deep(.tree-node-label) {
@@ -1257,7 +1345,7 @@ async function openDiffModal(path) {
 }
 
 :deep(.tree-node-label.is-sync-hover) {
-  background: rgba(16, 185, 129, 0.12);
+  background: var(--folder-diff-sync-hover);
   border-radius: 4px;
 }
 
@@ -1270,6 +1358,7 @@ async function openDiffModal(path) {
 
 :deep(.tree-node-label .node-name) {
   white-space: nowrap;
+  color: var(--folder-diff-text-main);
 }
 
 :deep(.tree-node-label .node-status) {
@@ -1277,8 +1366,8 @@ async function openDiffModal(path) {
   font-size: 10px;
   padding: 0 4px;
   border-radius: 4px;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  border: 1px solid var(--folder-diff-border-strong);
+  color: var(--folder-diff-text-main);
 }
 
 :deep(.type-dir .node-name) {
@@ -1287,43 +1376,49 @@ async function openDiffModal(path) {
 
 :deep(.status-left-only .status-dot),
 .legend-item.status-left-only .legend-dot {
-  background: #f59e0b;
+  background: var(--folder-diff-left-only);
 }
 
 :deep(.status-right-only .status-dot),
 .legend-item.status-right-only .legend-dot {
-  background: #3b82f6;
+  background: var(--folder-diff-right-only);
 }
 
 :deep(.status-modified .status-dot),
 .legend-item.status-modified .legend-dot {
-  background: #ef4444;
+  background: var(--folder-diff-modified);
 }
 
 :deep(.status-same .status-dot),
 .legend-item.status-same .legend-dot {
-  background: #10b981;
+  background: var(--folder-diff-same);
 }
 
 :deep(.status-left-only .node-name) {
-  color: #b45309;
+  color: var(--folder-diff-left-only-name);
 }
 
 :deep(.status-right-only .node-name) {
-  color: #1d4ed8;
+  color: var(--folder-diff-right-only-name);
 }
 
 :deep(.status-modified .node-name) {
-  color: #b91c1c;
+  color: var(--folder-diff-modified-name);
 }
 
 :deep(.status-same .node-name) {
-  color: #065f46;
+  color: var(--folder-diff-same-name);
 }
 
 .diff-modal {
   width: min(1200px, 95vw);
   height: min(760px, 90vh);
+}
+
+.diff-modal :deep(.n-card) {
+  background-color: var(--folder-diff-surface);
+  color: var(--folder-diff-text-main);
+  border: 1px solid var(--folder-diff-border);
 }
 
 .diff-modal :deep(.n-card__content) {
@@ -1346,5 +1441,8 @@ async function openDiffModal(path) {
   width: 100% !important;
   max-width: 100%;
   overflow: auto;
+  border: 1px solid var(--lk-surface-border) !important;
+  border-radius: var(--lk-surface-radius) !important;
+  background: var(--lk-surface-bg) !important;
 }
 </style>
