@@ -57,6 +57,58 @@ export default {
     unfavorite: "取消收藏",
     readFavoritesFailed: "[menu] 读取收藏菜单失败",
   },
+  about: {
+    title: "关于",
+    tabs: {
+      about: "关于",
+      support: "支持项目",
+      thanks: "致谢",
+    },
+    description: {
+      line1: "LoneKit 是一个专注于开发与测试场景的工具集。",
+      line2: "每一个工具都源于真实工作中的需求，旨在减少琐碎操作，让开发者更专注于创造本身。",
+      line3: "如果它能帮你每天节省 5 分钟，请把这些时间留给家人，留给自己，留给生活。",
+      issuePrefix: "如果你有任何问题、建议或想法，欢迎在 GitHub 上提交",
+      issueSuffix: "进行交流。",
+    },
+    support: {
+      intro: {
+        line1: "这个项目目前完全由个人业余时间维护，属于用爱发电的开源项目。",
+        line2: "未来也不会通过在工具页面接入广告的方式作为盈利或收入来源。",
+        line3: "如果它对你有帮助，并且你愿意支持它继续发展，我将非常感激。",
+        line4: "赞助仅用于支持服务器、基础设施与开发成本，不会带来任何功能特权或额外服务。",
+        line5: "所有功能对所有用户始终保持免费与一致。",
+      },
+      acknowledge: "支持一下",
+      qrPlaceholder: "二维码占位",
+      methodsNote: "请在赞助时备注您的信息，赞助信息将会定期更新在感谢页。",
+      methods: {
+        token: {
+          title: "Token 赞助",
+          descriptionPrefix: "如果您手头有空闲的 Token 消耗不完，可以通过邮件联系的方式赞助",
+          emailBase64: "eWFuZ3hqc3VuMDMyNEBnbWFpbC5jb20=(Base64)",
+        },
+        wechat: {
+          title: "微信支付",
+        },
+        alipay: {
+          title: "支付宝支付",
+        },
+      },
+    },
+    thanks: {
+      specialTitle: "特别感谢",
+      special: {
+        line1: "感谢陪伴这个项目从 v0.0.1 走到 v1.0.0 的所有使用者，是你们的反馈与建议，让它不断完善并成长至今。",
+        line2: "感谢这个 AI 时代，让许多原本复杂的想法得以更轻松地被实现。",
+        line3: "特别感谢她——这个业余项目占用了不少本该用于陪伴的时间。而且我总是在有灵感的时候敲键盘到深夜一两点。🫣",
+      },
+      sponsorTitle: "赞助感谢",
+      sponsor: {
+        empty: "定期更新。现在还空空如也哦。",
+      },
+    },
+  },
   update: {
     checkingTitle: "检查更新",
     foundTitle: "发现新版本",
