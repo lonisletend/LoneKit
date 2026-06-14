@@ -1,5 +1,18 @@
 export default [
   {
+    date: '2026.06.14',
+    version: 'v1.0.0',
+    added: [
+      '新增关于弹窗，集中展示应用 Logo、版本信息、项目说明与 GitHub Issue 反馈入口。',
+      '新增支持项目页面，说明项目维护方式与赞助原则，并提供 Token、微信支付、支付宝支付三种支持方式。',
+      '新增致谢页面，记录项目从 v0.0.1 走向 v1.0.0 过程中的特别感谢与赞助感谢。',
+    ],
+    optimized: [
+      '赞助二维码改为本地资源打包，避免依赖外部图片链接，提升桌面端离线与弱网展示稳定性。',
+      '侧边栏底部按钮支持换行排列，避免新增关于入口后在窄侧栏下溢出。',
+    ],
+  },
+  {
     date: '2026.06.09',
     version: 'v0.9.14',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.14',

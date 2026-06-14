@@ -1,5 +1,18 @@
 export default [
   {
+    date: '2026.06.14',
+    version: 'v1.0.0',
+    added: [
+      'Added an About modal that shows the app logo, version, project description, and GitHub Issue feedback entry.',
+      'Added a Support page explaining project maintenance and sponsorship principles, with Token, WeChat Pay, and Alipay support methods.',
+      'Added a Thanks page for special thanks and sponsor acknowledgements as the project moves from v0.0.1 to v1.0.0.',
+    ],
+    optimized: [
+      'Bundled sponsorship QR codes as local assets instead of external image links, improving desktop display stability offline and on weak networks.',
+      'Allowed footer sidebar buttons to wrap, preventing overflow after adding the About entry in narrow sidebars.',
+    ],
+  },
+  {
     date: '2026.06.09',
     version: 'v0.9.14',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v0.9.14',
