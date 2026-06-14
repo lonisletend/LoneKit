@@ -21,7 +21,7 @@
           </div>
           <div class="shrink-0 mb-4 flex items-center justify-center border-t border-slate-200 dark:border-slate-800 pt-3">
             <div class="w-full px-2 flex flex-col items-center gap-2">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center justify-center gap-2 flex-wrap">
                 <n-button size="small" quaternary circle class="theme-toggle-btn" @click="handleThemeToggleClick">
                   <template #icon>
                     <n-icon :component="currentThemeIcon" />
@@ -41,6 +41,19 @@
                 <n-button size="small" quaternary circle class="theme-toggle-btn" @click="handleGithubClick">
                   <template #icon>
                     <n-icon :component="GithubIcon" />
+                  </template>
+                </n-button>
+                <n-button
+                  size="small"
+                  quaternary
+                  circle
+                  class="theme-toggle-btn"
+                  :title="t('about.title')"
+                  :aria-label="t('about.title')"
+                  @click="showAboutModal = true"
+                >
+                  <template #icon>
+                    <n-icon :component="InfoIcon" />
                   </template>
                 </n-button>
               </div>
@@ -64,6 +77,87 @@
         </n-notification-provider>
       </div>
     </n-layout>
+    <n-modal v-model:show="showAboutModal" :mask-closable="true">
+      <div class="about-modal">
+        <n-tabs
+          v-model:value="aboutActiveTab"
+          type="line"
+          animated
+          justify-content="center"
+          pane-class="about-tab-pane"
+          @update:value="handleAboutTabUpdate"
+        >
+          <n-tab-pane name="about" :tab="t('about.tabs.about')">
+            <section class="about-content">
+              <img class="about-logo-image" :src="logoImage" :alt="t('common.appName')" />
+              <div class="about-logo font-logo">LoneKit</div>
+              <div class="about-version">{{ t('common.version') }} {{ version }}</div>
+              <div class="about-description">
+                <p>{{ t('about.description.line1') }}</p>
+                <p>{{ t('about.description.line2') }}</p>
+                <p>{{ t('about.description.line3') }}</p>
+                <p>
+                  {{ t('about.description.issuePrefix') }}
+                  <a class="about-link" :href="issueUrl" @click.prevent="openExternalLink(issueUrl)">Issue</a>
+                  {{ t('about.description.issueSuffix') }}
+                </p>
+              </div>
+            </section>
+          </n-tab-pane>
+          <n-tab-pane name="support" :tab="t('about.tabs.support')">
+            <section class="support-content" aria-label="support project">
+              <div v-if="!supportAcknowledged" class="support-intro">
+                <div class="support-intro-text">
+                  <p>{{ t('about.support.intro.line1') }}</p>
+                  <p>{{ t('about.support.intro.line2') }}</p>
+                  <p>{{ t('about.support.intro.line3') }}</p>
+                  <p>{{ t('about.support.intro.line4') }}</p>
+                  <p>{{ t('about.support.intro.line5') }}</p>
+                </div>
+                <n-button type="primary" round class="support-ack-button" @click="supportAcknowledged = true">
+                  {{ t('about.support.acknowledge') }}
+                </n-button>
+              </div>
+              <div v-else class="support-methods">
+                <p class="support-methods-note">{{ t('about.support.methodsNote') }}</p>
+                <n-collapse accordion>
+                  <n-collapse-item :title="t('about.support.methods.token.title')" name="token">
+                    <p class="support-method-description">
+                      {{ t('about.support.methods.token.descriptionPrefix') }}
+                    </p>
+                    <div class="support-token">{{ t('about.support.methods.token.emailBase64') }}</div>
+                  </n-collapse-item>
+                  <n-collapse-item :title="t('about.support.methods.wechat.title')" name="wechat">
+                    <div class="payment-qr-card">
+                      <img class="payment-qr-image" :src="wechatPayQrUrl" :alt="t('about.support.methods.wechat.title')" />
+                    </div>
+                  </n-collapse-item>
+                  <n-collapse-item :title="t('about.support.methods.alipay.title')" name="alipay">
+                    <div class="payment-qr-card">
+                      <img class="payment-qr-image" :src="alipayQrUrl" :alt="t('about.support.methods.alipay.title')" />
+                    </div>
+                  </n-collapse-item>
+                </n-collapse>
+              </div>
+            </section>
+          </n-tab-pane>
+          <n-tab-pane name="thanks" :tab="t('about.tabs.thanks')">
+            <section class="thanks-content">
+              <div class="thanks-section">
+                <h3>{{ t('about.thanks.specialTitle') }}</h3>
+                <p>{{ t('about.thanks.special.line1') }}</p>
+                <p>{{ t('about.thanks.special.line2') }}</p>
+                <p>{{ t('about.thanks.special.line3') }}</p>
+              </div>
+              <div class="thanks-section">
+                <h3>{{ t('about.thanks.sponsorTitle') }}</h3>
+                <p>{{ t('about.thanks.sponsor.empty') }}</p>
+              </div>
+            </section>
+          </n-tab-pane>
+        </n-tabs>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -72,7 +166,7 @@ import router from "../router";
 import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider, NButton } from "naive-ui";
+import { NLayout, NLayoutSider, NMenu, NIcon, NNotificationProvider, NButton, NModal, NTabs, NTabPane, NCollapse, NCollapseItem } from "naive-ui";
 import packageJson from "../../package.json";
 import Base64Icon from "./icons/Base64Icon.vue";
 import Md5Icon from "./icons/Md5Icon.vue";
@@ -84,8 +178,11 @@ import BarcodeIcon from "./icons/BarcodeIcon.vue";
 import TimeIcon from "./icons/TimeIcon.vue";
 import JsonIcon from "./icons/JsonIcon.vue";
 import CodeIcon from "./icons/CodeIcon.vue";
+import logoImage from "../assets/logo.png";
+import alipayQrImage from "../assets/sponsor/alipay.jpg";
+import wechatPayQrImage from "../assets/sponsor/wechat_pay.jpg";
 import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon, DocumentTextToolbox24Regular as TextProcessIcon } from '@vicons/fluent';
-import { ContrastOutline, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline, LanguageOutline as UnicodeMenuIcon } from '@vicons/ionicons5';
+import { ContrastOutline, InformationCircleOutline as InfoIcon, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline, LanguageOutline as UnicodeMenuIcon } from '@vicons/ionicons5';
 import { useThemeMode } from "../composables/useThemeMode";
 import { useLocaleMode } from "../composables/useLocaleMode";
 
@@ -217,11 +314,18 @@ const menuOptions = computed(() =>
 );
 const activeKey = ref(null);
 const collapsed = ref(false);
+const aboutActiveTab = ref("about");
+const showAboutModal = ref(false);
+const supportAcknowledged = ref(false);
 const version = packageJson.version;
 const route = useRoute();
 const { themeMode, setThemeMode } = useThemeMode();
 const { localeMode, toggleLocaleMode } = useLocaleMode();
 const themeModeOrder = ["light", "dark", "auto"];
+const githubUrl = "https://github.com/lonisletend/LoneKit";
+const issueUrl = "https://github.com/lonisletend/LoneKit/issues";
+const wechatPayQrUrl = wechatPayQrImage;
+const alipayQrUrl = alipayQrImage;
 const localeButtonText = computed(() => (localeMode.value === "zh-CN" ? "EN" : "中"));
 const siderWidth = computed(() => {
   const longestLabelLength = rawMenuItems.reduce((max, item) => Math.max(max, t(item.titleKey).length), 0);
@@ -245,13 +349,22 @@ function handleThemeToggleClick() {
   setThemeMode(themeModeOrder[nextIndex]);
 }
 
+function handleAboutTabUpdate(value) {
+  if (value === "support") {
+    supportAcknowledged.value = false;
+  }
+}
+
 async function handleGithubClick() {
-  const githubUrl = "https://github.com/lonisletend/LoneKit";
+  await openExternalLink(githubUrl);
+}
+
+async function openExternalLink(url) {
   try {
     const { open } = await import("@tauri-apps/plugin-shell");
-    await open(githubUrl);
+    await open(url);
   } catch {
-    window.open(githubUrl, "_blank", "noopener,noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 }
 
@@ -291,6 +404,202 @@ watch(
 .theme-toggle-btn {
   width: 32px;
   height: 32px;
+}
+
+.about-modal {
+  width: min(720px, calc(100vw - 32px));
+  padding: 36px 48px 44px;
+  border-radius: 18px;
+  background: var(--n-color);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.22);
+}
+
+.about-content {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.about-logo-image {
+  width: 112px;
+  height: 112px;
+  border-radius: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 28px rgba(22, 163, 74, 0.22));
+}
+
+.about-logo {
+  margin-top: 18px;
+  color: #16a34a;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.about-version {
+  margin-top: 12px;
+  color: #64748b;
+  font-size: 13px;
+  font-family: Monaco, Consolas, 'Courier New', monospace;
+}
+
+.about-description {
+  margin-top: 34px;
+  color: #334155;
+  font-size: 15px;
+  line-height: 2.5;
+}
+
+.about-description p {
+  margin: 0;
+}
+
+.about-link {
+  color: #16a34a;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.about-link:hover {
+  text-decoration: underline;
+}
+
+.support-content {
+  width: min(560px, 100%);
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.support-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.support-intro-text {
+  color: #334155;
+  font-size: 15px;
+  line-height: 2.2;
+}
+
+.support-intro-text p {
+  margin: 0;
+}
+
+.support-ack-button {
+  margin-top: 34px;
+  min-width: 132px;
+}
+
+.support-methods {
+  width: 100%;
+}
+
+.support-methods-note {
+  margin: 0 0 18px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.support-method-description {
+  margin: 0;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.support-token {
+  margin-top: 10px;
+  font-family: Monaco, Consolas, 'Courier New', monospace;
+  color: #16a34a;
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+.payment-qr-card {
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #94a3b8;
+  border-radius: 16px;
+  color: #64748b;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.payment-qr-image {
+  width: min(320px, 100%);
+  max-height: 360px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.thanks-content {
+  width: min(580px, 100%);
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.thanks-section {
+  text-align: left;
+}
+
+.thanks-section h3 {
+  margin: 0 0 12px;
+  color: #16a34a;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.thanks-section p {
+  margin: 0;
+  color: #334155;
+  font-size: 15px;
+  line-height: 2;
+}
+
+:deep(.about-tab-pane) {
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.dark) .about-modal,
+:global(.dark) .about-modal {
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+}
+
+:global(.dark) .about-version {
+  color: #94a3b8;
+}
+
+:global(.dark) .about-description {
+  color: #cbd5e1;
+}
+
+:global(.dark) .support-intro-text,
+:global(.dark) .support-methods-note,
+:global(.dark) .support-method-description,
+:global(.dark) .thanks-section p {
+  color: #cbd5e1;
+}
+
+:global(.dark) .payment-qr-card {
+  border-color: #475569;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.08);
 }
 
 :deep(.menu-label-row) {

@@ -57,6 +57,58 @@ export default {
     unfavorite: "Remove favorite",
     readFavoritesFailed: "[menu] Failed to read favorite menu",
   },
+  about: {
+    title: "About",
+    tabs: {
+      about: "About",
+      support: "Support",
+      thanks: "Thanks",
+    },
+    description: {
+      line1: "LoneKit is a toolkit focused on development and testing scenarios.",
+      line2: "Every tool comes from real work needs, reducing repetitive operations so developers can focus on creating.",
+      line3: "If it saves you 5 minutes a day, spend that time with family, with yourself, and with life.",
+      issuePrefix: "If you have any questions, suggestions, or ideas, open a GitHub",
+      issueSuffix: "to discuss them.",
+    },
+    support: {
+      intro: {
+        line1: "This project is currently maintained entirely in personal spare time as an open-source project powered by passion.",
+        line2: "In the future, ads embedded in tool pages will not be used as a profit model or income source.",
+        line3: "If it helps you and you are willing to support its continued development, I would be very grateful.",
+        line4: "Sponsorship only supports server, infrastructure, and development costs, and does not provide any feature privileges or extra services.",
+        line5: "All features always remain free and consistent for all users.",
+      },
+      acknowledge: "Support",
+      qrPlaceholder: "QR code placeholder",
+      methodsNote: "Please include your information when sponsoring. Sponsorship information will be updated regularly on the thanks page.",
+      methods: {
+        token: {
+          title: "Token Sponsorship",
+          descriptionPrefix: "If you have unused Token quota, you can sponsor by contacting this email",
+          emailBase64: "eWFuZ3hqc3VuMDMyNEBnbWFpbC5jb20=(Base64)",
+        },
+        wechat: {
+          title: "WeChat Pay",
+        },
+        alipay: {
+          title: "Alipay",
+        },
+      },
+    },
+    thanks: {
+      specialTitle: "Special Thanks",
+      special: {
+        line1: "Thank you to everyone who has accompanied this project from v0.0.1 to v1.0.0. Your feedback and suggestions have helped it improve and grow.",
+        line2: "Thank you to this AI era, which has made many once-complex ideas easier to realize.",
+        line3: "Special thanks to her. This side project has taken quite a bit of time that should have been spent together, and I often keep typing until one or two in the morning whenever inspiration arrives. 🫣",
+      },
+      sponsorTitle: "Sponsor Thanks",
+      sponsor: {
+        empty: "Updated regularly. It is still empty for now.",
+      },
+    },
+  },
   update: {
     checkingTitle: "Checking Updates",
     foundTitle: "New Version Available",
