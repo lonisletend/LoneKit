@@ -407,10 +407,13 @@ watch(
 }
 
 .about-modal {
+  --about-text-color: #334155;
+  --about-muted-text-color: #64748b;
   width: min(720px, calc(100vw - 32px));
   padding: 36px 48px 44px;
   border-radius: 18px;
   background: var(--n-color);
+  color: var(--about-text-color);
   box-shadow: 0 18px 60px rgba(15, 23, 42, 0.22);
 }
 
@@ -442,14 +445,14 @@ watch(
 
 .about-version {
   margin-top: 12px;
-  color: #64748b;
+  color: var(--about-muted-text-color);
   font-size: 13px;
   font-family: Monaco, Consolas, 'Courier New', monospace;
 }
 
 .about-description {
   margin-top: 34px;
-  color: #334155;
+  color: var(--about-text-color);
   font-size: 15px;
   line-height: 2.5;
 }
@@ -484,7 +487,7 @@ watch(
 }
 
 .support-intro-text {
-  color: #334155;
+  color: var(--about-text-color);
   font-size: 15px;
   line-height: 2.2;
 }
@@ -504,7 +507,7 @@ watch(
 
 .support-methods-note {
   margin: 0 0 18px;
-  color: #64748b;
+  color: var(--about-muted-text-color);
   font-size: 14px;
   line-height: 1.8;
   text-align: center;
@@ -512,7 +515,7 @@ watch(
 
 .support-method-description {
   margin: 0;
-  color: #334155;
+  color: var(--about-text-color);
   font-size: 14px;
   line-height: 1.9;
 }
@@ -566,7 +569,7 @@ watch(
 
 .thanks-section p {
   margin: 0;
-  color: #334155;
+  color: var(--about-text-color);
   font-size: 15px;
   line-height: 2;
 }
@@ -576,27 +579,15 @@ watch(
   justify-content: center;
 }
 
-:deep(.dark) .about-modal,
-:global(.dark) .about-modal {
+:global(html.dark .about-modal),
+:global(html[data-theme='dark'] .about-modal) {
+  --about-text-color: #cbd5e1;
+  --about-muted-text-color: #94a3b8;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
 }
 
-:global(.dark) .about-version {
-  color: #94a3b8;
-}
-
-:global(.dark) .about-description {
-  color: #cbd5e1;
-}
-
-:global(.dark) .support-intro-text,
-:global(.dark) .support-methods-note,
-:global(.dark) .support-method-description,
-:global(.dark) .thanks-section p {
-  color: #cbd5e1;
-}
-
-:global(.dark) .payment-qr-card {
+:global(html.dark .payment-qr-card),
+:global(html[data-theme='dark'] .payment-qr-card) {
   border-color: #475569;
   color: #94a3b8;
   background: rgba(148, 163, 184, 0.08);
