@@ -20,6 +20,11 @@ const routes = [
         component: () => import("/src/components/wrapper/TimeToolWrapper.vue"),
       },
       {
+        path: "/cron",
+        name: "CronTool",
+        component: () => import("/src/components/wrapper/CronToolWrapper.vue"),
+      },
+      {
         path: "/uuid",
         name: "UUIDTool",
         component: () => import("/src/components/tools/UUIDTool.vue"),

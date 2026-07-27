@@ -181,7 +181,7 @@ import CodeIcon from "./icons/CodeIcon.vue";
 import logoImage from "../assets/logo.png";
 import alipayQrImage from "../assets/sponsor/alipay.jpg";
 import wechatPayQrImage from "../assets/sponsor/wechat_pay.jpg";
-import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon, DocumentTextToolbox24Regular as TextProcessIcon } from '@vicons/fluent';
+import { Flash24Filled as FlashIcon, Fingerprint24Regular as UUIDIcon, FolderOpen24Regular as FolderDiffIcon, ScanDash24Filled as QRCodeReaderIcon, BarcodeScanner24Filled as BarcodeReaderIcon, TextWordCount24Filled as TextCountIcon, DocumentTextToolbox24Regular as TextProcessIcon, CalendarClock24Regular as CronIcon } from '@vicons/fluent';
 import { ContrastOutline, InformationCircleOutline as InfoIcon, LogoGithub as GithubIcon, MoonOutline, SunnyOutline, FlagOutline, LanguageOutline as UnicodeMenuIcon } from '@vicons/ionicons5';
 import { useThemeMode } from "../composables/useThemeMode";
 import { useLocaleMode } from "../composables/useLocaleMode";
@@ -204,6 +204,7 @@ const rawMenuItems = [
   { key: "xml-format-wrapper", routeName: "XmlFormatWrapper", titleKey: "menu.xmlFormat", icon: CodeIcon },
   { key: "sql-format-wrapper", routeName: "SQLFormatWrapper", titleKey: "menu.sqlFormat", icon: SQLIcon },
   { key: "time-tool", routeName: "TimeTool", titleKey: "menu.time", icon: TimeIcon },
+  { key: "cron-tool", routeName: "CronTool", titleKey: "menu.cron", icon: CronIcon },
   { key: "diff-tool", routeName: "DiffToolWrapper", titleKey: "menu.diff", icon: DiffIcon },
   { key: "folder-diff-tool", routeName: "FolderDiffToolWrapper", titleKey: "menu.folderDiff", icon: FolderDiffIcon },
   { key: "text-count-tool", routeName: "TextCountTool", titleKey: "menu.textCount", icon: TextCountIcon },
