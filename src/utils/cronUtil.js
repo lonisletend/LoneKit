@@ -7,6 +7,10 @@ export const CRON_DIALECTS = {
     fieldKeys: ["second", "minute", "hour", "dayOfMonth", "month", "dayOfWeek"],
     cronerMode: "6-part",
   },
+  "year-7": {
+    fieldKeys: ["second", "minute", "hour", "dayOfMonth", "month", "dayOfWeek", "year"],
+    cronerMode: "7-part",
+  },
 };
 
 export const CRON_FIELD_DEFINITIONS = {
@@ -16,6 +20,7 @@ export const CRON_FIELD_DEFINITIONS = {
   dayOfMonth: { min: 1, max: 31 },
   month: { min: 1, max: 12 },
   dayOfWeek: { min: 0, max: 7 },
+  year: { min: 1, max: 9999 },
 };
 
 const MONTH_ALIASES = {
@@ -47,6 +52,39 @@ function parseAtomicField(source, fieldKey, allowAny = true) {
   if (allowAny && value === "*") {
     return { type: "any" };
   }
+  if (allowAny && value === "?") {
+    if (!["dayOfMonth", "dayOfWeek"].includes(fieldKey)) {
+      throw error("No-specific-value (?) is only supported for day fields", fieldKey);
+    }
+    return { type: "noSpecific" };
+  }
+
+  if (fieldKey === "dayOfMonth") {
+    if (value.toUpperCase() === "L") {
+      return { type: "lastDay" };
+    }
+    if (value.toUpperCase() === "LW") {
+      return { type: "lastWeekday" };
+    }
+    const nearestWeekdayMatch = value.match(/^(\d+)W$/i);
+    if (nearestWeekdayMatch) {
+      return { type: "nearestWeekday", day: parseValue(nearestWeekdayMatch[1], fieldKey) };
+    }
+  }
+
+  if (fieldKey === "dayOfWeek") {
+    const occurrenceMatch = value.match(/^(.+)#(L|[1-5])$/i);
+    if (occurrenceMatch) {
+      const weekday = parseValue(occurrenceMatch[1], fieldKey);
+      return occurrenceMatch[2].toUpperCase() === "L"
+        ? { type: "lastWeekdayOfMonth", weekday }
+        : { type: "nthWeekdayOfMonth", weekday, nth: Number(occurrenceMatch[2]) };
+    }
+    const lastOccurrenceMatch = value.match(/^(.+)L$/i);
+    if (lastOccurrenceMatch) {
+      return { type: "lastWeekdayOfMonth", weekday: parseValue(lastOccurrenceMatch[1], fieldKey) };
+    }
+  }
 
   const stepParts = value.split("/");
   if (stepParts.length === 2) {
@@ -55,8 +93,8 @@ function parseAtomicField(source, fieldKey, allowAny = true) {
       throw error(`Invalid step value: ${stepParts[1]}`, fieldKey);
     }
     const base = parseAtomicField(stepParts[0], fieldKey, true);
-    if (!["any", "range"].includes(base.type)) {
-      throw error("Step base must be any value or a range", fieldKey);
+    if (!["any", "value", "range"].includes(base.type)) {
+      throw error("Step base must be any value, a start value, or a range", fieldKey);
     }
     return { type: "step", base, step };
   }
@@ -98,6 +136,8 @@ export function stringifyCronField(field) {
   switch (field?.type) {
     case "any":
       return "*";
+    case "noSpecific":
+      return "?";
     case "value":
       return String(field.value);
     case "range":
@@ -106,6 +146,16 @@ export function stringifyCronField(field) {
       return `${stringifyCronField(field.base)}/${field.step}`;
     case "list":
       return field.items.map(stringifyCronField).join(",");
+    case "lastDay":
+      return "L";
+    case "lastWeekday":
+      return "LW";
+    case "nearestWeekday":
+      return `${field.day}W`;
+    case "lastWeekdayOfMonth":
+      return `${field.weekday}#L`;
+    case "nthWeekdayOfMonth":
+      return `${field.weekday}#${field.nth}`;
     default:
       throw new Error(`Unsupported cron field type: ${field?.type}`);
   }
@@ -138,7 +188,12 @@ export function stringifyCron(document) {
 }
 
 export function createCronDocument(dialect = "standard-5") {
-  const document = parseCron(dialect === "seconds-6" ? "0 * * * * *" : "* * * * *", dialect);
+  const expressions = {
+    "standard-5": "* * * * *",
+    "seconds-6": "0 * * * * *",
+    "year-7": "0 * * * * * *",
+  };
+  const document = parseCron(expressions[dialect], dialect);
   return document;
 }
 
@@ -147,8 +202,11 @@ export function convertCronDialect(document, dialect) {
     throw new Error(`Unsupported cron dialect: ${dialect}`);
   }
   const fields = { ...document.fields };
-  if (dialect === "seconds-6" && !fields.second) {
+  if (CRON_DIALECTS[dialect].fieldKeys.includes("second") && !fields.second) {
     fields.second = { type: "value", value: 0 };
+  }
+  if (CRON_DIALECTS[dialect].fieldKeys.includes("year") && !fields.year) {
+    fields.year = { type: "any" };
   }
   return { schemaVersion: 1, dialect, fields };
 }

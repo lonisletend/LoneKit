@@ -13,23 +13,38 @@ const { t } = useI18n();
 
 const definition = computed(() => CRON_FIELD_DEFINITIONS[props.fieldKey]);
 const listText = ref("");
+const stepText = ref("");
 
-const typeOptions = computed(() => [
-  { label: t("tool.cron.types.any"), value: "any" },
-  { label: t("tool.cron.types.value"), value: "value" },
-  { label: t("tool.cron.types.range"), value: "range" },
-  { label: t("tool.cron.types.step"), value: "step" },
-  { label: t("tool.cron.types.list"), value: "list" },
-]);
-const stepBaseOptions = computed(() => [
-  { label: t("tool.cron.types.any"), value: "any" },
-  { label: t("tool.cron.types.range"), value: "range" },
-]);
-
+const typeOptions = computed(() => {
+  const options = [
+    { label: t("tool.cron.types.any"), value: "any" },
+    { label: t("tool.cron.types.value"), value: "value" },
+    { label: t("tool.cron.types.range"), value: "range" },
+    { label: t("tool.cron.types.step"), value: "step" },
+    { label: t("tool.cron.types.list"), value: "list" },
+  ];
+  if (props.fieldKey === "dayOfMonth") {
+    options.splice(1, 0, { label: t("tool.cron.types.noSpecific"), value: "noSpecific" });
+    options.push(
+      { label: t("tool.cron.types.lastDay"), value: "lastDay" },
+      { label: t("tool.cron.types.nearestWeekday"), value: "nearestWeekday" },
+      { label: t("tool.cron.types.lastWeekday"), value: "lastWeekday" }
+    );
+  }
+  if (props.fieldKey === "dayOfWeek") {
+    options.splice(1, 0, { label: t("tool.cron.types.noSpecific"), value: "noSpecific" });
+    options.push(
+      { label: t("tool.cron.types.lastWeekdayOfMonth"), value: "lastWeekdayOfMonth" },
+      { label: t("tool.cron.types.nthWeekdayOfMonth"), value: "nthWeekdayOfMonth" }
+    );
+  }
+  return options;
+});
 watch(
   () => props.modelValue,
   (field) => {
     if (field?.type === "list") listText.value = stringifyCronField(field);
+    if (field?.type === "step") stepText.value = stringifyCronField(field);
   },
   { immediate: true, deep: true }
 );
@@ -52,6 +67,12 @@ function changeType(type) {
         { type: "value", value: Math.min(min + 1, max) },
       ],
     }),
+    noSpecific: () => ({ type: "noSpecific" }),
+    lastDay: () => ({ type: "lastDay" }),
+    nearestWeekday: () => ({ type: "nearestWeekday", day: min }),
+    lastWeekday: () => ({ type: "lastWeekday" }),
+    lastWeekdayOfMonth: () => ({ type: "lastWeekdayOfMonth", weekday: 1 }),
+    nthWeekdayOfMonth: () => ({ type: "nthWeekdayOfMonth", weekday: 1, nth: 1 }),
   };
   emitField(factories[type]());
 }
@@ -59,16 +80,6 @@ function changeType(type) {
 function updateProperty(property, value) {
   if (value === null || value === undefined) return;
   emitField({ ...props.modelValue, [property]: value });
-}
-
-function changeStepBase(type) {
-  const { min, max } = definition.value;
-  updateProperty("base", type === "any" ? { type: "any" } : { type: "range", from: min, to: max });
-}
-
-function updateStepBase(property, value) {
-  if (value === null || value === undefined) return;
-  updateProperty("base", { ...props.modelValue.base, [property]: value });
 }
 
 function commitList() {
@@ -81,19 +92,29 @@ function commitList() {
     listText.value = stringifyCronField(props.modelValue);
   }
 }
+
+function commitStep() {
+  try {
+    const field = parseCronField(stepText.value, props.fieldKey);
+    if (field.type !== "step") throw new Error(t("tool.cron.stepRequiresStep"));
+    emitField(field);
+  } catch (error) {
+    emit("invalid", error.message);
+    stepText.value = stringifyCronField(props.modelValue);
+  }
+}
 </script>
 
 <template>
   <section class="cron-field-block">
-    <div class="cron-field-heading">
-      <n-tag size="large" type="info">{{ t(`tool.cron.fields.${fieldKey}`) }}</n-tag>
-      <span class="cron-field-bounds">{{ definition.min }} - {{ definition.max }}</span>
-      <code>{{ stringifyCronField(modelValue) }}</code>
-    </div>
+    <n-tag class="cron-field-tag" size="medium" type="info">
+      {{ t(`tool.cron.fields.${fieldKey}`) }} ({{ definition.min }}-{{ definition.max }})
+    </n-tag>
 
     <div class="cron-field-controls">
       <n-select
         class="cron-type-select"
+        size="medium"
         :value="modelValue.type"
         :options="typeOptions"
         @update:value="changeType"
@@ -102,6 +123,7 @@ function commitList() {
       <n-input-number
         v-if="modelValue.type === 'value'"
         class="cron-number-control"
+        size="medium"
         :value="modelValue.value"
         :min="definition.min"
         :max="definition.max"
@@ -110,79 +132,127 @@ function commitList() {
       />
 
       <template v-else-if="modelValue.type === 'range'">
-        <n-input-number class="cron-number-control" :value="modelValue.from" :min="definition.min" :max="definition.max" :precision="0"
+        <n-input-number class="cron-number-control cron-range-control" size="medium" :value="modelValue.from" :min="definition.min" :max="definition.max" :precision="0"
           @update:value="(value) => updateProperty('from', value)" />
         <span>{{ t('tool.cron.to') }}</span>
-        <n-input-number class="cron-number-control" :value="modelValue.to" :min="definition.min" :max="definition.max" :precision="0"
+        <n-input-number class="cron-number-control cron-range-control" size="medium" :value="modelValue.to" :min="definition.min" :max="definition.max" :precision="0"
           @update:value="(value) => updateProperty('to', value)" />
       </template>
 
       <template v-else-if="modelValue.type === 'step'">
-        <n-select class="cron-step-base-select" :value="modelValue.base.type" :options="stepBaseOptions" @update:value="changeStepBase" />
-        <template v-if="modelValue.base.type === 'range'">
-          <n-input-number class="cron-number-control" :value="modelValue.base.from" :min="definition.min" :max="definition.max" :precision="0"
-            @update:value="(value) => updateStepBase('from', value)" />
-          <span>{{ t('tool.cron.to') }}</span>
-          <n-input-number class="cron-number-control" :value="modelValue.base.to" :min="definition.min" :max="definition.max" :precision="0"
-            @update:value="(value) => updateStepBase('to', value)" />
-        </template>
-        <span>/</span>
-        <n-input-number class="cron-number-control" :value="modelValue.step" :min="1" :precision="0"
-          @update:value="(value) => updateProperty('step', value)" />
+        <n-input
+          v-model:value="stepText"
+          class="cron-expression-control"
+          size="medium"
+          :placeholder="t('tool.cron.stepPlaceholder')"
+          @blur="commitStep"
+          @keyup.enter="commitStep"
+        />
       </template>
 
       <n-input
         v-else-if="modelValue.type === 'list'"
         v-model:value="listText"
         class="cron-list-control"
+        size="medium"
         :placeholder="t('tool.cron.listPlaceholder')"
         @blur="commitList"
         @keyup.enter="commitList"
       />
+
+      <n-input-number
+        v-else-if="modelValue.type === 'nearestWeekday'"
+        class="cron-number-control"
+        size="medium"
+        :value="modelValue.day"
+        :min="definition.min"
+        :max="definition.max"
+        :precision="0"
+        @update:value="(value) => updateProperty('day', value)"
+      />
+
+      <n-input-number
+        v-else-if="modelValue.type === 'lastWeekdayOfMonth'"
+        class="cron-number-control"
+        size="medium"
+        :value="modelValue.weekday"
+        :min="definition.min"
+        :max="definition.max"
+        :precision="0"
+        @update:value="(value) => updateProperty('weekday', value)"
+      />
+
+      <template v-else-if="modelValue.type === 'nthWeekdayOfMonth'">
+        <n-input-number class="cron-number-control" size="medium" :value="modelValue.weekday" :min="definition.min" :max="definition.max" :precision="0"
+          @update:value="(value) => updateProperty('weekday', value)" />
+        <span>#</span>
+        <n-input-number class="cron-number-control" size="medium" :value="modelValue.nth" :min="1" :max="5" :precision="0"
+          @update:value="(value) => updateProperty('nth', value)" />
+      </template>
     </div>
+    <code class="cron-field-result">{{ stringifyCronField(modelValue) }}</code>
   </section>
 </template>
 
 <style scoped>
 .cron-field-block {
-  padding: 12px;
-  border: 1px solid var(--lk-surface-border);
-  border-radius: 6px;
+  min-height: 44px;
+  padding: 5px 0;
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr) minmax(36px, auto);
+  align-items: center;
+  gap: 6px;
 }
 
-.cron-field-heading,
 .cron-field-controls {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 4px;
 }
 
-.cron-field-heading {
-  margin-bottom: 10px;
+.cron-field-tag {
+  width: 100px;
+  height: 34px;
+  justify-content: center;
+  /*font-size: 14px;*/
+  white-space: nowrap;
 }
 
-.cron-field-heading code {
-  margin-left: auto;
-  font-size: 13px;
+.cron-field-controls {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
-.cron-field-bounds {
-  color: #64748b;
-  font-size: 12px;
-}
-
-.cron-type-select,
-.cron-step-base-select {
+.cron-type-select {
   width: 132px;
+  min-width: 132px;
 }
 
 .cron-number-control {
-  width: 116px;
+  width: 80px;
+  min-width: 80px;
 }
 
-.cron-list-control {
-  flex: 1 1 260px;
-  min-width: min(100%, 260px);
+.cron-range-control {
+  width: 90px;
+  min-width: 90px;
+}
+
+.cron-list-control,
+.cron-expression-control {
+  flex: 1 1 180px;
+  min-width: 150px;
+}
+
+.cron-field-result {
+  justify-self: end;
+  max-width: 110px;
+  overflow: hidden;
+  color: #475569;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

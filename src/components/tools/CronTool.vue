@@ -9,7 +9,6 @@ import {
   NInputGroup,
   NInputGroupLabel,
   NSelect,
-  NTag,
   NTooltip,
 } from "naive-ui";
 import { Copy24Regular, Play24Filled } from "@vicons/fluent";
@@ -28,13 +27,24 @@ import {
 
 const { t, locale } = useI18n();
 const { copyToClipboard, readFromClipboard, notify } = useCommon();
+const nextYear = new Date().getFullYear() + 1;
 
 const examples = [
+  { dialect: "standard-5", expression: "* * * * *" },
   { dialect: "standard-5", expression: "*/5 * * * *" },
-  { dialect: "standard-5", expression: "0 9-18 * * 1-5" },
-  { dialect: "standard-5", expression: "30 8 1,15 * *" },
+  { dialect: "standard-5", expression: "30 8 * * 1-5" },
+  { dialect: "standard-5", expression: "0,30 9-18 * * 1-5" },
+  { dialect: "standard-5", expression: "5-55/10 8-20 1,15 1-6 1-5" },
+  { dialect: "seconds-6", expression: "* * * * * *" },
   { dialect: "seconds-6", expression: "*/10 * * * * *" },
-  { dialect: "seconds-6", expression: "0 0 12 * * 1-5" },
+  { dialect: "seconds-6", expression: "0 30 8 * * 1-5" },
+  { dialect: "seconds-6", expression: "0,30 0,30 9-18 * * 1-5" },
+  { dialect: "seconds-6", expression: "5-55/10 0,30 8-20 1,15 1-6 1-5" },
+  { dialect: "year-7", expression: "* * * * * * *" },
+  { dialect: "year-7", expression: "0 0 9 ? * 1-5 *" },
+  { dialect: "year-7", expression: "0 0 9 L * ? *" },
+  { dialect: "year-7", expression: "0 0 9 15W * ? *" },
+  { dialect: "year-7", expression: `0 0 9 ? 1-6 1#2 ${nextYear}-${nextYear + 4}/2` },
 ];
 
 const dialect = ref("standard-5");
@@ -43,40 +53,52 @@ const document = ref(parseCron(expression.value, dialect.value));
 const parseError = ref("");
 const exampleIndex = ref(0);
 const runCount = ref(10);
+const startMode = ref("current");
 const startTime = ref(Date.now());
 const runDates = ref([]);
 
 const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-const timezone = ref(localTimezone);
-const timezoneOptions = computed(() => {
-  const supported = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : [];
-  const values = Array.from(new Set([localTimezone, "UTC", "Asia/Shanghai", ...supported]));
-  return values.map((value) => ({
-    label: value === localTimezone ? `${value} (${t("tool.cron.local")})` : value,
-    value,
-  }));
-});
 const dialectOptions = computed(() => [
   { label: t("tool.cron.dialects.standard5"), value: "standard-5" },
   { label: t("tool.cron.dialects.seconds6"), value: "seconds-6" },
+  { label: t("tool.cron.dialects.year7"), value: "year-7" },
 ]);
 const countOptions = [5, 10, 20, 50, 100].map((value) => ({ label: String(value), value }));
+const startModeOptions = computed(() => [
+  { label: t("tool.cron.startModes.current"), value: "current" },
+  { label: t("tool.cron.startModes.custom"), value: "custom" },
+]);
 const activeFieldKeys = computed(() => CRON_DIALECTS[dialect.value].fieldKeys);
 
 function describeNode(node) {
   switch (node.type) {
     case "any":
       return t("tool.cron.structured.any");
+    case "noSpecific":
+      return t("tool.cron.structured.noSpecific");
     case "value":
       return String(node.value);
     case "range":
       return t("tool.cron.structured.range", { from: node.from, to: node.to });
     case "step":
-      return node.base.type === "any"
-        ? t("tool.cron.structured.step", { step: node.step })
+      if (node.base.type === "any") {
+        return t("tool.cron.structured.step", { step: node.step });
+      }
+      return node.base.type === "value"
+        ? t("tool.cron.structured.valueStep", { from: node.base.value, step: node.step })
         : t("tool.cron.structured.rangeStep", { from: node.base.from, to: node.base.to, step: node.step });
     case "list":
       return node.items.map(describeNode).join(t("tool.cron.structured.separator"));
+    case "lastDay":
+      return t("tool.cron.structured.lastDay");
+    case "lastWeekday":
+      return t("tool.cron.structured.lastWeekday");
+    case "nearestWeekday":
+      return t("tool.cron.structured.nearestWeekday", { day: node.day });
+    case "lastWeekdayOfMonth":
+      return t("tool.cron.structured.lastWeekdayOfMonth", { weekday: node.weekday });
+    case "nthWeekdayOfMonth":
+      return t("tool.cron.structured.nthWeekdayOfMonth", { weekday: node.weekday, nth: node.nth });
     default:
       return "";
   }
@@ -91,14 +113,8 @@ function describeDocument() {
     .join(t("tool.cron.structured.fieldSeparator"));
 }
 
-const hasCompositeList = computed(() => activeFieldKeys.value.some((fieldKey) => {
-  const field = document.value.fields[fieldKey];
-  return field?.type === "list" && field.items.some((item) => item.type !== "value");
-}));
-
 const description = computed(() => {
   if (parseError.value) return "";
-  if (hasCompositeList.value) return describeDocument();
   try {
     return cronstrue.toString(expression.value, {
       locale: locale.value === "zh-CN" ? "zh_CN" : "en",
@@ -106,19 +122,38 @@ const description = computed(() => {
       dayOfWeekStartIndexZero: true,
       throwExceptionOnParseError: true,
     });
-  } catch (error) {
-    return error.message;
+  } catch {
+    return describeDocument();
   }
 });
 
+function getCronOptions(value, expressionDialect) {
+  const config = CRON_DIALECTS[expressionDialect];
+  const parts = value.trim().split(/\s+/);
+  const usesNoSpecificDay = ["dayOfMonth", "dayOfWeek"].some((fieldKey) => {
+    const index = config.fieldKeys.indexOf(fieldKey);
+    return index >= 0 && parts[index] === "?";
+  });
+  return {
+    mode: config.cronerMode,
+    timezone: localTimezone,
+    domAndDow: usesNoSpecificDay,
+    sloppyRanges: true,
+  };
+}
+
 function validateExpression(value, expressionDialect) {
-  const mode = CRON_DIALECTS[expressionDialect].cronerMode;
-  new Cron(value, { mode, timezone: timezone.value });
+  new Cron(value, getCronOptions(value, expressionDialect));
 }
 
 function applyExpression(value, forcedDialect) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
-  const inferredDialect = forcedDialect || (parts.length === 6 ? "seconds-6" : parts.length === 5 ? "standard-5" : dialect.value);
+  const dialectByPartCount = {
+    5: "standard-5",
+    6: "seconds-6",
+    7: "year-7",
+  };
+  const inferredDialect = forcedDialect || dialectByPartCount[parts.length] || dialect.value;
   try {
     const parsed = parseCron(value, inferredDialect);
     const normalized = stringifyCron(parsed);
@@ -142,6 +177,7 @@ function handleExpressionInput(value) {
 function handleDialectChange(value) {
   const converted = convertCronDialect(document.value, value);
   dialect.value = value;
+  exampleIndex.value = 0;
   applyDocument(converted);
   runDates.value = [];
 }
@@ -177,7 +213,9 @@ async function readClipboard() {
 }
 
 function showExample() {
-  const example = examples[exampleIndex.value % examples.length];
+  const dialectExamples = examples.filter((example) => example.dialect === dialect.value);
+  if (!dialectExamples.length) return;
+  const example = dialectExamples[exampleIndex.value % dialectExamples.length];
   exampleIndex.value += 1;
   expression.value = example.expression;
   applyExpression(example.expression, example.dialect);
@@ -191,16 +229,16 @@ function clear() {
 }
 
 function run() {
+  if (startMode.value === "current") {
+    startTime.value = Date.now();
+  }
   if (!applyExpression(expression.value, dialect.value)) {
     notify("warning", t("tool.cron.fixExpression"));
     return;
   }
   try {
-    const cron = new Cron(expression.value, {
-      mode: CRON_DIALECTS[dialect.value].cronerMode,
-      timezone: timezone.value,
-    });
-    runDates.value = cron.nextRuns(runCount.value, new Date(startTime.value || Date.now()));
+    const cron = new Cron(expression.value, getCronOptions(expression.value, dialect.value));
+    runDates.value = cron.nextRuns(runCount.value, new Date(startTime.value));
     if (!runDates.value.length) notify("warning", t("tool.cron.noRuns"));
   } catch (error) {
     parseError.value = error.message;
@@ -210,7 +248,7 @@ function run() {
 
 function formatDate(date) {
   return new Intl.DateTimeFormat(locale.value, {
-    timeZone: timezone.value,
+    timeZone: localTimezone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -231,10 +269,10 @@ onMounted(run);
 
 <template>
   <div class="w-full h-full">
-    <SplitPanel :default-size="0.58" :min="0.36" :max="0.75">
+    <SplitPanel :default-size="0.5">
       <template #left>
         <div class="cron-pane cron-editor-pane">
-          <div class="lk-toolbar lk-toolbar--compact">
+          <div class="lk-toolbar lk-toolbar--compact cron-editor-toolbar">
             <n-select class="cron-dialect-select" :value="dialect" :options="dialectOptions" @update:value="handleDialectChange" />
             <n-button @click="readClipboard">{{ t('common.clipboard') }}</n-button>
             <n-button @click="showExample">{{ t('common.example') }}</n-button>
@@ -252,9 +290,6 @@ onMounted(run);
           />
 
           <div class="cron-description" :class="{ 'cron-description--error': parseError }">
-            <n-tag size="small" :type="parseError ? 'error' : 'success'">
-              {{ parseError ? t('tool.cron.invalid') : t('tool.cron.description') }}
-            </n-tag>
             <span>{{ parseError || description }}</span>
           </div>
 
@@ -284,11 +319,13 @@ onMounted(run);
             </n-input-group>
             <n-input-group class="cron-start-group">
               <n-input-group-label>{{ t('tool.cron.startTime') }}</n-input-group-label>
-              <n-date-picker v-model:value="startTime" type="datetime" class="cron-start-picker" clearable />
-            </n-input-group>
-            <n-input-group class="cron-timezone-group">
-              <n-input-group-label>{{ t('tool.cron.timezone') }}</n-input-group-label>
-              <n-select v-model:value="timezone" class="cron-timezone-select" :options="timezoneOptions" filterable />
+              <n-select v-model:value="startMode" class="cron-start-mode-select" :options="startModeOptions" />
+              <n-date-picker
+                v-model:value="startTime"
+                type="datetime"
+                class="cron-start-picker"
+                :disabled="startMode === 'current'"
+              />
             </n-input-group>
           </div>
 
@@ -333,7 +370,14 @@ onMounted(run);
 }
 
 .cron-dialect-select {
-  width: 180px;
+  width: 160px;
+  min-width: 160px;
+}
+
+.cron-editor-toolbar {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .cron-expression-input :deep(.n-input__input-el) {
@@ -371,18 +415,21 @@ onMounted(run);
   width: 142px;
 }
 
-.cron-start-group,
-.cron-timezone-group {
-  flex: 1 1 220px;
-  min-width: 190px;
+.cron-start-group {
+  flex: 1 1 320px;
+  min-width: 280px;
 }
 
 .cron-count-select {
   width: 78px;
 }
 
-.cron-start-picker,
-.cron-timezone-select {
+.cron-start-mode-select {
+  width: 88px;
+  min-width: 88px;
+}
+
+.cron-start-picker {
   flex: 1;
   min-width: 0;
 }
