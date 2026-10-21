@@ -1,7 +1,26 @@
 export default [
   {
+    date: '2026.10.22',
+    version: 'v1.1.0',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.0',
+    added: [
+      'Added a Cron expression tool supporting standard 5-field, 6-field with seconds, and 7-field with year formats, with conversion between them.',
+      'The Cron tool supports structured per-field editing (any, specific values, ranges, steps, lists, and special syntax such as L, W, # and ?) with a live human-readable description.',
+      'The Cron tool calculates the next 5 to 100 run times from the current time or a custom start time, with one-click copy for each run time.',
+    ],
+    optimized: [
+      'Removed the extra focus glow outline on inputs and selects for a cleaner look.',
+      'Cron run times now display as YYYY-MM-DD HH:mm:ss, rows are vertically centered, and separators use a lighter dashed line.',
+    ],
+    fixed: [
+      'Fixed low text contrast in the About, Support, and Thanks modals in dark mode.',
+      'Fixed the SQL format result area and the Cron run list not scrolling when content is long.',
+    ],
+  },
+  {
     date: '2026.06.14',
     version: 'v1.0.0',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.0.0',
     added: [
       'Added an About modal that shows the app logo, version, project description, and GitHub Issue feedback entry.',
       'Added a Support page explaining project maintenance and sponsorship principles, with Token, WeChat Pay, and Alipay support methods.',

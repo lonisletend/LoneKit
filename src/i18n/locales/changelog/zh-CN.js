@@ -1,7 +1,26 @@
 export default [
   {
+    date: '2026.10.22',
+    version: 'v1.1.0',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.0',
+    added: [
+      '新增 Cron 表达式工具，支持标准 5 段、带秒 6 段、带年 7 段三种格式，可在格式间互相转换。',
+      'Cron 工具支持按字段结构化编辑（任意值、指定值、范围、步长、列表及 L、W、#、? 等特殊语法），并实时生成可读的表达式描述。',
+      'Cron 工具支持按当前时间或自定义起始时间计算后续 5～100 次运行时间，并可一键复制单次运行时间。',
+    ],
+    optimized: [
+      '输入框与选择框聚焦时移除额外的外发光描边，界面更简洁。',
+      'Cron 运行结果时间统一显示为 YYYY-MM-DD HH:mm:ss 格式，行内容垂直居中，分隔线改为更淡的虚线。',
+    ],
+    fixed: [
+      '修复深色模式下关于、支持与致谢弹窗文字对比度不足的问题。',
+      '修复 SQL 格式化结果区域与 Cron 运行结果列表在内容过长时无法滚动的问题。',
+    ],
+  },
+  {
     date: '2026.06.14',
     version: 'v1.0.0',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.0.0',
     added: [
       '新增关于弹窗，集中展示应用 Logo、版本信息、项目说明与 GitHub Issue 反馈入口。',
       '新增支持项目页面，说明项目维护方式与赞助原则，并提供 Token、微信支付、支付宝支付三种支持方式。',

@@ -37,7 +37,7 @@ const lightInputTheme = {
   border: '1px solid #cbd5e1',
   borderHover: '1px solid #94a3b8',
   borderFocus: '1px solid #16a34a',
-  boxShadowFocus: '0 0 0 1px #16a34a',
+  boxShadowFocus: 'none',
   caretColor: '#16a34a'
 };
 const lightSelectionTheme = {
@@ -51,8 +51,8 @@ const lightSelectionTheme = {
   borderActive: '1px solid #16a34a',
   borderFocus: '1px solid #16a34a',
   boxShadowHover: 'none',
-  boxShadowActive: '0 0 0 1px #16a34a',
-  boxShadowFocus: '0 0 0 1px #16a34a',
+  boxShadowActive: 'none',
+  boxShadowFocus: 'none',
   caretColor: '#16a34a'
 };
 const darkInputTheme = {
@@ -66,7 +66,7 @@ const darkInputTheme = {
   border: '1px solid #3f3f46',
   borderHover: '1px solid #52525b',
   borderFocus: '1px solid #22c55e',
-  boxShadowFocus: '0 0 0 1px #22c55e',
+  boxShadowFocus: 'none',
   caretColor: '#22c55e'
 };
 const darkSelectionTheme = {
@@ -80,8 +80,8 @@ const darkSelectionTheme = {
   borderActive: '1px solid #22c55e',
   borderFocus: '1px solid #22c55e',
   boxShadowHover: 'none',
-  boxShadowActive: '0 0 0 1px #22c55e',
-  boxShadowFocus: '0 0 0 1px #22c55e',
+  boxShadowActive: 'none',
+  boxShadowFocus: 'none',
   caretColor: '#22c55e'
 };
 function createNaiveThemeOverrides(inputTheme, selectionTheme) {

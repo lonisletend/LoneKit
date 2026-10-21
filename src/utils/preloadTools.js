@@ -15,6 +15,7 @@ const preloadBatches = [
     () => import('/src/components/wrapper/TextProcessToolWrapper.vue'),
     () => import('/src/components/wrapper/SendpayDisplayWrapper.vue'),
     () => import('/src/components/wrapper/TimeToolWrapper.vue'),
+    () => import('/src/components/wrapper/CronToolWrapper.vue'),
     () => import('/src/components/tools/Base64Tool.vue'),
     () => import('/src/components/tools/UUIDTool.vue'),
     () => import('/src/components/tools/Md5Tool.vue'),
