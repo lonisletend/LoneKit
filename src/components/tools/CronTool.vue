@@ -247,17 +247,10 @@ function run() {
 }
 
 function formatDate(date) {
-  return new Intl.DateTimeFormat(locale.value, {
-    timeZone: localTimezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-  }).format(date);
+  const pad = (value) => String(value).padStart(2, "0");
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const time = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  return `${day} ${time}`;
 }
 
 function copyRunDate(date) {
@@ -367,6 +360,7 @@ onMounted(run);
 
 .cron-runs-pane {
   margin-left: 12px;
+  overflow: hidden;
 }
 
 .cron-dialect-select {
@@ -434,20 +428,27 @@ onMounted(run);
   min-width: 0;
 }
 
+/* flex-basis 用 0px 而非 0%：WebKit(Tauri) 下百分比 basis 可能按 auto 处理，列表会被撑开而无法滚动 */
 .cron-run-list {
-  flex: 1;
+  flex: 1 1 0px;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 .cron-run-row {
-  min-height: 48px;
-  padding: 7px 10px;
+  min-height: 44px;
+  padding: 6px 10px;
   display: grid;
   grid-template-columns: minmax(76px, auto) minmax(0, 1fr) 34px;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid var(--lk-surface-border);
+  border-bottom: 1px dashed color-mix(in srgb, var(--lk-surface-border) 60%, transparent);
+}
+
+.cron-run-row > * {
+  display: flex;
+  align-items: center;
+  line-height: 1.4;
 }
 
 .cron-run-row:last-child {

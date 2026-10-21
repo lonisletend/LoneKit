@@ -195,4 +195,14 @@ function handleMoreSelect(key) {
 .lk-sql-dialect-select :deep(.n-base-selection) {
   width: 100%;
 }
+
+/* lone-format 的 .sql-format 不是 flex 容器，content 的 flex:1 不生效，长 SQL 会被 overflow:hidden 裁掉 */
+.lk-result-surface :deep(.sql-format) {
+  display: flex;
+  flex-direction: column;
+}
+
+.lk-result-surface :deep(.sql-format__content) {
+  min-height: 0;
+}
 </style>
