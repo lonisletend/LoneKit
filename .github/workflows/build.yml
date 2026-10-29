@@ -64,6 +64,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - uses: tauri-apps/tauri-action@v0
+        id: tauri
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
@@ -75,3 +76,41 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.tauriTarget != '' && format('--target {0}', matrix.tauriTarget) || '' }}
+
+      - name: package dist (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_ID: ${{ steps.tauri.outputs.releaseId }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          ARCHIVE="dist-v${VERSION}.tar.gz"
+          npm run build
+          tar -czf "$ARCHIVE" -C dist .
+          gh api --method POST \
+            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${ARCHIVE}" \
+            -H "Content-Type: application/gzip" \
+            --input "$ARCHIVE"
+
+  publish-release:
+    needs: publish-tauri
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: publish draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          RELEASE_ID=$(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate \
+            --jq ".[] | select(.draft and .tag_name == \"app-v${VERSION}\") | .id" | head -n 1)
+          if [ -z "$RELEASE_ID" ]; then
+            echo "draft release app-v${VERSION} not found" >&2
+            exit 1
+          fi
+          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -F draft=false
