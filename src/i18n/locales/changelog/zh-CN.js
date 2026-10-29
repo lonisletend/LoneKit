@@ -1,5 +1,13 @@
 export default [
   {
+    date: '2026.10.30',
+    version: 'v1.1.1',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.1',
+    optimized: [
+      '自动构建新增带版本号的前端静态资源包 dist-v<版本号>.tar.gz，并在全部平台构建完成后自动发布 Release，方便服务器拉取并部署新版本。',
+    ],
+  },
+  {
     date: '2026.10.22',
     version: 'v1.1.0',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.0',

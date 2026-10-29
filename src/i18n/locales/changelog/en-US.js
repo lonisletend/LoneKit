@@ -1,5 +1,13 @@
 export default [
   {
+    date: '2026.10.30',
+    version: 'v1.1.1',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.1',
+    optimized: [
+      'The automated build now attaches a versioned frontend bundle, dist-v<version>.tar.gz, and publishes the release automatically once all platform builds finish, so servers can pull and deploy new versions.',
+    ],
+  },
+  {
     date: '2026.10.22',
     version: 'v1.1.0',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.0',
