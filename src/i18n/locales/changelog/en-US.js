@@ -1,5 +1,14 @@
 export default [
   {
+    date: '2026.11.04',
+    version: 'v1.1.2',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.2',
+    fixed: [
+      'JSON Formatter: fixed decimals being incorrectly recognized as protected numbers.',
+      'JSON Formatter: fixed incorrect formatted output for JSON containing protected numbers when sorting is enabled.',
+    ],
+  },
+  {
     date: '2026.10.30',
     version: 'v1.1.1',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.1',

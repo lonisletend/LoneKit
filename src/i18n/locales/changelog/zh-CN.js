@@ -1,5 +1,14 @@
 export default [
   {
+    date: '2026.11.04',
+    version: 'v1.1.2',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.2',
+    fixed: [
+      'JSON 格式化：修复小数被错误识别为保护数字的问题。',
+      'JSON 格式化：修复包含保护数字的 JSON 在开启排序时格式化结果展示错误的问题。',
+    ],
+  },
+  {
     date: '2026.10.30',
     version: 'v1.1.1',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.1',
