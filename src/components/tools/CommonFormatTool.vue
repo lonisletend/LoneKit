@@ -50,7 +50,8 @@
             <!-- JSON 格式化 -->
             <div v-else-if="segment.type === 'json'" class="relative rounded format-block json-segment">
               <!-- 悬浮工具栏 -->
-              <div class="absolute top-0 right-0 flex items-center space-x-1 format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200">
+              <div class="absolute top-0 right-0 flex items-center format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200"
+                   :class="{ 'filter-open': filterVisibility[index] }">
                 <n-tag size="small" type="info">JSON</n-tag>
                 <n-button size="small" circle @click="copyJsonSegment(index)">
                   <template #icon>
@@ -72,8 +73,22 @@
                     <component :is="SortIcon" />
                   </template>
                 </n-button>
+                <n-button size="small" circle @click="toggleSegmentFilter(index)" :secondary="!!filterVisibility[index]"
+                          :aria-label="t('tool.json.jsonPathPlaceholder')" :aria-expanded="!!filterVisibility[index]">
+                  <template #icon><component :is="FilterIcon" /></template>
+                </n-button>
+                <n-input
+                  v-if="filterVisibility[index]"
+                  v-model:value="filterExpressions[index]"
+                  class="format-filter-input"
+                  size="small"
+                  clearable
+                  :placeholder="t('tool.json.jsonPathPlaceholder')"
+                  @keydown.enter="executeSegmentFilter(index)"
+                  @clear="clearSegmentFilter(index)"
+                />
               </div>
-              <JsonFormat 
+              <JsonFormat
                 :ref="el => setJsonFormatRef(el, index)"
                 :modelValue="segment.content" 
                 :theme="formatTheme"
@@ -83,7 +98,8 @@
             <!-- XML 格式化 -->
             <div v-else-if="segment.type === 'xml'" class="relative rounded format-block xml-segment">
               <!-- 悬浮工具栏 -->
-              <div class="absolute top-0 right-0 flex items-center space-x-1 format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200">
+              <div class="absolute top-0 right-0 flex items-center format-toolbar opacity-0 hover:opacity-100 transition-opacity duration-200"
+                   :class="{ 'filter-open': filterVisibility[index] }">
                 <n-tag size="small" type="success">XML</n-tag>
                 <n-button size="small" circle @click="copyXmlSegment(index)">
                   <template #icon>
@@ -105,8 +121,22 @@
                     <component :is="SortIcon" />
                   </template>
                 </n-button>
+                <n-button size="small" circle @click="toggleSegmentFilter(index)" :secondary="!!filterVisibility[index]"
+                          :aria-label="t('tool.format.xpathPlaceholder')" :aria-expanded="!!filterVisibility[index]">
+                  <template #icon><component :is="FilterIcon" /></template>
+                </n-button>
+                <n-input
+                  v-if="filterVisibility[index]"
+                  v-model:value="filterExpressions[index]"
+                  class="format-filter-input"
+                  size="small"
+                  clearable
+                  :placeholder="t('tool.format.xpathPlaceholder')"
+                  @keydown.enter="executeSegmentFilter(index)"
+                  @clear="clearSegmentFilter(index)"
+                />
               </div>
-              <XmlFormat 
+              <XmlFormat
                 :ref="el => setXmlFormatRef(el, index)"
                 :modelValue="segment.content" 
                 :theme="formatTheme"
@@ -122,11 +152,12 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { NInput, NTag, NButton, NDropdown, NIcon } from "naive-ui";
 import { 
   Copy24Regular as CopyIcon,
+  Filter24Regular as FilterIcon,
   TextSortAscending24Regular as SortIcon,
   ArrowMaximizeVertical24Regular as ExpandIcon,
   ArrowMinimizeVertical24Regular as CollapseIcon
@@ -159,6 +190,8 @@ const jsonFormatRefs = ref({});
 const xmlFormatRefs = ref({});
 const jsonSortStates = ref({});
 const xmlSortStates = ref({});
+const filterVisibility = ref({});
+const filterExpressions = ref({});
 const { resolvedTheme } = useThemeMode();
 const formatTheme = computed(() => (resolvedTheme.value === "dark" ? "min-dark" : "min-light"));
 
@@ -223,6 +256,38 @@ function toggleXmlSort(index) {
   } else {
     xmlFormatRefs.value[index]?.clearSort();
   }
+}
+
+// 每个片段独立维护过滤输入，隐藏输入框不会清除已执行的过滤。
+function toggleSegmentFilter(index) {
+  filterVisibility.value[index] = !filterVisibility.value[index];
+  filterExpressions.value[index] ??= '';
+}
+
+function getSegmentFormatRef(index) {
+  return parsedSegments.value[index]?.type === 'json'
+    ? jsonFormatRefs.value[index]
+    : xmlFormatRefs.value[index];
+}
+
+function executeSegmentFilter(index) {
+  const expression = (filterExpressions.value[index] ?? '').trim();
+  if (!expression) {
+    clearSegmentFilter(index);
+    return;
+  }
+
+  getSegmentFormatRef(index)?.filter({
+    type: parsedSegments.value[index]?.type === 'json' ? 'jsonpath' : 'xpath',
+    expression
+  });
+}
+
+function clearSegmentFilter(index) {
+  filterExpressions.value[index] = '';
+  const formatRef = getSegmentFormatRef(index);
+  formatRef?.clearFilter();
+  formatRef?.expandAll();
 }
 
 // 查找完整的 JSON 对象或数组（支持任意层级嵌套）
@@ -482,6 +547,10 @@ function resolveText(text) {
 }
 
 function handleSourceTextChange() {
+  // 片段索引可能改变，避免旧过滤条件作用于新内容。
+  Object.keys(filterExpressions.value).forEach(clearSegmentFilter);
+  filterVisibility.value = {};
+  filterExpressions.value = {};
   try {
     parsedSegments.value = resolveText(sourceText.value);
   } catch (error) {
@@ -508,7 +577,7 @@ function showExample() {
 
 function clear() {
   sourceText.value = '';
-  parsedSegments.value = [];
+  handleSourceTextChange();
 }
 
 function copySource() {
@@ -630,11 +699,21 @@ function handleMoreSelect(key) {
 }
 
 /* 悬浮工具栏样式 */
-.format-block:hover .format-toolbar {
+.format-block:hover .format-toolbar,
+.format-toolbar:focus-within,
+.format-toolbar.filter-open {
   opacity: 1;
 }
 
+.format-filter-input {
+  width: 240px;
+  max-width: 100%;
+}
+
 .format-toolbar {
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 4px;
   background: var(--common-format-toolbar-bg);
   border: 1px solid var(--lk-surface-border);
   border-radius: var(--lk-surface-radius);
