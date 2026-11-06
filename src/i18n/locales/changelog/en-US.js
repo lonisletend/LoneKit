@@ -1,5 +1,17 @@
 export default [
   {
+    date: '2026.11.06',
+    version: 'v1.1.3',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.3',
+    added: [
+      'Common Formatter: added a filter button to each JSON/XML segment toolbar. Click to reveal an expression input and press Enter to apply JSONPath/XPath filtering independently per segment.',
+    ],
+    optimized: [
+      'Common Formatter: clearing the filter expression restores the full content, hiding the input preserves the filter, and editing the source resets filter state.',
+      'Common Formatter: toolbars stay visible while filter inputs are open or focused and wrap automatically in narrow panels.',
+    ],
+  },
+  {
     date: '2026.11.04',
     version: 'v1.1.2',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.2',
