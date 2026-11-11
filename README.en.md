@@ -13,11 +13,20 @@ Formatters, encoders, text diff, time and Cron, QR codes and barcodes — the sm
 [![License](https://img.shields.io/github/license/lonisletend/LoneKit)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux%20%7C%20Web-lightgrey)
 
-[中文](README.md) · [Use online](#use-online) · [Download](#download) · [Tools](#tools) · [Support](#support-the-project)
+[中文](README.md) · [Screenshots](#screenshots) · [Use online](#use-online) · [Download](#download) · [Tools](#tools) · [Support](#support-the-project)
 
 </div>
 
 ---
+
+## Screenshots
+
+The Universal Formatter: paste a messy log on the left, and every JSON / XML fragment inside it is detected and formatted on the right.
+
+| | Light | Dark |
+| :--: | :--: | :--: |
+| **English** | <img src="docs/screenshots/format-en-light.png" alt="Universal Formatter light" width="420" /> | <img src="docs/screenshots/format-en-dark.png" alt="Universal Formatter dark" width="420" /> |
+| **中文** | <img src="docs/screenshots/format-zh-light.png" alt="Universal Formatter Chinese light" width="420" /> | <img src="docs/screenshots/format-zh-dark.png" alt="Universal Formatter Chinese dark" width="420" /> |
 
 ## Use online
 

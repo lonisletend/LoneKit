@@ -13,11 +13,20 @@
 [![License](https://img.shields.io/github/license/lonisletend/LoneKit)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux%20%7C%20Web-lightgrey)
 
-[English](README.en.md) · [在线使用](#在线使用) · [下载客户端](#下载客户端) · [功能清单](#功能清单) · [支持项目](#支持项目)
+[English](README.en.md) · [界面预览](#界面预览) · [在线使用](#在线使用) · [下载客户端](#下载客户端) · [功能清单](#功能清单) · [支持项目](#支持项目)
 
 </div>
 
 ---
+
+## 界面预览
+
+以「通用格式化」为例——左侧粘贴混杂日志，右侧自动识别其中的 JSON / XML 片段并分别格式化。
+
+| | 亮色 | 暗色 |
+| :--: | :--: | :--: |
+| **中文** | <img src="docs/screenshots/format-zh-light.png" alt="通用格式化 中文亮色" width="420" /> | <img src="docs/screenshots/format-zh-dark.png" alt="通用格式化 中文暗色" width="420" /> |
+| **English** | <img src="docs/screenshots/format-en-light.png" alt="Universal Formatter light" width="420" /> | <img src="docs/screenshots/format-en-dark.png" alt="Universal Formatter dark" width="420" /> |
 
 ## 在线使用
 
