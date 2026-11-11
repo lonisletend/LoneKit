@@ -59,3 +59,37 @@ When adding a new tool, create both files and register a lazy-loaded route in `s
 ### Clipboard & system access
 
 Prefer `useCommon()` helpers over raw APIs. The composable already handles the Tauri ↔ Web API fallback and shows user-facing notifications on error.
+
+## Release process
+
+Follow these rules whenever bumping the version, writing changelogs, or merging for release.
+
+### Version numbering
+
+Semantic versioning, judged by user-visible impact:
+
+- **Minor** (`1.1.x` → `1.2.0`) — a significant change or a sizeable new feature.
+- **Patch** (`1.1.3` → `1.1.4`) — small improvements and bug fixes.
+
+Bump the version in all three files together: `package.json`, `package-lock.json` (2 occurrences), `src-tauri/tauri.conf.json`.
+
+### Changelog
+
+Entries live in `src/i18n/locales/changelog/zh-CN.js` and `en-US.js` (newest first, keys: `added` / `optimized` / `fixed`). Both locales must stay in sync.
+
+**Include** only what users notice: tool features, behaviour, UI/styling.
+
+**Exclude** internal work: code refactors, architecture changes, CI/workflow changes, dependency bumps, tests.
+
+Writing style:
+
+- Concise and specific. Do not simply restate commit messages.
+- One entry per user-facing change; do not split a single change across several entries.
+- A short usage hint is welcome (how to reach the feature, what it does).
+- Do not log the iteration process of developing a feature. Polishing a new feature during its own release is part of that feature's `added` entry, not a separate `optimized` entry.
+
+Example — v1.1.3 should have been a single `added` entry: 「通用格式化：JSON/XML 片段的悬浮工具栏新增过滤功能。」
+
+### Confirmation gate
+
+After bumping the version and writing the changelog, **stop and ask the user to confirm or amend the entries before committing**. Only after explicit confirmation: commit, push, merge into `main`, and push `main` to trigger the release CI.

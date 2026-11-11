@@ -1,14 +1,18 @@
 export default [
   {
+    date: '2026.11.11',
+    version: 'v1.1.4',
+    releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.4',
+    fixed: [
+      '通用格式化：修复 JSON 内容中含有类似 XML 标签的文本时，相邻的合法 JSON/XML 片段被误判为普通文本的问题。',
+    ],
+  },
+  {
     date: '2026.11.06',
     version: 'v1.1.3',
     releaseLink: 'https://github.com/lonisletend/LoneKit/releases/tag/app-v1.1.3',
     added: [
       '通用格式化：JSON/XML 片段的悬浮工具栏新增过滤按钮，点击展开表达式输入框，支持回车执行 JSONPath/XPath 过滤，各片段独立生效。',
-    ],
-    optimized: [
-      '通用格式化：清空过滤表达式可恢复完整内容，收起输入框保留过滤条件，修改源文本时重置过滤状态。',
-      '通用格式化：过滤输入框展开或聚焦时工具栏保持可见，窄面板下支持自动换行。',
     ],
   },
   {

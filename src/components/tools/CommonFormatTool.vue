@@ -468,36 +468,26 @@ function resolveText(text) {
   
   // 合并所有匹配
   const allMatches = [...jsonMatches, ...xmlMatches];
-  
-  // 按起始位置排序
-  allMatches.sort((a, b) => a.start - b.start);
-  
-  // 处理重叠，保留最长的匹配
+
+  // 处理重叠：按长度降序挑选互不重叠的片段。
+  // 不能按起始位置贪心替换——长片段挤掉短片段后，若自身又被更长的片段替换，
+  // 被挤掉的短片段不会恢复，会导致合法片段退化成普通文本。
+  const matchLength = (match) => match.end - match.start;
   const filteredMatches = [];
-  for (let i = 0; i < allMatches.length; i++) {
-    const current = allMatches[i];
-    let shouldAdd = true;
-    
-    // 检查是否与已添加的匹配重叠
-    for (let j = 0; j < filteredMatches.length; j++) {
-      const existing = filteredMatches[j];
-      if (current.start < existing.end && current.end > existing.start) {
-        // 有重叠，保留更长的
-        if (current.end - current.start > existing.end - existing.start) {
-          filteredMatches.splice(j, 1);
-        } else {
-          shouldAdd = false;
-          break;
-        }
-      }
-    }
-    
-    if (shouldAdd) {
-      filteredMatches.push(current);
+  const candidates = allMatches
+    .slice()
+    .sort((a, b) => matchLength(b) - matchLength(a) || a.start - b.start);
+
+  for (const candidate of candidates) {
+    const overlapped = filteredMatches.some(
+      (kept) => candidate.start < kept.end && candidate.end > kept.start
+    );
+    if (!overlapped) {
+      filteredMatches.push(candidate);
     }
   }
-  
-  // 重新排序
+
+  // 按起始位置排序，用于拼接片段与普通文本
   filteredMatches.sort((a, b) => a.start - b.start);
   
   // 构建最终的片段列表
