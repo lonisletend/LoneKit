@@ -93,3 +93,5 @@ Example — v1.1.3 should have been a single `added` entry: 「通用格式化�
 ### Confirmation gate
 
 After bumping the version and writing the changelog, **stop and ask the user to confirm or amend the entries before committing**. Only after explicit confirmation: commit, push, merge into `main`, and push `main` to trigger the release CI.
+
+Pushing `main` runs the `publish` workflow, which builds all platforms and publishes a release for the version in `package.json`. Pushing `main` again without a version bump fails, because the release for that tag is no longer a draft. Pushes that only touch `vercel.json`, Markdown, `LICENSE` or `.github/**` are excluded from the trigger and can go to `main` at any time.
