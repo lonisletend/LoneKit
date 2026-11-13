@@ -12,6 +12,7 @@ on:
       - 'LICENSE'
       - '.github/**'
       - 'docs/**'
+      - 'scripts/**'
 
 jobs:
   publish-tauri:
