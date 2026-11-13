@@ -11,6 +11,7 @@ on:
       - '**/*.md'
       - 'LICENSE'
       - '.github/**'
+      - 'docs/**'
 
 jobs:
   publish-tauri:
@@ -120,3 +121,25 @@ jobs:
             exit 1
           fi
           gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -F draft=false
+
+      # Counts installer downloads only; latest.json is polled by the updater and
+      # by self-hosted deploy scripts, so the raw release total is not meaningful.
+      - name: refresh download badge
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Rebuild on top of whatever main points at now, so a concurrent push
+          # cannot turn this cosmetic update into a failed release run.
+          git fetch origin main
+          git switch -C main origin/main
+          node scripts/generate-download-badge.mjs
+          if git diff --quiet -- docs/badges/downloads.json; then
+            echo "download badge unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/badges/downloads.json
+          git commit -m "chore: refresh download badge"
+          git push origin main

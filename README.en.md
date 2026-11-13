@@ -9,7 +9,7 @@
 Formatters, encoders, text diff, time and Cron, QR codes and barcodes — the small tools you reach for daily, in one window.
 
 [![Release](https://img.shields.io/github/v/release/lonisletend/LoneKit?label=release&color=brightgreen)](https://github.com/lonisletend/LoneKit/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/lonisletend/LoneKit/total?color=blue)](https://github.com/lonisletend/LoneKit/releases)
+[![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Flonisletend%2FLoneKit%2Fmain%2Fdocs%2Fbadges%2Fdownloads.json)](https://github.com/lonisletend/LoneKit/releases)
 [![License](https://img.shields.io/github/license/lonisletend/LoneKit)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux%20%7C%20Web-lightgrey)
 
